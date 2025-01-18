@@ -1,0 +1,238 @@
+import json
+from shortuuid import uuid
+from flask import Blueprint, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from sqlalchemy import asc, desc
+
+from app.api.helper import send_result, send_error
+from app.enums import regions
+from app.models import db, User, SessionOrder, SessionOrderCartItems, Orders, OrderItems, CartItems, AddressOrder, \
+    PriceShip, Shipper
+from app.utils import get_timestamp_now
+from app.validator import CartSchema, SessionSchema, ShipperSchema, AddressOrderSchema
+
+api = Blueprint('session_order', __name__)
+
+
+@api.route('', methods=['POST'])
+@jwt_required
+def add_item_to_session():
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+        if user is None:
+            return send_error(message='Người dùng không hợp lệ.')
+        json_body = request.get_json()
+
+        list_cart_id = json_body.get('list_cart_id', [])
+
+        if len(list_cart_id) == 0:
+            return send_error(message='Chưa chọn sản phẩm thanh toán.')
+
+        session = SessionOrder(id=str(uuid()), user_id=user_id)
+        db.session.add(session)
+        db.session.flush()
+
+
+        list_session_order_cart = [SessionOrderCartItems(id=str(uuid()),index=index,cart_id=cart_id,
+                                                         session_order_id=session.id)
+                                   for index, cart_id in enumerate(list_cart_id)]
+
+        db.session.bulk_save_objects(list_session_order_cart)
+        db.session.flush()
+        db.session.commit()
+        return send_result(data= {"id": session.id} ,message='Thành công.')
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex), code=442)
+
+
+@api.route("/<session_id>", methods=["GET"])
+@jwt_required
+def get_items_in_session(session_id):
+    try:
+        user_id=get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+        if user is None:
+            return send_error(message='Người dùng không hợp lệ.')
+        session = SessionOrder.query.filter(SessionOrder.user_id==user_id, SessionOrder.id == session_id,
+                                          SessionOrder.duration > get_timestamp_now()).first()
+        if session is None:
+            return send_error(message='Phiên thanh toán đã hết hạn')
+        items = session.items
+
+
+        shipper = Shipper.query.filter().order_by(asc(Shipper.index)).first()
+
+        if shipper is None:
+            return send_error(message='Shipper hiện giờ không làm việc.')
+
+        # Tìm địa chỉ mặc định và gán.
+        address_order = AddressOrder.query.filter_by(user_id=user_id, default=True).first()
+        if address_order is None:
+            price_ship = 0
+            data_address_order = None
+        else:
+            province = address_order.address.get('province')
+            region_id = ''
+            for key, value in regions.items():
+                if province in value:
+                    region_id = key
+                    break
+
+            find_price = PriceShip.query.filter_by(region_id=region_id, shipper_id=shipper.id).first()
+            data_address_order = AddressOrderSchema().dump(address_order)
+            price_ship = find_price.price
+
+        price_product = 0
+        for index, item in enumerate(items):
+            count_item = item.cart_detail.quantity * item.cart_detail.product.detail.get('price', 0)
+            price_product += count_item
+
+        total = price_product + price_ship
+
+
+        session_data = SessionSchema().dump(session)
+        session_data.update({
+            'price_product': price_product,
+            'total': total,
+            'price_ship': price_ship,
+            'shipper': ShipperSchema().dump(shipper),
+            'address_order': data_address_order
+        })
+        return send_result(data=session_data)
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+@api.route("/update_ship/<session_id>", methods=["PUT"])
+@jwt_required
+def update_ship_in_session(session_id):
+    try:
+        user_id=get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+        if user is None:
+            return send_error(message='Người dùng không hợp lệ.')
+        session = SessionOrder.query.filter(SessionOrder.user_id==user_id, SessionOrder.id == session_id,
+                                          SessionOrder.duration > get_timestamp_now()).first()
+        if session is None:
+            return send_error(message='Phiên thanh toán đã hết hạn')
+
+        body_request = request.get_json()
+
+        shipper_id = body_request.get('shipper_id')
+        address_order_id = body_request.get('address_order_id')
+
+
+        shipper = Shipper.query.filter_by(id=shipper_id).first()
+
+        if shipper is None:
+            return send_error(message='Shipper hiện giờ không làm việc.')
+
+        # Tìm địa chỉ mặc định và gán.
+        address_order = AddressOrder.query.filter_by(user_id=user_id, id=address_order_id).first()
+        if address_order is None:
+            price_ship = 0
+        else:
+            province = address_order.address.get('province')
+            region_id = ''
+            for key, value in regions.items():
+                if province in value:
+                    region_id = key
+                    break
+
+            find_price = PriceShip.query.filter_by(region_id=region_id, shipper_id=shipper.id).first()
+            price_ship = find_price.price
+
+        price_product = 0
+        for index, item in enumerate(session.items):
+            count_item = item.cart_detail.quantity * item.cart_detail.product.detail.get('price', 0)
+            price_product += count_item
+
+        total = price_product + price_ship
+
+        session_data = SessionSchema().dump(session)
+        session_data.update({
+            'price_product': price_product,
+            'total': total,
+            'price_ship': price_ship,
+            'shipper': ShipperSchema().dump(shipper),
+        })
+        return send_result(data=session_data)
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+@api.route("/order/<session_id>", methods=["POST"])
+@jwt_required
+def order_session(session_id):
+    try:
+        user_id=get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+        if user is None:
+            return send_error(message='Người dùng không hợp lệ.')
+        session_order_query = SessionOrder.query.filter(SessionOrder.user_id == user_id, SessionOrder.id == session_id,
+                                                        SessionOrder.duration > get_timestamp_now())
+
+        session_order = session_order_query.first()
+        if session_order is None:
+            return send_error(message='Phiên thanh toán đã hết hạn')
+
+        body_request = request.get_json()
+        message = body_request.get('message')
+        address_order_id = body_request.get('address_order_id')
+        ship_id = body_request.get('ship_id', '')
+
+        shipper = Shipper.query.filter(Shipper.id==ship_id).first()
+        if shipper is None:
+            return send_error(message='Shipper hiện giờ không làm việc.')
+
+
+        address_order = AddressOrder.query.filter_by(user_id=user_id, id=address_order_id).first()
+        if address_order is None:
+            return send_error(message='Vui lòng thêm địa chỉ địa chỉ. ')
+
+        province = address_order.address.get('province')
+        region_id = ''
+        for key, value in regions.items():
+            if province in value:
+                region_id = key
+                break
+
+        find_price = PriceShip.query.filter_by(region_id=region_id, shipper_id=shipper.id).first()
+        price_ship = find_price.price
+
+        order = Orders(id=str(uuid()), user_id=user_id, phone_number=address_order.phone,
+                       message=message, ship_id=ship_id, price_ship=price_ship,
+                       full_name=address_order.full_name, detail_address=address_order.detail_address,
+                       address_id=address_order.address_id)
+
+        db.session.add(order)
+        db.session.flush()
+
+        items = session_order.items
+        count = price_ship
+
+        for index, item in enumerate(items):
+            count_item = item.cart_detail.quantity * item.cart_detail.product.detail.get('price', 0)
+            order_item = OrderItems(id=str(uuid()), created_date=get_timestamp_now()+index, order_id=order.id,
+                                    quantity=item.cart_detail.quantity, color_id=item.cart_detail.color_id,
+                                    size_id=item.cart_detail.size_id, product_id=item.cart_detail.product_id,
+                                    count=count_item)
+            count += count_item
+            db.session.add(order_item)
+            CartItems.query.filter(CartItems.id==item.cart_id).delete()
+            db.session.flush()
+
+        session_order_query.delete()
+        db.session.flush()
+        order.count = count
+        db.session.flush()
+        db.session.commit()
+
+        return send_result(message='Đặt hàng thành công.', data={'count': count, 'price_ship': price_ship})
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex))
+
+
+
+

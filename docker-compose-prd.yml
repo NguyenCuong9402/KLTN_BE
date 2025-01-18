@@ -1,0 +1,74 @@
+version: "3"
+
+services:
+  mongodb:
+    image: mongo:6.0.6
+    container_name: mongodb_fit_prd
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: XY58JqcxNLmy8SHN
+      MONGO_INITDB_DATABASE: fit-prd
+    ports:
+      - 27017:27017
+    volumes:
+      - new_volume:/data/db
+    networks:
+      - fit-backend-net-prd
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      ENV: ${ENV}
+    command: gunicorn --workers=3 --threads=1 --timeout=3600 -b 0.0.0.0:5012 --preload --log-level=debug server:app
+    ports:
+      - "5010:5012"
+    networks:
+      - fit-backend-net-prd
+    volumes:
+      - ./:/fit-backend
+    depends_on:
+      - mongodb
+      - db
+      - redis
+  db:
+    image: mysql:8.0
+    container_name: mysql_fit
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: XY58JqcxNLmy8SHN
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - fit-backend-net-prd
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis_fit
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes:
+      - cache:/data
+    networks:
+      - fit-backend-net-prd
+
+networks:
+  fit-backend-net-prd:
+
+volumes:
+    new_volume:
+    db_data:
+    cache:
+
+
+

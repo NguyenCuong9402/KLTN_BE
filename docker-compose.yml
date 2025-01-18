@@ -1,0 +1,70 @@
+version: "3"
+
+services:
+  mongodb_container:
+    image: mongo:6.0.6
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: dev-csoc-stg
+      MONGO_INITDB_DATABASE: dev-csoc-stg
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+    networks:
+      - dev-csoc-net
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      ENV: ${ENV}
+    command: gunicorn --workers=3 --threads=1 -b 0.0.0.0:5012 --preload --log-level=debug server:app
+    ports:
+      - "5012:5012"
+    networks:
+      - be-net
+#    volumes:
+#      - ./:/dev-csoc-backend
+#      - /home/bootai/new_tmp_directory:/tmp
+    depends_on:
+      - mongodb_container
+      - db
+      - redis
+  db:
+    image: mysql:8.0
+    container_name: mysql_csoc
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: cuong942002
+    ports:
+      - "3306:3306"
+#    volumes:
+#      - db_data:/var/lib/mysql
+    networks:
+      - dev-csoc-net
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis_fit
+    restart: always
+    ports:
+      - '6380:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass cuong942002
+#    volumes:
+#      - cache:/data
+    networks:
+      - dev-csoc-net
+networks:
+  dev-csoc-net:
+
+
+volumes:
+  mongodb_data_container:
+  db_data:
+  cache:
