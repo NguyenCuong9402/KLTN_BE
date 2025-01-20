@@ -170,7 +170,11 @@ def get_comment_article(article_id):
         sort = params.get('sort', 'desc')
         timestamp = params.get('timestamp')
 
-        query = Comment.query.filter(Comment.article_id == article_id, Comment.ancestry_id ==  None)
+        query = Comment.query.filter(
+            Comment.article_id == article_id,
+            Comment.ancestry_id.is_(None)
+        )
+
         user_id = get_user_id_request()
 
         if timestamp:
@@ -189,8 +193,8 @@ def get_comment_article(article_id):
             items=comments,
             total_pages=paginator.pages if paginator.pages > 0 else 1,
             total=paginator.total,
-            has_previous=paginator.has_previous,  # Có trang trước không
-            has_next=paginator.has_next  # Có trang sau không
+            has_previous=paginator.has_previous,
+            has_next=paginator.has_next
         )
 
 

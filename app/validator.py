@@ -64,7 +64,13 @@ class AddressSchema(Schema):
 class GroupSchema(Schema):
     id = fields.String()
     name = fields.String()
-    
+
+class FileSchema(Schema):
+    id = fields.String()
+    file_path = fields.String()
+    index = fields.Integer()
+    created_date = fields.Integer()
+
 class UserSchema(Schema):
     id = fields.String()
     email = fields.String()
@@ -75,6 +81,7 @@ class UserSchema(Schema):
     address = fields.Dict()
     address_detail = fields.String()
     group = fields.Nested(GroupSchema())
+    avatar = fields.Nested(FileSchema())
 
 
 class AuthValidation(BaseValidation):
@@ -199,11 +206,7 @@ class ColorOrSizeSchema(Schema):
     index = fields.Integer()
     created_date = fields.Integer()
 
-class FileSchema(Schema):
-    id = fields.String()
-    file_path = fields.String()
-    index = fields.Integer()
-    created_date = fields.Integer()
+
 
 
 class ProductSchema(Schema):
@@ -272,7 +275,7 @@ class QueryParamsArticleSchema(QueryParamsAllSchema):
 
 
 class CommentParamsValidation(BaseValidation):
-    page = fields.Integer(required=True, validate=validate.Range(min=1))  # Bắt buộc, không nhỏ hơn 1
+    page = fields.Integer()
     page_size = fields.Integer(missing=10,
                                validate=validate.Range(min=1, max=100))  # Mặc định là 10, giới hạn tối đa 100
     order_by = fields.String(missing="created_date", validate=validate.OneOf(["created_date", "vote"]))
@@ -398,7 +401,7 @@ class CommentSchema(Schema):
     body = fields.String()
     created_date = fields.Integer()
     modified_date = fields.Integer()
-    user = fields.Nested(UserSchema(only=("id","full_name")))
+    user = fields.Nested(UserSchema(only=("id","full_name", "avatar")))
     article = fields.Nested(ArticleSchema(only=("id", "title")))
     has_reacted = fields.Method("get_has_reacted")
     reaction_count = fields.Integer()

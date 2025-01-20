@@ -52,6 +52,10 @@ class User(db.Model):
     )
 
     @property
+    def avatar(self):
+        return self.files.first()
+
+    @property
     def address(self):
         data = {
             'province': '',

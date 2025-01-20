@@ -73,7 +73,7 @@ def remove_comment(comment_id):
         return send_error(message=str(ex))
 
 
-@api.route('/<comment_id>', methods=['GET'])
+@api.route('/<comment_id>/children', methods=['GET'])
 def get_comment(comment_id):
     try:
         try:
