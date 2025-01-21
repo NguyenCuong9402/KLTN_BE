@@ -289,10 +289,11 @@ class QueryParamsOrderSchema(BaseValidation):
     sort = fields.String(
         missing="desc", validate=validate.OneOf(["asc", "desc"])  # Chỉ chấp nhận 'asc' hoặc 'desc'
     )
-    status = fields.String(
-        required=True, validate=validate.OneOf(["pending", "processing", "delivering", "resolved"])  # Chỉ chấp nhận 4 giá trị
-    )
+    status = fields.String(validate=validate.OneOf(["pending", "processing", "delivering", "resolved"]))
     text_search = fields.String(allow_none=True)
+
+class QueryParamsManageOrderSchema(QueryParamsOrderSchema):
+    time = fields.String()
 
 class CartSchema(Schema):
     id = fields.String()
