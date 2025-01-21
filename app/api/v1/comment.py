@@ -91,18 +91,13 @@ def get_comment(comment_id):
         page_size = params.get('page_size', 10)
         order_by = params.get('order_by', 'created_date')
         sort = params.get('sort', 'desc')
-        timestamp = params.get('timestamp')
 
         query = Comment.query.filter(Comment.ancestry_id == comment_id)
         user_id = get_user_id_request()
 
-        if timestamp:
-            query = query.filter(Comment.created_date < timestamp) if sort == 'desc' \
-                else query.filter(Comment.created_date > timestamp)
-        if order_by == 'created_date':
-            query = query.order_by(desc(Comment.created_date)) if sort == "desc" else query.order_by(asc(Comment.created_date))
-        else:
-            pass
+
+        query = query.order_by(desc(Comment.created_date)) if sort == "desc" else query.order_by(asc(Comment.created_date))
+
 
         paginator = paginate(query, page, page_size)
         comments = CommentSchema(many=True, context={"user_id": user_id, "order_by": order_by,

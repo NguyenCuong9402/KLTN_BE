@@ -280,7 +280,6 @@ class CommentParamsValidation(BaseValidation):
     sort = fields.String(
         missing="desc", validate=validate.OneOf(["asc", "desc"])  # Chỉ chấp nhận 'asc' hoặc 'desc'
     )
-    timestamp = fields.Integer(allow_none=True)
 
 
 class QueryParamsOrderSchema(BaseValidation):
