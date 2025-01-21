@@ -100,15 +100,20 @@ def get_comment(comment_id):
 
 
         paginator = paginate(query, page, page_size)
+        print(len(query.all()))
+        print(paginator.items, page, page_size)
         comments = CommentSchema(many=True, context={"user_id": user_id, "order_by": order_by,
                                                      "sort": sort, "depth": LAYER_COMMENT}).dump(paginator.items)
+
+
 
         response_data = dict(
             items=comments,
             total_pages=paginator.pages if paginator.pages > 0 else 1,
             total=paginator.total,
             has_previous=paginator.has_previous,  # Có trang trước không
-            has_next=paginator.has_next  # Có trang sau không
+            has_next=paginator.has_next,  # Có trang sau không
+            remaining_count = max(paginator.total - page_size * page, 0)
         )
 
 
