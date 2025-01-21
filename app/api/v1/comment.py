@@ -100,8 +100,6 @@ def get_comment(comment_id):
 
 
         paginator = paginate(query, page, page_size)
-        print(len(query.all()))
-        print(paginator.items, page, page_size)
         comments = CommentSchema(many=True, context={"user_id": user_id, "order_by": order_by,
                                                      "sort": sort, "depth": LAYER_COMMENT}).dump(paginator.items)
 
