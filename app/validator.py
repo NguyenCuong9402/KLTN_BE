@@ -167,9 +167,7 @@ class ProductValidation(BaseValidation):
 
 class ArticleValidate(BaseValidation):
     tags = fields.List(
-        fields.String(validate=validate.Length(min=1)),
-        required=True,
-        validate=validate.Length(min=1)
+        fields.String(),
     )
 
     title = fields.String(required=True)
@@ -401,6 +399,7 @@ class CommentSchema(Schema):
     body = fields.String()
     created_date = fields.Integer()
     modified_date = fields.Integer()
+    ancestry_id = fields.String()
     user = fields.Nested(UserSchema(only=("id","full_name", "avatar")))
     article = fields.Nested(ArticleSchema(only=("id", "title")))
     has_reacted = fields.Method("get_has_reacted")
@@ -411,7 +410,7 @@ class CommentSchema(Schema):
         order_by = self.context.get("order_by", "created_date")
         sort = self.context.get("sort", 'desc')
         user_id = self.context.get("user_id")
-        depth = self.context.get("depth", 2)
+        depth = self.context.get("depth", 0)
 
         if depth <= 0:
             return []

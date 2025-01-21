@@ -38,14 +38,16 @@ def create_comment():
 
         if Article.query.filter_by(id=article_id).first() is None:
             return send_error(message="Bài viết không tồn tại")
-        if Comment.query.filter_by(id=ancestry_id, article_id=article_id).first():
-            return send_error(message="Comment được trả lời không tồn tại.")
+        if ancestry_id:
+            if Comment.query.filter_by(id=ancestry_id, article_id=article_id).first() is None :
+                return send_error(message="Comment được trả lời không tồn tại.")
         mention_usernames = json_body.pop('mention_usernames', [])
         comment = Comment(id=str(uuid()), user_id=user_id, **json_body)
         db.session.add(comment)
         db.session.flush()
         db.session.commit()
-        data = CommentSchema().dump(comment)
+        data = CommentSchema(context={"user_id": user_id}).dump(comment)
+
         return send_result(data=data, message='Thành công')
 
     except Exception as ex:
@@ -95,8 +97,8 @@ def get_comment(comment_id):
         user_id = get_user_id_request()
 
         if timestamp:
-            query = query.filter(Comment.modified_date < timestamp) if sort == 'desc' \
-                else query.filter(Comment.modified_date > timestamp)
+            query = query.filter(Comment.created_date < timestamp) if sort == 'desc' \
+                else query.filter(Comment.created_date > timestamp)
         if order_by == 'created_date':
             query = query.order_by(desc(Comment.created_date)) if sort == "desc" else query.order_by(asc(Comment.created_date))
         else:
@@ -116,6 +118,25 @@ def get_comment(comment_id):
 
 
         return send_result(data= response_data,  message='Thành công')
+
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex), code=442)
+
+@api.route('/<comment_id>', methods=['GET'])
+def get_comment_detail(comment_id):
+    try:
+
+        query = Comment.query.filter(Comment.ancestry_id == comment_id).first()
+        if not query:
+            return send_error(message="Comment không tồn tại", code=404)
+        user_id = get_user_id_request()
+        comment = CommentSchema(
+            context={"user_id": user_id},
+            include=("replies",)
+        ).dump(query)
+
+        return send_result(data=comment,  message='Thành công')
 
     except Exception as ex:
         db.session.rollback()

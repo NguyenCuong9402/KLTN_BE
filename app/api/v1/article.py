@@ -48,7 +48,7 @@ def create_article():
         db.session.bulk_save_objects(tag_product)
         db.session.flush()
         db.session.commit()
-        return send_result(message='Thành công')
+        return send_result(message='Thành công', data={'article_id': artice.id})
 
     except Exception as ex:
         db.session.rollback()
