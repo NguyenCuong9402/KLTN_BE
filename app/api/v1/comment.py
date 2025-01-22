@@ -1,21 +1,18 @@
 import json
 
-from pandas.core.internals.blocks import NumpyBlock
 from shortuuid import uuid
 from flask import Blueprint, request
 from marshmallow import ValidationError
 from sqlalchemy import desc, asc
-from sqlalchemy.sql.visitors import replacement_traverse
 from sqlalchemy_pagination import paginate
 
 from app.enums import LAYER_COMMENT
 from app.extensions import logger, db
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request_optional
 from app.api.helper import send_result, send_error, get_user_id_request
-from app.models import User, Article, Community, Product, ArticleTagProduct, Comment
-from app.utils import trim_dict, escape_wildcard, get_timestamp_now
-from app.validator import ProductValidation, ArticleSchema, QueryParamsAllSchema, ArticleValidate, \
-    QueryParamsArticleSchema, CommentValidation, CommentParamsValidation, CommentSchema
+from app.models import User, Article, Comment
+from app.utils import trim_dict
+from app.validator import  CommentValidation, CommentParamsValidation, CommentSchema
 
 api = Blueprint('comment', __name__)
 
@@ -125,13 +122,14 @@ def get_comment(comment_id):
 def get_comment_detail(comment_id):
     try:
 
-        query = Comment.query.filter(Comment.ancestry_id == comment_id).first()
+        query = Comment.query.filter(Comment.id == comment_id).first()
         if not query:
             return send_error(message="Comment không tồn tại", code=404)
         user_id = get_user_id_request()
         comment = CommentSchema(
             context={"user_id": user_id},
-            include=("replies",)
+            only=("id", "body", "created_date", "ancestry_id", "user", "article", "has_reacted", "reaction_count",
+                  "reply_count")
         ).dump(query)
 
         return send_result(data=comment,  message='Thành công')
