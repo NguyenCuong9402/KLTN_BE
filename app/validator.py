@@ -249,13 +249,12 @@ class QueryParamsSchema(BaseValidation):
 
     @pre_load
     def normalize_empty_strings_and_trim(self, data, **kwargs):
-        # Xử lý trim và chuyển '' thành None
-        for key in ['text_search', 'type_id']:
+        for key in ['text_search', 'type_id', 'from_money', 'to_money']:
             if key in data:
                 value = data[key]
                 if isinstance(value, str):
-                    value = value.strip()  # Trim khoảng trắng
-                    data[key] = value if value != '' else None  # Gán None nếu chuỗi rỗng
+                    value = value.strip()
+                    data[key] = value if value != '' else None
         return data
 
 class QueryParamsAllSchema(BaseValidation):
