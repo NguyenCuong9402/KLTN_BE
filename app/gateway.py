@@ -24,10 +24,10 @@ def authorization_require():
         def decorator(*args, **kwargs):
             verify_jwt_in_request()
             permission_route = "{0}@{1}".format(request.method.lower(), request.url_rule.rule)
-            claims = get_jwt_claims()
-
-            if claims.get("force_change_password"):
-                return send_error(message='You have to change your password before do this action')
+            # claims = get_jwt_claims()
+            #
+            # if claims.get("force_change_password"):
+            #     return send_error(message='You have to change your password before do this action')
 
             # check permission from redis
             list_permission = pickle.loads(red.get(f"permission_{get_jwt_identity()}"))

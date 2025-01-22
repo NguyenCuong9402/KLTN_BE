@@ -136,6 +136,12 @@ class ReactionValidation(BaseValidation):
                                                                       TYPE_REACTION.get('COMMENT', "comment")]))
     reactable_id = fields.String(required=True)
 
+
+class TypeProductValidation(BaseValidation):
+    key = fields.String(required=True)
+    name = fields.String(required=True)
+    type_id = fields.String(required=True)
+
 class ProductValidation(BaseValidation):
     files = fields.List(
         fields.Dict(
