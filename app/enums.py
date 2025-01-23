@@ -9,6 +9,12 @@ TYPE_REACTION = {
     'COMMENT': 'comment',
 }
 
+STATUS_ORDER = {
+    'PENDING': 'pending',
+    'DELIVERING': 'delivering',
+    'RESOLVED': 'resolved',
+}
+
 LAYER_COMMENT = 2
 
 TYPE_FILE_LINK = {
