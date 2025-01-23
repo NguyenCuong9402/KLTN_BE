@@ -30,9 +30,11 @@ def change_status(order_id, status):
 
         order.status = status
         db.session.flush()
-
         db.session.commit()
-        return send_result(message="Cập nhật thành công")
+
+        data = OrderSchema().dump(order)
+
+        return send_result(data=data, message="Cập nhật thành công")
 
     except Exception as ex:
         db.session.rollback()
