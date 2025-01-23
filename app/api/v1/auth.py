@@ -7,7 +7,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, get_raw_jwt, jwt_refresh_token_required, jwt_required)
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.enums import ADMIN_EMAIL, MAIL_VERITY_CODE, GROUP_KEY_PARAM, GROUP_ADMIN_KEY
+from app.enums import ADMIN_EMAIL, MAIL_VERITY_CODE, GROUP_KEY_PARAM, GROUP_ADMIN_KEY, GROUP_USER_KEY
 from app.api.helper import get_permissions, CONFIG, send_email_template, get_roles_key, Token, convert_to_datetime
 from app.api.helper import send_error, send_result, Token
 from app.extensions import jwt, db
@@ -162,7 +162,7 @@ def register():
         json_body.pop('confirm_password')
         if User.query.filter(User.email == json_body.get('email'), User.phone == json_body.get('phone')).first():
             return send_error(message='Gmail/ Phone đã được đăng ký.')
-        group = Group.query.filter(Group.key == GROUP_ADMIN_KEY).first()
+        group = Group.query.filter(Group.key == GROUP_USER_KEY).first()
         user = User(id=str(uuid()), **json_body, group_id=group.id)
         db.session.add(user)
         db.session.flush()
