@@ -33,9 +33,7 @@ def change_status(order_id, status):
         db.session.commit()
 
         data = OrderSchema().dump(order)
-
         return send_result(data=data, message="Cập nhật thành công")
-
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex), code=442)
