@@ -51,6 +51,7 @@ def add_item_to_session():
 @jwt_required
 def get_items_in_session(session_id):
     try:
+        address_order_id = request.args.get('address_order_id', None)
         user_id=get_jwt_identity()
         user = User.query.filter_by(id=user_id).first()
         if user is None:
@@ -63,31 +64,29 @@ def get_items_in_session(session_id):
 
 
         shipper = Shipper.query.filter().order_by(asc(Shipper.index)).first()
-
         if shipper is None:
             return send_error(message='Shipper hiện giờ không làm việc.')
 
-        # Tìm địa chỉ mặc định và gán.
-        address_order = AddressOrder.query.filter_by(user_id=user_id, default=True).first()
-        if address_order is None:
-            price_ship = 0
-            data_address_order = None
-        else:
-            province = address_order.address.get('province')
-            region_id = ''
-            for key, value in regions.items():
-                if province in value:
-                    region_id = key
-                    break
+        # Tìm địa chỉ ship
+        price_ship = 0
+        data_address_order = None
 
-            find_price = PriceShip.query.filter_by(region_id=region_id, shipper_id=shipper.id).first()
-            data_address_order = AddressOrderSchema().dump(address_order)
-            price_ship = find_price.price
+        if address_order_id:
+            address_order = AddressOrder.query.filter_by(user_id=user_id, id=address_order_id).first()
+            if address_order :
+                province = address_order.address.get('province')
+                region_id = ''
+                for key, value in regions.items():
+                    if province in value:
+                        region_id = key
+                        break
 
-        price_product = 0
-        for index, item in enumerate(items):
-            count_item = item.cart_detail.quantity * item.cart_detail.product.detail.get('price', 0)
-            price_product += count_item
+                find_price = PriceShip.query.filter_by(region_id=region_id, shipper_id=shipper.id).first()
+                data_address_order = AddressOrderSchema().dump(address_order)
+                price_ship = find_price.price
+
+        price_product = sum(item.cart_detail.quantity * item.cart_detail.product.detail.get('price', 0)
+                            for item in items)
 
         total = price_product + price_ship
 

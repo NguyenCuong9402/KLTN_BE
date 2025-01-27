@@ -15,7 +15,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 api = Blueprint('order_report', __name__)
 
-@api.route('/new', methods=['POST'])
+@api.route('', methods=['POST'])
 @jwt_required
 def new():
     try:

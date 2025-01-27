@@ -17,7 +17,7 @@ from app.validator import  CommentValidation, CommentParamsValidation, CommentSc
 api = Blueprint('comment', __name__)
 
 
-@api.route('/new', methods=['POST'])
+@api.route('', methods=['POST'])
 @jwt_required
 def create_comment():
     try:

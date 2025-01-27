@@ -35,7 +35,7 @@ def get_address():
         return send_error(message=str(ex))
 
 
-@api.route("/add_address", methods=["POST"])
+@api.route("", methods=["POST"])
 @jwt_required
 def post_address_order():
     try:
@@ -99,33 +99,20 @@ def get_address_order():
         if user is None:
             return send_error(message='Tài khoản không hợp lệ.')
         user_address = AddressOrder.query.filter_by(user_id=user_id).order_by(asc(AddressOrder.index))
-        data = AddressOrderSchema(many=True).dump(user_address)
+        data_address = AddressOrderSchema(many=True).dump(user_address) if user_address else []
 
-        return send_result(message='Done', data=data)
-    except Exception as ex:
-        return send_error(message=str(ex))
+        user_address_main = AddressOrder.query.filter_by(user_id=user_id, default=True).first()
 
-@api.route("/address_order_main", methods=["GET"])
-@jwt_required
-def address_order_main():
-    try:
-        user_id = get_jwt_identity()
-        user = User.query.filter_by(id=user_id).first()
-        if user is None:
-            return send_error(message='Tài khoản không hợp lệ.')
-        user_address = AddressOrder.query.filter_by(user_id=user_id, default=True).first()
+        main_address = AddressOrderSchema().dump(user_address_main) if user_address_main else None
 
-        if user_address:
-            data = AddressOrderSchema().dump(user_address)
-            return send_result(message='Thành công', data=data)
-
-        return send_result(message='Chưa có địa chỉ mặc định')
-
+        return send_result(message='Done', data= {
+            'data_address': data_address, 'main_address': main_address
+        })
     except Exception as ex:
         return send_error(message=str(ex))
 
 
-@api.route("/remove_address", methods=["DELETE"])
+@api.route("", methods=["DELETE"])
 @jwt_required
 def remove_item():
     try:
@@ -154,7 +141,7 @@ def remove_item():
         return send_error(message=str(ex))
 
 
-@api.route("/choose_default/<address_order_id>", methods=["PUT"])
+@api.route("/<address_order_id>", methods=["PUT"])
 @jwt_required
 def choose_default(address_order_id):
     try:

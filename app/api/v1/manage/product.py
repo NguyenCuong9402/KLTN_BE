@@ -17,7 +17,7 @@ from app.validator import ProductValidation, ProductSchema, QueryParamsSchema
 api = Blueprint('manage/product', __name__)
 
 
-@api.route('/new', methods=['POST'])
+@api.route('', methods=['POST'])
 @jwt_required
 def new():
     try:

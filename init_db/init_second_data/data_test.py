@@ -44,12 +44,12 @@ class Worker:
             ],
             "files": [
                 {
-                    "file_id": "NRXPdTTmNy7VgaDmhXvGCR",
-                    "file_path": "/files/NRXPdTTmNy7VgaDmhXvGCR.png"
+                    "file_id": "Z5CZYy3TxG8zYJqUEKW6Cq",
+                    "file_path": "/files/Z5CZYy3TxG8zYJqUEKW6Cq.jpg"
                 },
                 {
-                    "file_id": "V794qittRdAaqXVVD8zwPF",
-                    "file_path": "/files/V794qittRdAaqXVVD8zwPF.jpg"
+                    "file_id": "7kqVDEec6f5kLcajSMKoZd",
+                    "file_path": "/files/7kqVDEec6f5kLcajSMKoZd.jpg"
                 }
             ]
         }

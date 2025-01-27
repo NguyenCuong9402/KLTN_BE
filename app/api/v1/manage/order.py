@@ -17,10 +17,14 @@ from app.validator import OrderSchema, QueryParamsOrderSchema, QueryParamsManage
 api = Blueprint('manage/order', __name__)
 
 
-@api.route('/<order_id>/<status>', methods=['PUT'])
+@api.route('/<order_id>', methods=['PUT'])
 @jwt_required
-def change_status(order_id, status):
+def change_status(order_id):
     try:
+        body_request = request.get_json()
+
+        status = body_request.get('status', None)
+
         order = Orders.query.filter_by(id=order_id).first()
         if order is None:
             return send_error(message='Đơn hàng không tồn tại')

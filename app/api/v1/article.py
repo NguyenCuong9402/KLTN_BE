@@ -18,7 +18,7 @@ from app.validator import ProductValidation, ArticleSchema, QueryParamsAllSchema
 api = Blueprint('article', __name__)
 
 
-@api.route('/create', methods=['POST'])
+@api.route('', methods=['POST'])
 @jwt_required
 def create_article():
     try:
