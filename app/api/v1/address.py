@@ -112,30 +112,36 @@ def get_address_order():
         return send_error(message=str(ex))
 
 
-@api.route("", methods=["DELETE"])
+@api.route("/<address_order_id>", methods=["DELETE"])
 @jwt_required
-def remove_item():
+def remove_item(address_order_id):
     try:
         user_id = get_jwt_identity()
         user = User.query.filter_by(id=user_id).first()
         if user is None:
             return send_error(message='Tài khoản không hợp lệ.')
-        body_request = request.get_json()
-        list_id = body_request.get('list_id', [])
-        if len(list_id) == 0:
-            return send_error(message='Chưa chọn item nào.')
-        AddressOrder.query.filter(AddressOrder.id.in_(list_id),AddressOrder.user_id==user_id).delete()
-        db.session.flush()
+
+        address = AddressOrder.query.filter(AddressOrder.id == address_order_id,
+                                            AddressOrder.user_id == user_id).first()
+
+        if address is None:
+            return send_error(message='Địa chỉ không tồn tại để xóa.')
+
+        if address.default:
+            return send_error(message='Không thể xóa địa chỉ mặc định.')
+
+        db.session.delete(address)  # Xóa đối tượng
+        db.session.commit()  #
+
 
         address_orders = AddressOrder.query.filter(AddressOrder.user_id==user_id).order_by(asc(AddressOrder.index)).all()
-
         for index, address_order in enumerate(address_orders):
             address_order.index = index
             db.session.flush()
         db.session.commit()
         data = AddressOrderSchema(many=True).dump(address_orders)
 
-        return send_result(message="Xóa sản phẩm thành công", data=data)
+        return send_result(message="Xóa thành công", data=data)
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))
