@@ -1,4 +1,6 @@
 # coding: utf-8
+from email.policy import default
+
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
@@ -42,8 +44,13 @@ class User(db.Model):
     group_id = db.Column(ForeignKey('group.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
     group = relationship('Group', viewonly=True)
 
+    is_staff = db.Column(db.Boolean, nullable=False, default=False)
+    identification_card = db.Column(db.String(100, nullable=True)) # can cuoc cong dan
+    tax_code = db.Column(db.String(100, nullable=True)) # ma so thue
     join_date = db.Column(db.DateTime, nullable=True)
     finish_date = db.Column(db.DateTime, nullable=True)
+    number_dependent = db.Column(INTEGER(unsigned=True), default=0) # người phụ thuộc
+
 
     attendances = db.relationship('Attendance', back_populates='user', cascade="all, delete-orphan")
     salaries = db.relationship('Salary', back_populates='user', cascade="all, delete-orphan")
@@ -112,7 +119,9 @@ class SalaryReport(db.Model):
     month = db.Column(db.Integer, nullable=False)  # Tháng lương
     year = db.Column(db.Integer, nullable=False)  # Năm lương
     kpi_score = db.Column(INTEGER(unsigned=True), default=0, nullable=False)
+    number_dependent = db.Column(INTEGER(unsigned=True), default=0) # người phụ thuộc
     reward = db.Column(INTEGER(unsigned=True), default=0, nullable=False)
+
     total_salary = db.Column(db.Numeric(10, 2), nullable=False)
 
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
