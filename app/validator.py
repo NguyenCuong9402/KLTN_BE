@@ -459,6 +459,7 @@ class OrderReportSchema(Schema):
     created_date = fields.Integer()
     result_date = fields.Integer()
     result = fields.String()
+    user = fields.Nested(UserSchema(only=("id","full_name", "avatar", "email", "phone")))
 
 
 class ShipperSchema(Schema):

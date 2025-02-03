@@ -556,6 +556,8 @@ class OrderReport(db.Model):
         order_by="asc(FileLink.index)",
         viewonly=True
     )
+    user = db.relationship('User', viewonly=True)
+
     created_date = db.Column(db.Integer, default=get_timestamp_now())
     result_date = db.Column(db.Integer, nullable=True)
 
