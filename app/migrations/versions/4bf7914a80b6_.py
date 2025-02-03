@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: c8c0352732f3
+Revision ID: 4bf7914a80b6
 Revises: 
-Create Date: 2025-01-21 11:23:38.179693
+Create Date: 2025-02-03 23:05:19.436927
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'c8c0352732f3'
+revision = '4bf7914a80b6'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -173,6 +173,12 @@ def upgrade():
     sa.Column('detail_address', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
     sa.Column('last_seen_notify', mysql.INTEGER(unsigned=True), nullable=True),
     sa.Column('group_id', sa.String(length=50), nullable=True),
+    sa.Column('is_staff', sa.Boolean(), nullable=False),
+    sa.Column('identification_card', sa.String(length=100), nullable=False),
+    sa.Column('tax_code', sa.String(length=100), nullable=False),
+    sa.Column('join_date', sa.DateTime(), nullable=True),
+    sa.Column('finish_date', sa.DateTime(), nullable=True),
+    sa.Column('number_dependent', mysql.INTEGER(unsigned=True), nullable=True),
     sa.ForeignKeyConstraint(['address_id'], ['address.id'], onupdate='CASCADE', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['group_id'], ['group.id'], onupdate='CASCADE', ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id')
@@ -205,6 +211,15 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_article_created_date'), 'article', ['created_date'], unique=False)
+    op.create_table('attendance',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('user_id', sa.String(length=50), nullable=False),
+    sa.Column('work_date', sa.Date(), nullable=False),
+    sa.Column('check_in', sa.Time(), nullable=True),
+    sa.Column('check_out', sa.Time(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('color',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('name', sa.Text(collation='utf8mb4_unicode_ci'), nullable=False),
@@ -215,6 +230,17 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_color_created_date'), 'color', ['created_date'], unique=False)
+    op.create_table('document_storage',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('user_id', sa.String(length=50), nullable=False),
+    sa.Column('document_name', sa.String(length=255, collation='utf8mb4_vietnamese_ci'), nullable=False),
+    sa.Column('document_url', sa.String(length=500), nullable=False),
+    sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_document_storage_created_date'), 'document_storage', ['created_date'], unique=False)
     op.create_table('orders',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('user_id', sa.String(length=50), nullable=True),
@@ -276,6 +302,32 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
+    op.create_table('salary',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('user_id', sa.String(length=50), nullable=False),
+    sa.Column('base_salary', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('kpi_salary', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.Column('allowance_salary', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('salary_report',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('user_id', sa.String(length=50), nullable=False),
+    sa.Column('group_id', sa.String(length=50), nullable=True),
+    sa.Column('month', sa.Integer(), nullable=False),
+    sa.Column('year', sa.Integer(), nullable=False),
+    sa.Column('kpi_score', mysql.INTEGER(unsigned=True), nullable=False),
+    sa.Column('number_dependent', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.Column('reward', mysql.INTEGER(unsigned=True), nullable=False),
+    sa.Column('total_salary', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.ForeignKeyConstraint(['group_id'], ['group.id'], onupdate='CASCADE', ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_salary_report_created_date'), 'salary_report', ['created_date'], unique=False)
     op.create_table('session_order',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('created_date', sa.Integer(), nullable=True),
@@ -438,14 +490,20 @@ def downgrade():
     op.drop_index(op.f('ix_size_created_date'), table_name='size')
     op.drop_table('size')
     op.drop_table('session_order')
+    op.drop_index(op.f('ix_salary_report_created_date'), table_name='salary_report')
+    op.drop_table('salary_report')
+    op.drop_table('salary')
     op.drop_table('role')
     op.drop_table('reviews')
     op.drop_index(op.f('ix_reaction_created_date'), table_name='reaction')
     op.drop_table('reaction')
     op.drop_index(op.f('ix_orders_address_id'), table_name='orders')
     op.drop_table('orders')
+    op.drop_index(op.f('ix_document_storage_created_date'), table_name='document_storage')
+    op.drop_table('document_storage')
     op.drop_index(op.f('ix_color_created_date'), table_name='color')
     op.drop_table('color')
+    op.drop_table('attendance')
     op.drop_index(op.f('ix_article_created_date'), table_name='article')
     op.drop_table('article')
     op.drop_table('address_order')

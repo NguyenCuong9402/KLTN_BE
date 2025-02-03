@@ -44,9 +44,10 @@ class User(db.Model):
     group_id = db.Column(ForeignKey('group.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
     group = relationship('Group', viewonly=True)
 
+    # nhan vien
     is_staff = db.Column(db.Boolean, nullable=False, default=False)
-    identification_card = db.Column(db.String(100, nullable=True)) # can cuoc cong dan
-    tax_code = db.Column(db.String(100, nullable=True)) # ma so thue
+    identification_card = db.Column(db.String(100), nullable=False) # can cuoc cong dan
+    tax_code = db.Column(db.String(100), nullable=False) # ma so thue
     join_date = db.Column(db.DateTime, nullable=True)
     finish_date = db.Column(db.DateTime, nullable=True)
     number_dependent = db.Column(INTEGER(unsigned=True), default=0) # người phụ thuộc
@@ -108,6 +109,7 @@ class Salary(db.Model):
     base_salary = db.Column(db.Numeric(10, 2), nullable=False)
     kpi_salary = db.Column(INTEGER(unsigned=True))
     allowance_salary = db.Column(INTEGER(unsigned=True))
+    created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
 
 class SalaryReport(db.Model):
     __tablename__ = 'salary_report'
@@ -115,9 +117,11 @@ class SalaryReport(db.Model):
     id = db.Column(db.String(50), primary_key=True)
     user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     group_id = db.Column(ForeignKey('group.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
+    salary_id = db.Column(ForeignKey('salary.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
 
     user = db.relationship('User', viewonly=True)
     group = relationship('Group', viewonly=True)
+    salary = relationship('Group', viewonly=True)
 
     month = db.Column(db.Integer, nullable=False)  # Tháng lương
     year = db.Column(db.Integer, nullable=False)  # Năm lương
