@@ -115,7 +115,10 @@ class SalaryReport(db.Model):
     id = db.Column(db.String(50), primary_key=True)
     user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     group_id = db.Column(ForeignKey('group.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
+
+    user = db.relationship('User', viewonly=True)
     group = relationship('Group', viewonly=True)
+
     month = db.Column(db.Integer, nullable=False)  # Tháng lương
     year = db.Column(db.Integer, nullable=False)  # Năm lương
     kpi_score = db.Column(INTEGER(unsigned=True), default=0, nullable=False)
@@ -126,7 +129,6 @@ class SalaryReport(db.Model):
 
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
     modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
-    user = db.relationship('User', viewonly=True)
 
 
 class DocumentStorage(db.Model):
