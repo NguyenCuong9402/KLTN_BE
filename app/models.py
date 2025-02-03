@@ -3,10 +3,12 @@ from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey, TEXT, asc, desc
+from datetime import datetime
 
 from app.enums import FILE_TYPE, DURATION_SESSION_MINUTES, TYPE_REACTION
 from app.extensions import db
 from app.utils import get_timestamp_now
+
 
 class Address(db.Model):
     __tablename__ = 'address'
@@ -14,6 +16,7 @@ class Address(db.Model):
     province = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
     district = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
     ward = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
+
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -35,7 +38,7 @@ class User(db.Model):
 
     address_id = db.Column(ForeignKey('address.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
     detail_address = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=True)
-    last_seen_notify = db.Column(INTEGER(unsigned=True), nullable=True )
+    last_seen_notify = db.Column(INTEGER(unsigned=True), nullable=True)
     group_id = db.Column(ForeignKey('group.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
     group = relationship('Group', viewonly=True)
 
@@ -70,6 +73,74 @@ class User(db.Model):
         return data
 
 
+class Profile(db.Model):
+    __tablename__ = 'profile'
+
+    id = db.Column(db.String(50), primary_key=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    user = db.relationship('User', back_populates='profiles')
+
+    join_date = db.Column(db.DateTime, nullable=True)
+    finish_date = db.Column(db.DateTime, nullable=True)
+
+    attendances = db.relationship('Attendance', back_populates='profile', cascade="all, delete-orphan")
+    salaries = db.relationship('Salary', back_populates='profile', cascade="all, delete-orphan")
+
+
+class Attendance(db.Model):
+    __tablename__ = 'attendance'
+
+    id = db.Column(db.String(50), primary_key=True)
+    profile_id = db.Column(db.String(50), db.ForeignKey('profile.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    profile = db.relationship('Profile', back_populates='attendances')
+
+    work_date = db.Column(db.Date, nullable=False)
+    check_in = db.Column(db.Time, nullable=True)
+    check_out = db.Column(db.Time, nullable=True)
+
+
+
+class Salary(db.Model):
+    __tablename__ = 'salary'
+
+    id = db.Column(db.String(50), primary_key=True)
+    profile_id = db.Column(db.String(50), db.ForeignKey('profile.id', ondelete='CASCADE', onupdate='CASCADE'),
+                           nullable=False)
+    profile = db.relationship('Profile', back_populates='salaries')
+    base_salary = db.Column(db.Numeric(10, 2), nullable=False)
+    kpi_salary = db.Column(INTEGER(unsigned=True))
+    allowance_salary = db.Column(INTEGER(unsigned=True))
+
+class SalaryReport(db.Model):
+    __tablename__ = 'salary_report'
+
+    id = db.Column(db.String(50), primary_key=True)
+    profile_id = db.Column(db.String(50), db.ForeignKey('profile.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+
+    month = db.Column(db.Integer, nullable=False)  # Tháng lương
+    year = db.Column(db.Integer, nullable=False)  # Năm lương
+    kpi_score = db.Column(INTEGER(unsigned=True), default=0, nullable=False)
+    reward = db.Column(INTEGER(unsigned=True), default=0, nullable=False)
+    total_salary = db.Column(db.Numeric(10, 2), nullable=False)
+
+    created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
+    modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
+    profile = db.relationship('Profile', viewonly=True)
+
+
+class DocumentStorage(db.Model):
+    __tablename__ = 'document_storage'
+
+    id = db.Column(db.String(50), primary_key=True)
+    profile_id = db.Column(db.String(50), db.ForeignKey('profile.id', ondelete='CASCADE', onupdate='CASCADE'),
+                           nullable=False)
+    profile = db.relationship('Profile', viewonly=True)
+
+    document_name = db.Column(db.String(255), nullable=False)  # Tên tài liệu
+    document_url = db.Column(db.String(500), nullable=False)  # Đường dẫn đến tài liệu
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)  # Ngày tải lên
+
+
 class Community(db.Model):
     __tablename__ = 'community'
 
@@ -78,6 +149,7 @@ class Community(db.Model):
     description = db.Column(db.String(255, collation="utf8mb4_vietnamese_ci"))
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
     modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
+
 
 class Article(db.Model):
     __tablename__ = 'article'
@@ -90,24 +162,27 @@ class Article(db.Model):
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
     modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
     community_id = db.Column(db.String(50), db.ForeignKey('community.id',
-                                                     ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
+                                                          ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
 
     @property
     def reaction_count(self):
         return Reaction.query.filter(
             Reaction.reactable_id == self.id, Reaction.category == TYPE_REACTION.get('ARTICLE', "article"),
-            Reaction.vote==True).count()
+            Reaction.vote == True).count()
+
     user = db.relationship('User', viewonly=True)
     community = db.relationship('Community', viewonly=True)
+
 
 class ArticleTagProduct(db.Model):
     __tablename__ = 'article_tag_product'
     id = db.Column(db.String(50), primary_key=True)
     article_id = db.Column(db.String(50), db.ForeignKey('article.id',
-                                                     ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
+                                                        ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
     product_id = db.Column(db.String(50), db.ForeignKey('product.id',
                                                         ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
     index = db.Column(db.Integer, nullable=True)
+
 
 class Reaction(db.Model):
     __tablename__ = 'reaction'
@@ -115,10 +190,11 @@ class Reaction(db.Model):
     user_id = db.Column(db.String(50), db.ForeignKey('user.id',
                                                      ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
     reactable_id = db.Column(db.String(50), nullable=False)
-    category = db.Column(db.String(50), nullable=False) # article, comment
+    category = db.Column(db.String(50), nullable=False)  # article, comment
     vote = db.Column(db.Boolean, nullable=False, default=True)
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
     modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
+
 
 class Comment(db.Model):
     __tablename__ = 'comment'
@@ -197,6 +273,7 @@ class FileLink(db.Model):
 
     index = db.Column(db.Integer, nullable=True, default=0)
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
+
 
 class UserSetting(db.Model):
     __tablename__ = "user_setting"
@@ -319,6 +396,7 @@ class EmailTemplate(db.Model):
     template_code = db.Column(db.String(200))
     object = db.Column(db.JSON)
 
+
 class Mail(db.Model):
     __tablename__ = 'mail'
     id = db.Column(db.String(50), primary_key=True)
@@ -336,7 +414,7 @@ class VerityCode(db.Model):
                         nullable=True)
     mail_id = db.Column(db.String(50), db.ForeignKey('mail.id', ondelete='CASCADE', onupdate='CASCADE'),
                         nullable=True)
-    type = db.Column(db.Integer, default=1) # 1: đăng ký
+    type = db.Column(db.Integer, default=1)  # 1: đăng ký
     # thêm thời gian giới hạn
 
 
@@ -354,6 +432,7 @@ class Region(db.Model):
     name = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
     region = db.Column(db.JSON)
 
+
 class PriceShip(db.Model):
     __tablename__ = 'price_ship'
     id = db.Column(db.String(50), primary_key=True)
@@ -370,12 +449,14 @@ class TypeProduct(db.Model):
     type_id = db.Column(db.String(50), db.ForeignKey('type_product.id', ondelete='CASCADE', onupdate='CASCADE'),
                         nullable=True)
 
+
 class Size(db.Model):
     __tablename__ = 'size'
 
     id = db.Column(db.String(50), primary_key=True)
     name = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
-    product_id = db.Column(db.String(50), db.ForeignKey('product.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    product_id = db.Column(db.String(50), db.ForeignKey('product.id', ondelete='CASCADE', onupdate='CASCADE'),
+                           nullable=False)
     index = db.Column(db.Integer, nullable=True, default=0)
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
 
@@ -385,9 +466,11 @@ class Color(db.Model):
 
     id = db.Column(db.String(50), primary_key=True)
     name = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=False)
-    product_id = db.Column(db.String(50), db.ForeignKey('product.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    product_id = db.Column(db.String(50), db.ForeignKey('product.id', ondelete='CASCADE', onupdate='CASCADE'),
+                           nullable=False)
     index = db.Column(db.Integer, nullable=True, default=0)
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
+
 
 class Product(db.Model):
     __tablename__ = 'product'
@@ -401,10 +484,10 @@ class Product(db.Model):
     discount = db.Column(db.Integer, nullable=True, default=0)
     discount_from_date = db.Column(db.Integer, nullable=True)
     discount_to_date = db.Column(db.Integer, nullable=True)
-    type_product = db.relationship('TypeProduct',  lazy=True)
-    colors = db.relationship('Color', backref='product', lazy=True,  order_by="asc(Color.index)")
+    type_product = db.relationship('TypeProduct', lazy=True)
+    colors = db.relationship('Color', backref='product', lazy=True, order_by="asc(Color.index)")
 
-    sizes = db.relationship('Size', backref='product', lazy=True,  order_by="asc(Size.index)")
+    sizes = db.relationship('Size', backref='product', lazy=True, order_by="asc(Size.index)")
     created_date = db.Column(db.Integer,
                              default=get_timestamp_now())
     modified_date = db.Column(db.Integer,
@@ -432,8 +515,8 @@ class Product(db.Model):
         }
         if (self.discount_from_date and self.discount_to_date and self.discount > 0
                 and (self.discount_to_date > get_timestamp_now() > self.discount_from_date)):
-            dict_data["has_sale"] =  True
-            dict_data["price"] = self.original_price * (100 - self.discount)/100
+            dict_data["has_sale"] = True
+            dict_data["price"] = self.original_price * (100 - self.discount) / 100
             dict_data["discount"] = self.discount
 
         return dict_data
@@ -462,9 +545,9 @@ class CartItems(db.Model):
 
     quantity = db.Column(db.Integer, nullable=True, default=1)
     color_id = db.Column(db.String(50), db.ForeignKey('color.id', ondelete='SET NULL', onupdate='CASCADE'),
-                        nullable=True)
+                         nullable=True)
     size_id = db.Column(db.String(50), db.ForeignKey('size.id', ondelete='SET NULL', onupdate='CASCADE'),
-                      nullable=True)
+                        nullable=True)
     created_date = db.Column(db.Integer, default=get_timestamp_now())
     modified_date = db.Column(db.Integer, default=get_timestamp_now())
     user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
@@ -475,16 +558,18 @@ class CartItems(db.Model):
     color = db.relationship("Color")
     size = db.relationship("Size")
 
+
 class SessionOrderCartItems(db.Model):
     __tablename__ = 'session_order_cart_items'
     id = db.Column(db.String(50), primary_key=True)
     index = db.Column(db.Integer, nullable=False, default=0)
     cart_id = db.Column(db.String(50), db.ForeignKey('cart_items.id', ondelete='CASCADE',
-                                                              onupdate='CASCADE'), nullable=False)
+                                                     onupdate='CASCADE'), nullable=False)
     session_order_id = db.Column(db.String(50), db.ForeignKey('session_order.id', ondelete='CASCADE',
                                                               onupdate='CASCADE'), nullable=False)
 
     cart_detail = relationship('CartItems')
+
 
 class SessionOrder(db.Model):
     __tablename__ = 'session_order'
@@ -493,7 +578,7 @@ class SessionOrder(db.Model):
     created_date = db.Column(db.Integer, default=get_timestamp_now())
     user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
                         nullable=True)
-    duration = db.Column(db.Integer, default=lambda: get_timestamp_now() + DURATION_SESSION_MINUTES*60)
+    duration = db.Column(db.Integer, default=lambda: get_timestamp_now() + DURATION_SESSION_MINUTES * 60)
     items = db.relationship('SessionOrderCartItems', lazy=True,
                             order_by="asc(SessionOrderCartItems.index)")
 
@@ -533,6 +618,7 @@ class Orders(db.Model):
             data['ward'] = address.ward
         return data
 
+
 class OrderReport(db.Model):
     __tablename__ = 'order_report'
 
@@ -541,10 +627,10 @@ class OrderReport(db.Model):
                         nullable=True)
     reason = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"))
     order_id = db.Column(db.String(50), db.ForeignKey('orders.id', ondelete='CASCADE', onupdate='CASCADE'),
-                        nullable=True)
+                         nullable=True)
     message = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
-    status = db.Column(db.String(20), default='processing') # processing, resolved
-    result  = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
+    status = db.Column(db.String(20), default='processing')  # processing, resolved
+    result = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
     files = db.relationship(
         'Files',
         secondary='file_link',
@@ -562,7 +648,6 @@ class OrderReport(db.Model):
     result_date = db.Column(db.Integer, nullable=True)
 
 
-
 class OrderItems(db.Model):
     __tablename__ = 'order_items'
     id = db.Column(db.String(50), primary_key=True)
@@ -573,15 +658,16 @@ class OrderItems(db.Model):
     quantity = db.Column(db.Integer, nullable=True, default=1)
     count = db.Column(db.BigInteger, default=0)
     size_id = db.Column(db.String(50), db.ForeignKey('size.id', ondelete='SET NULL', onupdate='CASCADE'),
-                      nullable=True)
-    color_id = db.Column(db.String(50), db.ForeignKey('color.id', ondelete='SET NULL', onupdate='CASCADE'),
                         nullable=True)
+    color_id = db.Column(db.String(50), db.ForeignKey('color.id', ondelete='SET NULL', onupdate='CASCADE'),
+                         nullable=True)
     created_date = db.Column(db.Integer, default=get_timestamp_now())
     modified_date = db.Column(db.Integer, default=get_timestamp_now())
 
     product = db.relationship("Product")
     color = db.relationship("Color")
     size = db.relationship("Size")
+
 
 class Reviews(db.Model):
     __tablename__ = 'reviews'
