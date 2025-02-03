@@ -46,8 +46,8 @@ class User(db.Model):
 
     # nhan vien
     is_staff = db.Column(db.Boolean, nullable=False, default=False)
-    identification_card = db.Column(db.String(100), nullable=False) # can cuoc cong dan
-    tax_code = db.Column(db.String(100), nullable=False) # ma so thue
+    identification_card = db.Column(db.String(100), nullable=True) # can cuoc cong dan
+    tax_code = db.Column(db.String(100), nullable=True) # ma so thue
     join_date = db.Column(db.DateTime, nullable=True)
     finish_date = db.Column(db.DateTime, nullable=True)
     number_dependent = db.Column(INTEGER(unsigned=True), default=0) # người phụ thuộc
