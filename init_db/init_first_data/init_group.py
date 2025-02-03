@@ -40,6 +40,7 @@ class Worker:
             'password': '123456789',
             'full_name': 'Nguyễn Ngọc Cương',
             'group_key': 'admin',
+            'is_staff': True,
             },{
                 'email': 'cuonguser@gmail.com',
                 'password': '123456789',
@@ -57,6 +58,7 @@ class Worker:
                 'password': '123456789',
                 'full_name': 'Tô Thành lộc',
                 'group_key': 'admin',
+                'is_staff': True,
             }
         ]
 
