@@ -42,6 +42,12 @@ class User(db.Model):
     group_id = db.Column(ForeignKey('group.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
     group = relationship('Group', viewonly=True)
 
+    join_date = db.Column(db.DateTime, nullable=True)
+    finish_date = db.Column(db.DateTime, nullable=True)
+
+    attendances = db.relationship('Attendance', back_populates='user', cascade="all, delete-orphan")
+    salaries = db.relationship('Salary', back_populates='user', cascade="all, delete-orphan")
+
     files = db.relationship(
         'Files',
         secondary='file_link',
@@ -73,40 +79,25 @@ class User(db.Model):
         return data
 
 
-class Profile(db.Model):
-    __tablename__ = 'profile'
-
-    id = db.Column(db.String(50), primary_key=True)
-    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    user = db.relationship('User', back_populates='profiles')
-
-    join_date = db.Column(db.DateTime, nullable=True)
-    finish_date = db.Column(db.DateTime, nullable=True)
-
-    attendances = db.relationship('Attendance', back_populates='profile', cascade="all, delete-orphan")
-    salaries = db.relationship('Salary', back_populates='profile', cascade="all, delete-orphan")
-
-
 class Attendance(db.Model):
     __tablename__ = 'attendance'
 
     id = db.Column(db.String(50), primary_key=True)
-    profile_id = db.Column(db.String(50), db.ForeignKey('profile.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    profile = db.relationship('Profile', back_populates='attendances')
+    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    user = db.relationship('User', back_populates='attendances')
 
     work_date = db.Column(db.Date, nullable=False)
     check_in = db.Column(db.Time, nullable=True)
     check_out = db.Column(db.Time, nullable=True)
 
 
-
 class Salary(db.Model):
     __tablename__ = 'salary'
 
     id = db.Column(db.String(50), primary_key=True)
-    profile_id = db.Column(db.String(50), db.ForeignKey('profile.id', ondelete='CASCADE', onupdate='CASCADE'),
+    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
                            nullable=False)
-    profile = db.relationship('Profile', back_populates='salaries')
+    user = db.relationship('User', viewonly=True)
     base_salary = db.Column(db.Numeric(10, 2), nullable=False)
     kpi_salary = db.Column(INTEGER(unsigned=True))
     allowance_salary = db.Column(INTEGER(unsigned=True))
@@ -115,8 +106,9 @@ class SalaryReport(db.Model):
     __tablename__ = 'salary_report'
 
     id = db.Column(db.String(50), primary_key=True)
-    profile_id = db.Column(db.String(50), db.ForeignKey('profile.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-
+    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    group_id = db.Column(ForeignKey('group.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
+    group = relationship('Group', viewonly=True)
     month = db.Column(db.Integer, nullable=False)  # Tháng lương
     year = db.Column(db.Integer, nullable=False)  # Năm lương
     kpi_score = db.Column(INTEGER(unsigned=True), default=0, nullable=False)
@@ -125,20 +117,21 @@ class SalaryReport(db.Model):
 
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
     modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
-    profile = db.relationship('Profile', viewonly=True)
+    user = db.relationship('User', viewonly=True)
 
 
 class DocumentStorage(db.Model):
     __tablename__ = 'document_storage'
 
     id = db.Column(db.String(50), primary_key=True)
-    profile_id = db.Column(db.String(50), db.ForeignKey('profile.id', ondelete='CASCADE', onupdate='CASCADE'),
+    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
                            nullable=False)
-    profile = db.relationship('Profile', viewonly=True)
+    user = db.relationship('User', viewonly=True)
 
-    document_name = db.Column(db.String(255), nullable=False)  # Tên tài liệu
+    document_name = db.Column(db.String(255, collation="utf8mb4_vietnamese_ci"), nullable=False)  # Tên tài liệu
     document_url = db.Column(db.String(500), nullable=False)  # Đường dẫn đến tài liệu
-    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)  # Ngày tải lên
+    created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
+    modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
 
 
 class Community(db.Model):
