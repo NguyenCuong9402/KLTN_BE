@@ -8,9 +8,31 @@ from flask import Flask
 from app.models import Group, User
 from app.extensions import db
 from app.settings import DevConfig
+import datetime
+from pytz import timezone
+import random
 
 CONFIG = DevConfig
 
+def get_datetime_now():
+    """
+    Returns the current datetime in Asia/Ho_Chi_Minh timezone.
+    """
+    time_zone_sg = timezone('Asia/Ho_Chi_Minh')
+    return datetime.datetime.now(time_zone_sg)
+
+def generate_vietnam_id():
+    """
+    Generate a fake Vietnam-style identification number (CCCD).
+    """
+    return f"{random.randint(0,99):02}{random.randint(100000000, 999999999)}"
+
+def generate_vietnam_tax_code():
+    """
+    Generate a fake Vietnam-style tax code.
+    """
+    import random
+    return f"{random.randint(1000000000, 9999999999)}"
 
 class Worker:
     def __init__(self):
@@ -22,26 +44,57 @@ class Worker:
         app_context.push()
 
     def init_group(self):
-        list_group = [{
+        list_group = [
+            {
                 'key': 'admin',
                 'name': 'admin',
                 'description': 'admin',
             },
             {
                 'key': 'user',
-                'name': 'user',
-                'description': 'user',
+                'name': 'khách hàng',
+                'description': 'khách hàng',
+            },
+            {
+                'key': 'director',
+                'name': 'giám đốc',
+                'description': 'giám đốc',
+            },
+            {
+                'key': 'accountant',
+                'name': 'kế toán',
+                'description': 'kế toán',
+            },
+            {
+                'key': 'hr_manager',
+                'name': 'quản lý nhân sự',
+                'description': 'quản lý nhân sự',
+            },
+            {
+                'key': 'employee',
+                'name': 'nhân viên',
+                'description': 'nhân viên',
             }
         ]
 
         list_user = [
+            # Admin
             {
-            'email': 'cuongadmin@gmail.com',
-            'password': '123456789',
-            'full_name': 'Nguyễn Ngọc Cương',
-            'group_key': 'admin',
-            'is_staff': True,
-            },{
+                'email': 'cuongadmin@gmail.com',
+                'password': '123456789',
+                'full_name': 'Nguyễn Ngọc Cương',
+                'group_key': 'admin',
+                'is_staff': True,
+            },
+            {
+                'email': 'locadmin@gmail.com',
+                'password': '123456789',
+                'full_name': 'Tô Thành Lộc',
+                'group_key': 'admin',
+                'is_staff': True,
+            },
+            # User (Khách hàng)
+            {
                 'email': 'cuonguser@gmail.com',
                 'password': '123456789',
                 'full_name': 'Nguyễn Ngọc Cương',
@@ -50,17 +103,32 @@ class Worker:
             {
                 'email': 'locuser@gmail.com',
                 'password': '123456789',
-                'full_name': 'Tô Thành lộc',
+                'full_name': 'Tô Thành Lộc',
                 'group_key': 'user',
             },
-            {
-                'email': 'locadmin@gmail.com',
-                'password': '123456789',
-                'full_name': 'Tô Thành lộc',
-                'group_key': 'admin',
-                'is_staff': True,
-            }
         ]
+
+        # Các tài khoản nhân sự, kế toán, giám đốc, nhân viên
+        roles = ['director', 'employee', 'hr_manager', 'accountant']
+        users = ['cuong', 'loc']
+
+        for role in roles:
+            for user in users:
+                join_date = get_datetime_now()
+                finish_date = join_date + datetime.timedelta(days=3 * 365)  # +3 năm
+
+                list_user.append({
+                    'email': f'{user}{role}@gmail.com',
+                    'password': '123456789',
+                    'full_name': f'Cương {role}' if user == 'cuong' else f'Lộc {role}',
+                    'group_key': role,
+                    'is_staff': True,
+                    'identification_card': generate_vietnam_id(),
+                    'tax_code': generate_vietnam_tax_code(),
+                    'join_date': join_date,
+                    'finish_date': finish_date,
+                    'number_dependent': 0,
+                })
 
         list_add_group= []
         for item in list_group:
