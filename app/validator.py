@@ -173,7 +173,19 @@ class ProductValidation(BaseValidation):
     type_product_id = fields.String(required=True)
 
 class StaffValidation(BaseValidation):
-    pass
+    email = fields.String(allow_none=True, validate=validate.Regexp(REGEX_EMAIL))
+    phone = fields.String(allow_none=True,
+                          validate=[validate.Length(min=10, max=20), validate.Regexp(REGEX_PHONE_NUMBER)])
+    full_name = fields.String(allow_none=True)
+    gender = fields.Boolean(allow_none=True)
+    birthday = fields.String(allow_none=True)
+    detail_address = fields.String(allow_none=True)
+    address = fields.Dict(allow_none=True)
+    join_date = fields.DateTime(allow_none=True)
+    finish_date = fields.DateTime(allow_none=True)
+    tax_code = fields.String(allow_none=True)
+    identification_card = fields.String(allow_none=True)
+    number_dependent = fields.Integer(allow_none=True)
 
 
 class ArticleValidate(BaseValidation):
