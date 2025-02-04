@@ -172,6 +172,9 @@ class ProductValidation(BaseValidation):
     describe = fields.String(allow_none=True)
     type_product_id = fields.String(required=True)
 
+class StaffValidation(BaseValidation):
+    pass
+
 
 class ArticleValidate(BaseValidation):
     tags = fields.List(
