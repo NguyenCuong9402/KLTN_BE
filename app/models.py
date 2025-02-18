@@ -440,7 +440,8 @@ class TypeProduct(db.Model):
     name = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
     type_id = db.Column(db.String(50), db.ForeignKey('type_product.id', ondelete='CASCADE', onupdate='CASCADE'),
                         nullable=True)
-
+    created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
+    modified_date = db.Column(INTEGER(unsigned=True),default=get_timestamp_now())
 
 class Size(db.Model):
     __tablename__ = 'size'
