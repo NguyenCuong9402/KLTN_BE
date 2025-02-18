@@ -88,6 +88,7 @@ class UserSchema(Schema):
     identification_card = fields.String()
     tax_code = fields.String()
     avatar = fields.Nested(FileSchema())
+    created_date = fields.Integer()
 
 class AuthValidation(BaseValidation):
     password = fields.String(required=True,

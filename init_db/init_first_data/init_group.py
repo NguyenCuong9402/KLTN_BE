@@ -92,11 +92,13 @@ class Worker:
             {
                 'email': 'cuongadmin@gmail.com',
                 'password': '123456789',
+                'phone': '0327241194',
                 'full_name': 'Nguyễn Ngọc Cương',
                 'group_key': 'admin',
             },
             {
                 'email': 'locadmin@gmail.com',
+                'phone': '0327241194',
                 'password': '123456789',
                 'full_name': 'Tô Thành Lộc',
                 'group_key': 'admin',
@@ -104,12 +106,14 @@ class Worker:
             # User (Khách hàng)
             {
                 'email': 'cuonguser@gmail.com',
+                'phone': '0327241194',
                 'password': '123456789',
                 'full_name': 'Nguyễn Ngọc Cương',
                 'group_key': 'user',
             },
             {
                 'email': 'locuser@gmail.com',
+                'phone': '0327241194',
                 'password': '123456789',
                 'full_name': 'Tô Thành Lộc',
                 'group_key': 'user',
@@ -130,6 +134,7 @@ class Worker:
                     'password': '123456789',
                     'full_name': f'Cương {role}' if user == 'cuong' else f'Lộc {role}',
                     'group_key': role,
+                    'phone': '0327241194',
                     'identification_card': generate_vietnam_id(),
                     'tax_code': generate_vietnam_tax_code(),
                     'join_date': join_date,

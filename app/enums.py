@@ -9,6 +9,8 @@ TYPE_REACTION = {
     'COMMENT': 'comment',
 }
 
+ADMIN_KEY_GROUP = ['admin']
+
 STATUS_ORDER = {
     'PENDING': 'pending',
     'DELIVERING': 'delivering',
