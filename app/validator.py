@@ -296,6 +296,9 @@ class QueryParamsAllSchema(BaseValidation):
     )
     text_search = fields.String(allow_none=True)  # Có thể None
 
+class ParamTypeProduct(QueryParamsAllSchema):
+    type_id = fields.String(allow_none=True)
+
 class QueryParamsArticleSchema(QueryParamsAllSchema):
     community_id = fields.String(allow_none=True)
     timestamp = fields.Integer(allow_none=True)

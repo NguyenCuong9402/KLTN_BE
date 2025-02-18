@@ -1,4 +1,6 @@
 import json
+
+from dns.e164 import query
 from shortuuid import uuid
 from flask import Blueprint, request
 from marshmallow import ValidationError
@@ -11,7 +13,7 @@ from app.api.helper import send_result, send_error
 from app.models import TypeProduct, Product
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now
 from app.validator import ProductValidation, ProductSchema, QueryParamsSchema, TypeProductValidation, \
-    QueryParamsAllSchema, TypeProductSchema
+    QueryParamsAllSchema, TypeProductSchema, ParamTypeProduct
 
 api = Blueprint('manage/type_product', __name__)
 
@@ -81,7 +83,7 @@ def remove_item_id(type_id):
         return send_error(message=str(ex))
 
 
-@api.route("", methods=["GET"])
+@api.route("/get_parent", methods=["GET"])
 def get_parent_type():
     try:
         try:
@@ -135,12 +137,12 @@ def get_parent_type():
         return send_error(message=str(ex))
 
 
-@api.route("/get-children/<type_id>", methods=["GET"])
-def get_children_type(type_id):
+@api.route("", methods=["GET"])
+def get_children_type():
     try:
         try:
             params = request.args.to_dict(flat=True)
-            params = QueryParamsAllSchema().load(params) if params else dict()
+            params = ParamTypeProduct().load(params) if params else dict()
         except ValidationError as err:
             logger.error(json.dumps({
                 "message": err.messages,
@@ -153,13 +155,20 @@ def get_children_type(type_id):
         order_by = params.get('order_by', 'created_date')
         sort = params.get('sort', 'desc')
         text_search = params.get('text_search', None)
+        type_id = params.get('text_search', None)
 
-        check = TypeProduct.query.filter_by(id=type_id).first()
+        query = TypeProduct.query.filter()
 
-        if check is None:
-            return send_error(message='Loại sản phẩm không tồn tại')
+        if type_id:
+            check = TypeProduct.query.filter_by(id=type_id).first()
 
-        query = TypeProduct.query.filter(TypeProduct.type_id == type_id)
+            if check is None:
+                return send_error(message='Loại sản phẩm không tồn tại')
+
+            query = query.filter(TypeProduct.type_id == type_id)
+        else:
+            query = query.filter(TypeProduct.type_id.isnot(None))
+
         if text_search:
             text_search = text_search.strip()
             text_search = text_search.lower()
