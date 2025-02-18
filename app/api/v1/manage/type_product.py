@@ -157,7 +157,7 @@ def get_children_type():
         text_search = params.get('text_search', None)
         type_id = params.get('text_search', None)
 
-        query = TypeProduct.query.filter()
+        query = TypeProduct.query.filter(TypeProduct.type_id.isnot(None))
 
         if type_id:
             check = TypeProduct.query.filter_by(id=type_id).first()
@@ -166,8 +166,6 @@ def get_children_type():
                 return send_error(message='Loại sản phẩm không tồn tại')
 
             query = query.filter(TypeProduct.type_id == type_id)
-        else:
-            query = query.filter(TypeProduct.type_id.isnot(None))
 
         if text_search:
             text_search = text_search.strip()
