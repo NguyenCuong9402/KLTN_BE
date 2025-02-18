@@ -66,6 +66,7 @@ class GroupSchema(Schema):
     id = fields.String()
     name = fields.String()
     key = fields.String()
+    is_staff = fields.Boolean()
 
 
 class FileSchema(Schema):
@@ -84,7 +85,6 @@ class UserSchema(Schema):
     address = fields.Dict()
     address_detail = fields.String()
     group = fields.Nested(GroupSchema())
-    is_staff = fields.Boolean()
     identification_card = fields.String()
     tax_code = fields.String()
     avatar = fields.Nested(FileSchema())

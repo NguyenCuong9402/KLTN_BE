@@ -45,7 +45,6 @@ class User(db.Model):
     group = relationship('Group', viewonly=True)
 
     # nhan vien
-    is_staff = db.Column(db.Boolean, nullable=False, default=False)
     identification_card = db.Column(db.String(100), nullable=True) # can cuoc cong dan
     tax_code = db.Column(db.String(100), nullable=True) # ma so thue
     join_date = db.Column(db.DateTime, nullable=True)
@@ -334,7 +333,6 @@ class GroupRole(db.Model):
     id = db.Column(db.String(50), primary_key=True)
     role_id = db.Column(ForeignKey('role.id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
     group_id = db.Column(ForeignKey('group.id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
-
     role = relationship('Role', primaryjoin='GroupRole.role_id == Role.id')
 
     @classmethod
@@ -347,6 +345,7 @@ class Group(db.Model):
 
     id = db.Column(db.String(50), primary_key=True)
     key = db.Column(db.String(100), unique=True)
+    is_staff = db.Column(db.Boolean, nullable=False, default=False)
     name = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=False, unique=True)
     description = db.Column(db.String(500, collation="utf8mb4_vietnamese_ci"))
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), nullable=False, index=True)
