@@ -146,7 +146,7 @@ class ReactionValidation(BaseValidation):
 class TypeProductValidation(BaseValidation):
     key = fields.String(required=True)
     name = fields.String(required=True)
-    type_id = fields.String(required=True)
+    type_id = fields.String(allow_none=True)
 
 class ProductValidation(BaseValidation):
     files = fields.List(
@@ -224,6 +224,9 @@ class TypeProductSchema(Schema):
     id = fields.String()
     key = fields.String()
     name = fields.String()
+    created_date = fields.String()
+    modified_date = fields.Integer()
+
 
 class ColorOrSizeSchema(Schema):
     id = fields.String()
