@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: ae366515c38f
+Revision ID: f6ed6ad4ab49
 Revises: 
-Create Date: 2025-02-03 23:15:32.337493
+Create Date: 2025-02-18 14:14:33.716813
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'ae366515c38f'
+revision = 'f6ed6ad4ab49'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -162,7 +162,7 @@ def upgrade():
     sa.Column('password_hash', sa.String(length=255), nullable=True),
     sa.Column('gender', sa.Boolean(), nullable=True),
     sa.Column('full_name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
-    sa.Column('avatar_url', sa.String(length=255), nullable=True),
+    sa.Column('avatar_id', sa.String(length=50), nullable=True),
     sa.Column('birthday', sa.DATE(), nullable=True),
     sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
     sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
@@ -180,6 +180,7 @@ def upgrade():
     sa.Column('finish_date', sa.DateTime(), nullable=True),
     sa.Column('number_dependent', mysql.INTEGER(unsigned=True), nullable=True),
     sa.ForeignKeyConstraint(['address_id'], ['address.id'], onupdate='CASCADE', ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['avatar_id'], ['files.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['group_id'], ['group.id'], onupdate='CASCADE', ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id')
     )

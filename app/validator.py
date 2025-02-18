@@ -61,9 +61,12 @@ class AddressSchema(Schema):
     district = fields.String()
     ward = fields.String()
 
+
 class GroupSchema(Schema):
     id = fields.String()
     name = fields.String()
+    key = fields.String()
+
 
 class FileSchema(Schema):
     id = fields.String()
@@ -84,7 +87,7 @@ class UserSchema(Schema):
     is_staff = fields.Boolean()
     identification_card = fields.String()
     tax_code = fields.String()
-    avatar_
+    avatar = fields.Nested(FileSchema())
 
 class AuthValidation(BaseValidation):
     password = fields.String(required=True,

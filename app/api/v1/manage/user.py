@@ -40,7 +40,7 @@ def new():
 
 
 @api.route("/<user_id>", methods=["PUT"])
-@jwt_required()
+@jwt_required
 def active_user(user_id):
     try:
         user = User.query.filter(User.id == user_id).first()
