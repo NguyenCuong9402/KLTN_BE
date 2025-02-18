@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f6ed6ad4ab49
+Revision ID: a44b18ddbcee
 Revises: 
-Create Date: 2025-02-18 14:14:33.716813
+Create Date: 2025-02-18 14:32:39.586207
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'f6ed6ad4ab49'
+revision = 'a44b18ddbcee'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -63,6 +63,7 @@ def upgrade():
     op.create_table('group',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('key', sa.String(length=100), nullable=True),
+    sa.Column('is_staff', sa.Boolean(), nullable=False),
     sa.Column('name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=False),
     sa.Column('description', sa.String(length=500, collation='utf8mb4_vietnamese_ci'), nullable=True),
     sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=False),
@@ -173,7 +174,6 @@ def upgrade():
     sa.Column('detail_address', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
     sa.Column('last_seen_notify', mysql.INTEGER(unsigned=True), nullable=True),
     sa.Column('group_id', sa.String(length=50), nullable=True),
-    sa.Column('is_staff', sa.Boolean(), nullable=False),
     sa.Column('identification_card', sa.String(length=100), nullable=True),
     sa.Column('tax_code', sa.String(length=100), nullable=True),
     sa.Column('join_date', sa.DateTime(), nullable=True),

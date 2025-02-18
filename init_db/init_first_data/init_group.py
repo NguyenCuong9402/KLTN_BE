@@ -49,6 +49,8 @@ class Worker:
                 'key': 'admin',
                 'name': 'admin',
                 'description': 'admin',
+                'is_staff': True,
+
             },
             {
                 'key': 'user',
@@ -59,21 +61,29 @@ class Worker:
                 'key': 'director',
                 'name': 'giám đốc',
                 'description': 'giám đốc',
+                'is_staff': True,
+
             },
             {
                 'key': 'accountant',
                 'name': 'kế toán',
                 'description': 'kế toán',
+                'is_staff': True,
+
             },
             {
                 'key': 'hr_manager',
                 'name': 'quản lý nhân sự',
                 'description': 'quản lý nhân sự',
+                'is_staff': True,
+
             },
             {
                 'key': 'employee',
                 'name': 'nhân viên',
                 'description': 'nhân viên',
+                'is_staff': True,
+
             }
         ]
 
@@ -84,14 +94,12 @@ class Worker:
                 'password': '123456789',
                 'full_name': 'Nguyễn Ngọc Cương',
                 'group_key': 'admin',
-                'is_staff': True,
             },
             {
                 'email': 'locadmin@gmail.com',
                 'password': '123456789',
                 'full_name': 'Tô Thành Lộc',
                 'group_key': 'admin',
-                'is_staff': True,
             },
             # User (Khách hàng)
             {
@@ -122,7 +130,6 @@ class Worker:
                     'password': '123456789',
                     'full_name': f'Cương {role}' if user == 'cuong' else f'Lộc {role}',
                     'group_key': role,
-                    'is_staff': True,
                     'identification_card': generate_vietnam_id(),
                     'tax_code': generate_vietnam_tax_code(),
                     'join_date': join_date,
