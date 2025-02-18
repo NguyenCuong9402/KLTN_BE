@@ -81,10 +81,10 @@ class UserSchema(Schema):
     address = fields.Dict()
     address_detail = fields.String()
     group = fields.Nested(GroupSchema())
-    avatar = fields.Nested(FileSchema())
     is_staff = fields.Boolean()
     identification_card = fields.String()
     tax_code = fields.String()
+    avatar_
 
 class AuthValidation(BaseValidation):
     password = fields.String(required=True,

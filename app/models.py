@@ -30,7 +30,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(255))
     gender = db.Column(db.Boolean, default=0)
     full_name = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"))
-    avatar_url = db.Column(db.String(255))
+    avatar_id = db.Column(db.String(50), db.ForeignKey('files.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
     birthday = db.Column(db.DATE, nullable=True)
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
     modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
@@ -52,25 +52,10 @@ class User(db.Model):
     finish_date = db.Column(db.DateTime, nullable=True)
     number_dependent = db.Column(INTEGER(unsigned=True), default=0) # người phụ thuộc
 
+    avatar = db.relationship("Files", viewonly=True)
 
     attendances = db.relationship('Attendance', back_populates='user', cascade="all, delete-orphan")
     salaries = db.relationship('Salary', back_populates='user', cascade="all, delete-orphan")
-
-    files = db.relationship(
-        'Files',
-        secondary='file_link',
-        primaryjoin=(
-            "and_(User.id == FileLink.table_id, FileLink.table_type == 'user')"
-        ),
-        secondaryjoin="FileLink.file_id == Files.id",
-        lazy='dynamic',
-        order_by="asc(FileLink.index)",
-        viewonly=True
-    )
-
-    @property
-    def avatar(self):
-        return self.files.first()
 
     @property
     def address(self):
@@ -672,9 +657,9 @@ class OrderItems(db.Model):
     created_date = db.Column(db.Integer, default=get_timestamp_now())
     modified_date = db.Column(db.Integer, default=get_timestamp_now())
 
-    product = db.relationship("Product")
-    color = db.relationship("Color")
-    size = db.relationship("Size")
+    product = db.relationship("Product", viewonly=True)
+    color = db.relationship("Color", viewonly=True)
+    size = db.relationship("Size", viewonly=True)
 
 
 class Reviews(db.Model):
