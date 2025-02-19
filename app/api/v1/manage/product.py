@@ -85,3 +85,21 @@ def remove_item():
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))
+
+
+@api.route("/<product_id", methods=["PUT"])
+@jwt_required
+def update_item(product_id):
+    try:
+
+        product = Product.query.filter(Product.id == product_id).first()
+
+        if product is None:
+            return send_error(message='Sản phẩm không tồn tại.')
+
+        db.session.flush()
+        db.session.commit()
+        return send_result(message="Cập nhật sản phẩm thành công.")
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex))
