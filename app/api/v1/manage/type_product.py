@@ -32,6 +32,10 @@ def new():
 
         if check_coincided_name(json_req['name']):
             return send_error(message='Tên đã tồn tại')
+
+        if check_coincided_key(json_req['key']):
+            return send_error(message='Key đã tồn tại')
+
         type_product = TypeProduct(**json_body, id=str(uuid()))
         db.session.add(type_product)
         db.session.flush()
@@ -49,6 +53,15 @@ def check_coincided_name(name='', type_id=''):
     if type_id:
         existed_name = existed_name.filter(TypeProduct.id != type_id)
     if existed_name.first() is None:
+        return False
+    return True
+
+
+def check_coincided_key(key='', type_id=''):
+    existed_key = TypeProduct.query.filter(TypeProduct.key == key)
+    if type_id:
+        existed_key = existed_key.filter(TypeProduct.id != type_id)
+    if existed_key.first() is None:
         return False
     return True
 
