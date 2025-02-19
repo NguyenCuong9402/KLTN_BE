@@ -168,7 +168,7 @@ def get_children_type():
         order_by = params.get('order_by', 'created_date')
         sort = params.get('sort', 'desc')
         text_search = params.get('text_search', None)
-        type_id = params.get('text_search', None)
+        type_id = params.get('type_id', None)
 
         query = TypeProduct.query.filter(TypeProduct.type_id.isnot(None))
 
