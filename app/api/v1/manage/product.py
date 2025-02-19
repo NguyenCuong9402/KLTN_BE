@@ -87,7 +87,7 @@ def remove_item():
         return send_error(message=str(ex))
 
 
-@api.route("/<product_id", methods=["PUT"])
+@api.route("/<product_id>", methods=["PUT"])
 @jwt_required
 def update_item(product_id):
     try:
