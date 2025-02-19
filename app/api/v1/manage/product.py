@@ -45,7 +45,7 @@ def new():
         db.session.bulk_save_objects(color_objects)
         db.session.flush()
 
-        file_objects = [FileLink(id=str(uuid()), table_id=product.id, file_id=file["file_id"],
+        file_objects = [FileLink(id=str(uuid()), table_id=product.id, file_id=file["id"],
                                  table_type=TYPE_FILE_LINK.get('PRODUCT', 'product'),
                                  index=index, created_date=get_timestamp_now()+index)
                         for index, file in enumerate(files)]

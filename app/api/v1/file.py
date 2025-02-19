@@ -43,7 +43,7 @@ def upload_file():
         db.session.commit()
         dt = {
             "file_path": file.file_path,
-            "file_id": file.id
+            "id": file.id
         }
 
         return send_result(data=dt, message="File uploaded successfully")
@@ -78,7 +78,7 @@ def upload_picture():
                 continue
             dt = {
                 "file_path": file.file_path,
-                "file_id": file.id
+                "id": file.id
             }
             uploaded_files.append(dt)
 

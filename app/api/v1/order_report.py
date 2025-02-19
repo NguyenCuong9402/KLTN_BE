@@ -33,7 +33,7 @@ def new():
         db.session.add(order_report)
         db.session.flush()
 
-        file_objects = [FileLink(id=str(uuid()), table_id=order_report.id, file_id=file["file_id"],
+        file_objects = [FileLink(id=str(uuid()), table_id=order_report.id, file_id=file["id"],
                                  table_type=TYPE_FILE_LINK.get('ORDER_REPORT', 'order_report'),
                                  index=index, created_date=get_timestamp_now()+index)
                         for index, file in enumerate(files)]
