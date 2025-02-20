@@ -224,7 +224,7 @@ class TypeProductSchema(Schema):
     id = fields.String()
     key = fields.String()
     name = fields.String()
-    created_date = fields.String()
+    created_date = fields.Integer()
     modified_date = fields.Integer()
 
 class TypeProductWithChildrenSchema(TypeProductSchema):
