@@ -212,15 +212,3 @@ def get_children_type():
     except Exception as ex:
         return send_error(message=str(ex))
 
-
-@api.route("/<type_id>", methods=["GET"])
-def get_detail_type(type_id):
-    try:
-        check = TypeProduct.query.filter_by(id=type_id).first()
-        if check is None:
-            return send_error(message='Loại sản phẩm không tồn tại')
-        type_product = TypeProductSchema().dump(check)
-        return send_result(data=type_product)
-    except Exception as ex:
-        return send_error(message=str(ex))
-
