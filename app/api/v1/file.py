@@ -20,7 +20,7 @@ FILE_ORIGIN = "app"
 FOLDER = "/files/"
 
 @api.route('upload_file', methods=['POST'])
-def upload_file():
+def upload_one_file():
     try:
         # Lấy file từ request (chỉ lấy file đầu tiên từ input 'file')
         file = request.files.get('file')  # Chỉ nhận một file
@@ -54,7 +54,7 @@ def upload_file():
 
 
 @api.route('upload', methods=['POST'])
-def upload_picture():
+def upload_multi_file():
     try:
         files = request.files.getlist('files')  # Nhận danh sách file từ 'files'
         if not files:

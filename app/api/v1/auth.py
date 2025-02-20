@@ -228,49 +228,7 @@ def send_code():
         db.session.rollback()
         return send_error(message="Error" + str(ex), code=442)
 
-@api.route('/update', methods=['PUT'])
-@jwt_required
-def update_profile():
-    try:
-        user_id = get_jwt_identity()
-        json_req = request.get_json()
-        json_body = trim_dict(json_req)
-        validator_input = UserValidation()
-        is_not_validate = validator_input.validate(json_body)
-        if is_not_validate:
-            return send_error(data=is_not_validate, message='Validate Error')
 
-        user = User.query.filter_by(id=user_id).first()
-        if user is None:
-            return send_error(message="Người dùng không hợp lệ")
-
-        address = json_body.pop('address')
-        if json_body.get('birthday', None):
-            json_body['birthday'] = convert_to_datetime(json_body.get('birthday'))
-
-        for key, value in address.items():
-            if value is None or value.strip() =='':
-                return send_error(message='Vui lòng chọn địa chỉ')
-
-        address = Address.query.filter_by(province=address.get('province'), district=address.get('district'),
-                                          ward=address.get('ward')).first()
-        if address is None:
-            return send_error(message="Địa chỉ không hợp lệ.")
-        user.address_id = address.id
-
-        for key, value in json_body.items():
-            if value is not None and hasattr(user, key):
-                setattr(user, key, value)
-
-        db.session.flush()
-        db.session.commit()
-        data =  UserSchema().dump(user)
-        data.setdefault('param_router', GROUP_KEY_PARAM.get(user.group.key, '/'))
-
-        return send_result(data=data, message='Thành công')
-    except Exception as ex:
-        db.session.rollback()
-        return send_error(message=str(ex), code=442)
 
 @api.route('/change_password', methods=['PUT'])
 @jwt_required

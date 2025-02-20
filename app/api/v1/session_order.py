@@ -160,7 +160,7 @@ def update_ship_in_session(session_id):
     except Exception as ex:
         return send_error(message=str(ex))
 
-@api.route("/order/<session_id>", methods=["POST"])
+@api.route("/<session_id>", methods=["POST"])
 @jwt_required
 def order_session(session_id):
     try:

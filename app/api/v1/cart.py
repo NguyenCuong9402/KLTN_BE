@@ -16,7 +16,7 @@ from app.validator import QueryParamsAllSchema, CartSchema, CartValidation, Cart
 api = Blueprint('cart', __name__)
 
 
-@api.route('/add_item', methods=['POST'])
+@api.route('', methods=['POST'])
 @jwt_required
 def add_item_to_cart():
     try:

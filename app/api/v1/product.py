@@ -22,16 +22,6 @@ from app.validator import ProductValidation, TypeProductSchema, ProductSchema, Q
 
 api = Blueprint('product', __name__)
 
-
-@api.route('/get_type', methods=['GET'])
-def get_type():
-    try:
-        query=TypeProduct.query.filter().order_by(desc(TypeProduct.name)).all()
-        data = TypeProductSchema(many=True).dump(query)
-        return send_result(data=data, message='Thành công')
-    except Exception as ex:
-        return send_error(message=str(ex), code=442)
-
 @api.route("/<product_id>", methods=["GET"])
 def get_item(product_id):
     try:
