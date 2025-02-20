@@ -227,6 +227,9 @@ class TypeProductSchema(Schema):
     created_date = fields.String()
     modified_date = fields.Integer()
 
+class TypeProductWithChildrenSchema(TypeProductSchema):
+    type_child = fields.List(fields.Nested(TypeProductSchema))
+
 
 class ColorOrSizeSchema(Schema):
     id = fields.String()

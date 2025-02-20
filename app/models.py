@@ -443,6 +443,9 @@ class TypeProduct(db.Model):
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
     modified_date = db.Column(INTEGER(unsigned=True),default=get_timestamp_now())
 
+    type_child = db.relationship('TypeProduct', backref=db.backref('parent', remote_side=[id]), lazy=True)
+
+
 class Size(db.Model):
     __tablename__ = 'size'
 

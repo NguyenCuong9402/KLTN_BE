@@ -144,6 +144,8 @@ def register_blueprints(app):
     app.register_blueprint(api_v1.article.api, url_prefix='/api/v1/article')
     app.register_blueprint(api_v1.reaction.api, url_prefix='/api/v1/reaction')
     app.register_blueprint(api_v1.comment.api, url_prefix='/api/v1/comment')
+    app.register_blueprint(api_v1.type_product.api, url_prefix='/api/v1/type_product')
+
 
 
 
