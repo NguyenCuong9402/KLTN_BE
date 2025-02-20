@@ -12,7 +12,7 @@ from flask_jwt_extended import jwt_required
 from app.api.helper import send_result, send_error
 from app.models import User, Group
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now
-from app.validator import StaffValidation, QueryParamsSchema, QueryParamsAllSchema, UserSchema
+from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema
 
 api = Blueprint('manage/user', __name__)
 

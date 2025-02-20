@@ -512,7 +512,7 @@ class Product(db.Model):
         if (self.discount_from_date and self.discount_to_date and self.discount > 0
                 and (self.discount_to_date > get_timestamp_now() > self.discount_from_date)):
             dict_data["has_sale"] = True
-            dict_data["price"] = self.original_price * (100 - self.discount) / 100
+            dict_data["price"] = int(self.original_price * (100 - self.discount) / 100)
             dict_data["discount"] = self.discount
 
         return dict_data

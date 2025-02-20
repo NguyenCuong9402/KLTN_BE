@@ -278,7 +278,17 @@ class QueryParamsSchema(BaseValidation):
         missing="desc", validate=validate.OneOf(["asc", "desc"])  # Chỉ chấp nhận 'asc' hoặc 'desc'
     )
     text_search = fields.String(allow_none=True)  # Có thể None
-    type_id = fields.String(allow_none=True)  # Có thể None
+    select_type = fields.List(fields.String(), allow_none=True)
+
+    @pre_load
+    def parse_select_type(self, data, **kwargs):
+        """Tự động convert select_type từ string JSON thành list"""
+        if "select_type" in data and isinstance(data["select_type"], str):
+            try:
+                data["select_type"] = json.loads(data["select_type"])
+            except json.JSONDecodeError:
+                raise ValidationError({"select_type": "Invalid JSON format."})
+        return data
 
     @pre_load
     def normalize_empty_strings_and_trim(self, data, **kwargs):

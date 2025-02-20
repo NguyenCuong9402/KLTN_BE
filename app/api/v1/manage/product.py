@@ -12,7 +12,7 @@ from app.api.helper import send_result, send_error
 from app.models import Product, Size, Color, \
     FileLink
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now
-from app.validator import ProductValidation, ProductSchema, QueryParamsSchema
+from app.validator import ProductValidation
 
 api = Blueprint('manage/product', __name__)
 

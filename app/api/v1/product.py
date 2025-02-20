@@ -18,7 +18,7 @@ from app.api.helper import send_result, send_error
 from app.extensions import logger
 from app.models import db, Product, User, Orders, OrderItems, CartItems, Files, TypeProduct
 from app.utils import trim_dict, escape_wildcard
-from app.validator import ProductValidation, TypeProductSchema, ProductSchema, QueryParamsSchema
+from app.validator import ProductSchema, QueryParamsSchema
 
 api = Blueprint('product', __name__)
 
@@ -54,18 +54,12 @@ def get_items():
         order_by = params.get('order_by', 'created_date')
         sort = params.get('sort', 'desc')
         text_search = params.get('text_search', None)
-        type_id = params.get('type_id', None)
+        select_type = params.get('select_type', [])
 
         query = Product.query.filter()
 
-        if type_id:
-            check = TypeProduct.query.filter(TypeProduct.id == type_id).first()
-            if check is None:
-                return send_error(message='Loại không tồn tại')
-            get_child_type = TypeProduct.query.filter(TypeProduct.type_id == type_id).all()
-            list_id = [item.id for item in get_child_type]
-            list_id.append(type_id)
-            query = query.filter(Product.type_product_id.in_(list_id))
+        if select_type:
+            query = query.filter(Product.type_product_id.in_(select_type))
 
         if text_search:
             text_search = text_search.strip()
