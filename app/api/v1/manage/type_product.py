@@ -164,7 +164,7 @@ def get_children_type():
             return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
 
         page = params.get('page', 1)
-        page_size = params.get('page_size', 10)
+        page_size = params.get('page_size', 20)
         order_by = params.get('order_by', 'created_date')
         sort = params.get('sort', 'desc')
         text_search = params.get('text_search', None)
