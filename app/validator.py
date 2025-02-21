@@ -509,7 +509,7 @@ class PriceShipSchema(Schema):
     id = fields.String()
     price = fields.Integer()
     shipper_id = fields.String()
-    region = fields.Nested()
+    region = fields.Nested(RegionSchema())
 
 class ShipperSchema(Schema):
     id = fields.String()

@@ -409,14 +409,25 @@ class VerityCode(db.Model):
     type = db.Column(db.Integer, default=1)  # 1: đăng ký
     # thêm thời gian giới hạn
 
+class PriceShip(db.Model):
+    __tablename__ = 'price_ship'
+    id = db.Column(db.String(50), primary_key=True)
+    region_id = db.Column(ForeignKey('region.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
+    shipper_id = db.Column(ForeignKey('shipper.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
+    price = db.Column(db.Integer, nullable=False)
+    region = db.relationship("Region", viewonly=True)
 
 class Shipper(db.Model):
     __tablename__ = 'shipper'
     id = db.Column(db.String(50), primary_key=True)
     name = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
     index = db.Column(db.Integer, nullable=True, default=0)
-    price_ship = db.relationship('Region', backref='shipper', lazy=True, order_by="asc(Region.name)")
-
+    price_ship = db.relationship(
+        'PriceShip',
+        backref='shipper',
+        lazy=True,
+        order_by=PriceShip.price.asc()  # Sử dụng đúng cách
+    )
 
 class Region(db.Model):
     __tablename__ = 'region'
@@ -426,13 +437,7 @@ class Region(db.Model):
     region = db.Column(db.JSON)
 
 
-class PriceShip(db.Model):
-    __tablename__ = 'price_ship'
-    id = db.Column(db.String(50), primary_key=True)
-    region_id = db.Column(ForeignKey('region.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
-    shipper_id = db.Column(ForeignKey('shipper.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
-    price = db.Column(db.Integer, nullable=False)
-    region = db.relationship("Region", viewonly=True)
+
 
 
 class TypeProduct(db.Model):
