@@ -37,15 +37,11 @@ def new():
         return send_error(message=str(ex), code=442)
 
 
-@api.route("", methods=["DELETE"])
+@api.route("/<ship_id>", methods=["DELETE"])
 @jwt_required
-def remove_item():
+def remove_item(ship_id):
     try:
-        body_request = request.get_json()
-        list_id = body_request.get('list_id', [])
-        if len(list_id) == 0:
-            return send_error(message='Chưa chọn item nào.')
-        Shipper.query.filter(Shipper.id.in_(list_id)).delete()
+        Shipper.query.filter(Shipper.id == ship_id).delete()
         db.session.flush()
         db.session.commit()
         return send_result(message="Xóa sản phẩm thành công")
