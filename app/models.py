@@ -415,6 +415,7 @@ class Shipper(db.Model):
     id = db.Column(db.String(50), primary_key=True)
     name = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
     index = db.Column(db.Integer, nullable=True, default=0)
+    price_ship = db.relationship('Region', backref='shipper', lazy=True, order_by="asc(Region.name)")
 
 
 class Region(db.Model):
@@ -431,6 +432,7 @@ class PriceShip(db.Model):
     region_id = db.Column(ForeignKey('region.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
     shipper_id = db.Column(ForeignKey('shipper.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
     price = db.Column(db.Integer, nullable=False)
+    region = db.relationship("Region", viewonly=True)
 
 
 class TypeProduct(db.Model):
@@ -550,9 +552,9 @@ class CartItems(db.Model):
                         nullable=True)
     product_id = db.Column(db.String(50), db.ForeignKey('product.id', ondelete='CASCADE', onupdate='CASCADE'),
                            nullable=True)
-    product = db.relationship("Product")
-    color = db.relationship("Color")
-    size = db.relationship("Size")
+    product = db.relationship("Product", viewonly=True)
+    color = db.relationship("Color", viewonly=True)
+    size = db.relationship("Size", viewonly=True)
 
 
 class SessionOrderCartItems(db.Model):

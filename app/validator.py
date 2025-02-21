@@ -501,9 +501,19 @@ class OrderReportSchema(Schema):
     result = fields.String()
     user = fields.Nested(UserSchema(only=("id","full_name", "avatar", "email", "phone")))
 
+class RegionSchema(Schema):
+    id = fields.String()
+    name = fields.String()
+
+class PriceShipSchema(Schema):
+    id = fields.String()
+    price = fields.Integer()
+    shipper_id = fields.String()
+    region = fields.Nested()
 
 class ShipperSchema(Schema):
     id = fields.String()
     name = fields.String()
     index = fields.Integer()
+    price_ship = fields.List(fields.Nested(PriceShipSchema()))
 
