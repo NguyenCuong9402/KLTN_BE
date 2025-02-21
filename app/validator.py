@@ -83,7 +83,7 @@ class UserSchema(Schema):
     full_name = fields.String()
     birthday = fields.Date()
     address = fields.Dict()
-    address_detail = fields.String()
+    detail_address = fields.String()
     group = fields.Nested(GroupSchema())
     identification_card = fields.String()
     tax_code = fields.String()
@@ -122,7 +122,7 @@ class UserValidation(BaseValidation):
     full_name = fields.String(allow_none=True)
     gender = fields.Boolean(allow_none=True)
     birthday = fields.String(allow_none=True)
-    address_detail = fields.String(allow_none=True)
+    detail_address = fields.String(allow_none=True)
     address = fields.Dict(allow_none=True)
 
 class CartValidation(BaseValidation):
