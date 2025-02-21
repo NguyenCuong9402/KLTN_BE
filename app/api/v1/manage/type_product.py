@@ -152,3 +152,55 @@ def get_parent_type():
 
 
 
+
+@api.route("/get_all", methods=["GET"])
+def get_all():
+    try:
+        try:
+            params = request.args.to_dict(flat=True)
+            params = QueryParamsAllSchema().load(params) if params else dict()
+        except ValidationError as err:
+            logger.error(json.dumps({
+                "message": err.messages,
+                "data": err.valid_data
+            }))
+            return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
+
+
+        page = params.get('page', 1)
+        page_size = params.get('page_size', 20)
+        sort = params.get('sort', 'desc')
+        text_search = params.get('text_search', None)
+
+        query = TypeProduct.query.filter()
+        if text_search:
+            text_search = text_search.strip()
+            text_search = text_search.lower()
+            text_search = escape_wildcard(text_search)
+            text_search = "%{}%".format(text_search)
+
+            query = query.filter(
+                or_(
+                    TypeProduct.name.ilike(f"%{text_search}%"),
+                    TypeProduct.key.ilike(f"%{text_search}%")
+                )
+            )
+
+
+        query = query.order_by(desc(TypeProduct.name)) if sort == "desc" else query.order_by(asc(TypeProduct.name))
+
+        paginator = paginate(query, page, page_size)
+
+        type_products = TypeProductSchema(many=True).dump(paginator.items)
+
+        response_data = dict(
+            items=type_products,
+            total_pages=paginator.pages if paginator.pages > 0 else 1,
+            total=paginator.total,
+            has_previous=paginator.has_previous,
+            has_next=paginator.has_next
+        )
+        return send_result(data=response_data)
+    except Exception as ex:
+        return send_error(message=str(ex))
+
