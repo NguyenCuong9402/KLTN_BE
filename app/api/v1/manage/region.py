@@ -13,7 +13,7 @@ api = Blueprint('manage/region', __name__)
 def get_region():
     try:
 
-        query =  Region.query.filter().order_by(asc(Region.name)).all()
+        query =  Region.query.filter().order_by(asc(Region.id)).all()
         regions = ShipperSchema(many=True).dump(query)
 
         return send_result(data=regions)

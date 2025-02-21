@@ -409,13 +409,20 @@ class VerityCode(db.Model):
     type = db.Column(db.Integer, default=1)  # 1: đăng ký
     # thêm thời gian giới hạn
 
+class Region(db.Model):
+    __tablename__ = 'region'
+
+    id = db.Column(db.String(50), primary_key=True)
+    name = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
+    region = db.Column(db.JSON)
+
 class PriceShip(db.Model):
     __tablename__ = 'price_ship'
     id = db.Column(db.String(50), primary_key=True)
     region_id = db.Column(ForeignKey('region.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
     shipper_id = db.Column(ForeignKey('shipper.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
     price = db.Column(db.Integer, nullable=False)
-    region = db.relationship("Region", viewonly=True)
+    region = db.relationship("Region", order_by=Region.name.asc() ,viewonly=True)
 
 class Shipper(db.Model):
     __tablename__ = 'shipper'
@@ -426,19 +433,8 @@ class Shipper(db.Model):
         'PriceShip',
         backref='shipper',
         lazy=True,
-        order_by=PriceShip.price.asc()  # Sử dụng đúng cách
+        order_by="PriceShip.region_id"  # Sắp xếp theo region_id
     )
-
-class Region(db.Model):
-    __tablename__ = 'region'
-
-    id = db.Column(db.String(50), primary_key=True)
-    name = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
-    region = db.Column(db.JSON)
-
-
-
-
 
 class TypeProduct(db.Model):
     __tablename__ = 'type_product'
