@@ -46,8 +46,9 @@ def create_payment():
         # Gửi request đến MoMo
         response = requests.post(MOMO_API_URL, json=payload, headers={"Content-Type": "application/json"})
 
+        data = response.json()
         # Trả về phản hồi
-        return send_result(data=response.json())
+        return send_result(data=data)
     except Exception as ex:
         return send_error(message=str(ex))
 
