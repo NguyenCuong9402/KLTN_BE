@@ -10,8 +10,8 @@ from flask_migrate import Migrate
 from apscheduler.schedulers.background import BackgroundScheduler
 import pymongo
 
-from .settings import ProdConfig, StgConfig, DevConfig
-CONFIG = ProdConfig if os.environ.get('ENV') == 'prd' else StgConfig if os.environ.get('ENV') == 'stg' else DevConfig
+from .settings import DevConfig
+CONFIG = DevConfig
 
 jwt = JWTManager()
 

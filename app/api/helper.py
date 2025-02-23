@@ -1,27 +1,18 @@
 import datetime
-import json
 import os
 import pickle
-import uuid
 from typing import List
-import boto3
 from flask import jsonify, request
 from flask_jwt_extended import decode_token, get_jwt_identity, verify_jwt_in_request_optional
 from flask_mail import Message as MessageMail
 from jinja2 import Template
-from marshmallow import ValidationError
-from pytz import timezone
-from sqlalchemy import func, distinct
-from benedict import benedict
-from sqlalchemy_pagination import paginate
 
 from app.extensions import logger, mail, red, db, mongo_db
 from app.models import User, GroupRole, RolePermission, Message, Role
-from app.settings import ProdConfig, DevConfig, StgConfig
-from app.utils import get_timestamp_now, get_datetime_now, dt_from_config_time_zone, escape_wildcard, \
-    normalize_search_input, no_accent_vietnamese
+from app.settings import DevConfig
+from app.utils import get_timestamp_now, no_accent_vietnamese
 
-CONFIG = ProdConfig if os.environ.get('ENV') == 'prd' else StgConfig if os.environ.get('ENV') == 'stg' else DevConfig
+CONFIG = DevConfig
 
 
 def get_permissions(user: User):

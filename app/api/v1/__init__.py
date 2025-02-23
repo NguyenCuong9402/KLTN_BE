@@ -14,4 +14,6 @@ from app.api.v1 import article
 from app.api.v1 import reaction
 from app.api.v1 import comment
 from app.api.v1 import type_product
+from app.api.v1 import momo
+
 
