@@ -16,7 +16,6 @@ api = Blueprint('momo', __name__)
 endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
 accessKey = "F8BBA842ECF85"
 secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
-orderInfo = "pay with MoMo"
 partnerCode = "MOMO"
 partnerName = "MoMo Payment"
 requestType = "payWithMethod"
@@ -37,6 +36,8 @@ def create_payment():
         requestId = str(uuid())
         redirectUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{orderId}/{requestId}/payment_return"
         ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{orderId}/{requestId}/payment_notify"
+        orderInfo = f"Thanh toán hóa đơn {orderId}"
+
         rawSignature = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + extraData + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId \
                        + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl \
                        + "&requestId=" + requestId + "&requestType=" + requestType
