@@ -105,7 +105,7 @@ def payment_notify(order_momo_id, request_momo_id):
         payment_momo = PaymentMomo.query.filter(PaymentMomo.order_momo_id == order_momo_id,
                                                 PaymentMomo.request_momo_id == request_momo_id).first()
         if payment_momo:
-            payment_momo.result = data
+            payment_momo.result_momo = data
             db.session.flush()
             db.session.commit()
 
