@@ -3,15 +3,15 @@ import uuid
 import requests
 import hmac
 import hashlib
-
+URL= "https://e25d-42-112-72-4.ngrok-free.app"
 # parameters send to MoMo get get payUrl
 endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
 accessKey = "F8BBA842ECF85"
 secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
 orderInfo = "pay with MoMo"
 partnerCode = "MOMO"
-redirectUrl = "https://8e55-2402-800-61c3-3c96-98b-b9b3-4bac-bf62.ngrok-free.app/api/v1/payment_return"
-ipnUrl = "https://8e55-2402-800-61c3-3c96-98b-b9b3-4bac-bf62.ngrok-free.app/api/v1/payment_notify"
+redirectUrl = f"{URL}/api/v1/momo/payment_return"
+ipnUrl = f"{URL}/api/v1/momo/payment_notify"
 amount = "60000"
 orderId = str(uuid.uuid4())
 requestId = str(uuid.uuid4())
