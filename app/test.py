@@ -4,7 +4,6 @@ import requests
 import hmac
 import hashlib
 URL= "https://e25d-42-112-72-4.ngrok-free.app"
-# parameters send to MoMo get get payUrl
 endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
 accessKey = "F8BBA842ECF85"
 secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
@@ -31,13 +30,8 @@ rawSignature = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + 
                + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl\
                + "&requestId=" + requestId + "&requestType=" + requestType
 
-# puts raw signature
-print("--------------------RAW SIGNATURE----------------")
-print(rawSignature)
-# signature
 h = hmac.new(bytes(secretKey, 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
 signature = h.hexdigest()
-# json object send to MoMo endpoint
 
 data = {
     'partnerCode': partnerCode,
