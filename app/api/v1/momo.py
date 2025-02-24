@@ -2,52 +2,72 @@ import os
 from shortuuid import uuid
 
 from flask import Blueprint, request
+from app.api.helper import send_result, send_error, CONFIG
+import json
 import uuid
 import requests
 import hmac
 import hashlib
-from app.api.helper import send_result, send_error, CONFIG
 
 api = Blueprint('momo', __name__)
 
-MOMO_API_URL = "https://test-payment.momo.vn/v2/gateway/api/create"
-ACCESS_KEY = "F8BBA842ECF85"
-SECRET_KEY = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
+endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
+accessKey = "F8BBA842ECF85"
+secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
+orderInfo = "pay with MoMo"
+partnerCode = "MOMO"
+partnerName = "MoMo Payment"
+requestType = "payWithMethod"
+extraData = ""  # pass empty value or Encode base64 JsonString
+autoCapture = True
+lang = "vi"
+redirectUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/payment_return"
+ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/payment_notify"
 
-
-def generate_signature(secret_key, data):
-    """Tạo chữ ký HMAC SHA256 cho MoMo theo thứ tự chính xác."""
-    raw_signature = "&".join(f"{key}={value}" for key, value in sorted(data.items()) if value != "")
-    return hmac.new(secret_key.encode(), raw_signature.encode(), hashlib.sha256).hexdigest()
 
 
 @api.route("/create_payment", methods=['POST'])
 def create_payment():
     try:
-        # Tạo payload cho MoMo
-        payload = {
-            "partnerCode": "MOMO",
-            "accessKey": ACCESS_KEY,
-            "requestId": str(uuid.uuid4()),
-            "amount": "50000",
-            "orderId": str(uuid.uuid4()),
-            "orderInfo": "Thanh toán MoMo",
-            "redirectUrl": f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/payment_return",
-            "ipnUrl": f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/payment_notify",
-            "extraData": "",
-            "requestType": "captureWallet",
-            "autoCapture": True,
-            "lang": "vi"
+
+        amount = "60000"
+        orderId = str(uuid())
+        requestId = str(uuid())
+        storeId = "Test Store"
+        orderGroupId = ""
+        rawSignature = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + extraData + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId \
+                       + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl \
+                       + "&requestId=" + requestId + "&requestType=" + requestType
+
+        h = hmac.new(bytes(secretKey, 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
+        signature = h.hexdigest()
+
+        data = {
+            'partnerCode': partnerCode,
+            'orderId': orderId,
+            'partnerName': partnerName,
+            'storeId': storeId,
+            'ipnUrl': ipnUrl,
+            'amount': amount,
+            'lang': lang,
+            'requestType': requestType,
+            'redirectUrl': redirectUrl,
+            'autoCapture': autoCapture,
+            'orderInfo': orderInfo,
+            'requestId': requestId,
+            'extraData': extraData,
+            'signature': signature,
+            'orderGroupId': orderGroupId
         }
 
-        # Thêm chữ ký
-        payload["signature"] = generate_signature(SECRET_KEY, payload)
+        data = json.dumps(data)
 
-        # Gửi request đến MoMo
-        response = requests.post(MOMO_API_URL, json=payload, headers={"Content-Type": "application/json"})
-
-        data = response.json()
+        clen = len(data)
+        response = requests.post(endpoint, data=data,
+                                 headers={'Content-Type': 'application/json', 'Content-Length': str(clen)})
         # Trả về phản hồi
+        data = response.json()
+
         return send_result(data=data)
     except Exception as ex:
         return send_error(message=str(ex))
