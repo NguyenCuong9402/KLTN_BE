@@ -4,7 +4,6 @@ from shortuuid import uuid
 from flask import Blueprint, request
 from app.api.helper import send_result, send_error, CONFIG
 import json
-import uuid
 import requests
 import hmac
 import hashlib
