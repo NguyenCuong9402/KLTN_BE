@@ -22,7 +22,8 @@ autoCapture = True
 lang = "vi"
 redirectUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/payment_return"
 ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/payment_notify"
-
+storeId = "Test Store"
+orderGroupId = ""
 
 
 @api.route("/create_payment", methods=['POST'])
@@ -32,15 +33,12 @@ def create_payment():
         amount = "60000"
         orderId = str(uuid())
         requestId = str(uuid())
-        storeId = "Test Store"
-        orderGroupId = ""
         rawSignature = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + extraData + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId \
                        + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl \
                        + "&requestId=" + requestId + "&requestType=" + requestType
 
         h = hmac.new(bytes(secretKey, 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
         signature = h.hexdigest()
-
         data = {
             'partnerCode': partnerCode,
             'orderId': orderId,

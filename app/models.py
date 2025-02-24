@@ -599,6 +599,9 @@ class Orders(db.Model):
     status = db.Column(db.String(20), default='pending')
     items = db.relationship('OrderItems', lazy=True,
                             order_by="asc(OrderItems.created_date)")
+    online_payment = db.Column(db.Boolean, nullable=False, default=False)
+
+    payment_momo_id = db.Column(db.String(50), db.ForeignKey('payment_momo.id', ondelete='SET NULL', onupdate='SET NULL'))
 
     @property
     def address(self):
@@ -613,6 +616,14 @@ class Orders(db.Model):
             data['district'] = address.district
             data['ward'] = address.ward
         return data
+
+
+class PaymentMomo(db.Model):
+    __tablename__ = 'payment_momo'
+    id = db.Column(db.String(50), primary_key=True)
+    order_momo_id =  db.Column(db.String(100), nullable=False)
+    request_momo_id = db.Column(db.String(50), nullable=False)
+    result_momo = db.Column(db.JSON, nullable=True, default=None)
 
 
 class OrderReport(db.Model):
