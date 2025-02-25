@@ -4,6 +4,7 @@ from shortuuid import uuid
 import random
 import pandas as pd
 from flask import Flask
+from sqlalchemy.sql.expression import func
 
 from app.enums import TYPE_FILE_LINK
 from app.models import Product, Size, Color, FileLink, TypeProduct
@@ -29,7 +30,6 @@ class Worker:
         data = {
             "name": "Áo phông",
             "describe": "Áo đẹp giá tốt",
-            "type_product_key": "ao_bo",
             "discount_from_date": 1735365861,
             "discount_to_date": 1735521538,
             "sizes": [
@@ -61,13 +61,11 @@ class Worker:
         colors = data.pop('colors')
         name = data.pop('name')
 
-        type_key = data.pop('type_product_key')
+        random_type = TypeProduct.query.filter(TypeProduct.type_id.isnot(None)).order_by(func.random()).first()
 
-        type_product = TypeProduct.query.filter_by(key=type_key).first()
-
-        if type_product:
+        if random_type:
             for i in range(1, 40):
-                product = Product(**data, type_product_id=type_product.id, id=str(uuid()), original_price=random.choice(values),
+                product = Product(**data, type_product_id=random_type.id, id=str(uuid()), original_price=random.choice(values),
                                   name=f'Sản phẩm {name} {i}', discount=random.randint(1, 20),
                                   created_date=get_timestamp_now() + i)
                 db.session.add(product)
