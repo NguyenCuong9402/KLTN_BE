@@ -88,7 +88,14 @@ def create_payment():
                                  headers={'Content-Type': 'application/json', 'Content-Length': str(clen)})
         # Trả về phản hồi
         data = response.json()
-        return send_result(data=data)
+
+        data_result = {
+            'result': data,
+        }
+        if data.get("payUrl", None) and data.get("resultCode", None) == 0:
+            data_result['pay_url'] = data.get("payUrl")
+
+        return send_result(data=data_result)
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))
