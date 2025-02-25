@@ -1,12 +1,16 @@
 import json
+from operator import or_
 
 from flask import Blueprint, request
 from marshmallow import ValidationError
-from sqlalchemy import asc
+from sqlalchemy import asc, desc
 from sqlalchemy.orm import joinedload
+from sqlalchemy_pagination import paginate
+
 from app.api.helper import send_result, send_error
 from app.extensions import logger
 from app.models import TypeProduct, Product
+from app.utils import escape_wildcard
 from app.validator import TypeProductWithChildrenSchema, TypeProductSchema, ParamTypeProduct
 
 api = Blueprint('type_product', __name__)
@@ -36,7 +40,7 @@ def get_detail_type(type_id):
         return send_error(message=str(ex))
 
 
-@api.route("/get_all", methods=["GET"])
+@api.route("", methods=["GET"])
 def get_all_type():
     try:
         try:
