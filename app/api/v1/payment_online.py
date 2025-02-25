@@ -104,7 +104,7 @@ def create_payment():
 
         requestId = str(uuid())
         payment_online_id = str(uuid())
-        ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get("MOMO", "momo")}/{payment_online_id}/payment_notify"
+        ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get('MOMO', 'momo')}/{payment_online_id}/payment_notify"
         orderInfo = "pay with MoMo"
         # Trang momo đt chuyển đến link web mình muốn
         # redirectUrl = f"https://www.facebook.com/"
@@ -199,7 +199,7 @@ def zalo_create_payment():
                                      type=TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo'),)
 
         # set link callback
-        callback_url = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get("ZALO", "zalo")}/{payment_zalo.id}/payment_notify"
+        callback_url = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo')}/{payment_zalo.id}/payment_notify"
         order["callback_url"] = callback_url
 
 
