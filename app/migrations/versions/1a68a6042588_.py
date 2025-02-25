@@ -22,7 +22,7 @@ def upgrade():
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('order_payment_id', sa.String(length=100), nullable=False),
     sa.Column('request_payment_id', sa.String(length=50), nullable=False),
-    sa.Column('result_momo', sa.JSON(), nullable=True),
+    sa.Column('result_payment', sa.JSON(), nullable=True),
     sa.Column('status_payment', sa.Boolean(), nullable=False),
     sa.Column('type', sa.String(length=20), nullable=True),
     sa.PrimaryKeyConstraint('id')

@@ -87,9 +87,9 @@ def payment_notify(payment_online):
         if payment_online is None:
             return send_error(message='Không tìm thấy giao dịch.')
         # if isinstance(data, dict):
-        #     payment_momo.result_momo = data
+        #     payment_online.result_payment = data
         #     if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
-        #         payment_momo.status_payment = True
+        #         payment_online.status_payment = True
         # db.session.flush()
         # db.session.commit()
         return send_result(data=data)

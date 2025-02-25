@@ -37,7 +37,6 @@ STATUS_PAYMENT_MOMO_SUCCESS = 0
 @api.route("/create_payment", methods=['POST'])
 def create_payment():
     try:
-
         amount = 5000
         orderId = str(uuid())
         requestId = str(uuid())
@@ -65,7 +64,6 @@ def create_payment():
 
         data = {
             'partnerCode': MOMO_CONFIG.get("partnerCode"),
-            'orderId': MOMO_CONFIG.get("orderId"),
             'partnerName': MOMO_CONFIG.get("partnerName"),
             'storeId': MOMO_CONFIG.get("storeId"),
             'extraData': MOMO_CONFIG.get("extraData"),
@@ -74,6 +72,7 @@ def create_payment():
             'requestType': MOMO_CONFIG.get("requestType"),
             'redirectUrl': MOMO_CONFIG.get("redirectUrl"),
             'autoCapture': MOMO_CONFIG.get("autoCapture"),
+            'orderId': orderId,
             'orderInfo': orderInfo,
             'requestId': requestId,
             'ipnUrl': ipnUrl,
@@ -123,18 +122,18 @@ def check_payment(payment_momo_id):
         data = response.json()
 
         if isinstance(data, dict):
-            if payment_momo.result_momo is None:
-                payment_momo.result_momo = data
+            if payment_momo.result_payment is None:
+                payment_momo.result_payment = data
                 if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
                     payment_momo.status_payment = True
 
                 db.session.flush()
                 db.session.commit()
             else:
-                if isinstance(payment_momo.result_momo, dict):
-                    current_result_code = payment_momo.result_momo.get('resultCode', None)
+                if isinstance(payment_momo.result_payment, dict):
+                    current_result_code = payment_momo.result_payment.get('resultCode', None)
                     if current_result_code != STATUS_PAYMENT_MOMO_SUCCESS and data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
-                        payment_momo.result_momo = data
+                        payment_momo.result_payment = data
                         payment_momo.status_payment = True
                         db.session.flush()
                         db.session.commit()
@@ -156,7 +155,7 @@ def payment_notify(payment_online_id):
         if payment_momo is None:
             return send_error(message='Không tìm thấy giao dịch.')
         if isinstance(data, dict):
-            payment_momo.result_momo = data
+            payment_momo.result_payment = data
             if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
                 payment_momo.status_payment = True
         db.session.flush()

@@ -17,7 +17,7 @@ config = {
 }
 transID = get_timestamp_now()
 
-URL_CALLBACK = "https://c928-203-191-8-78.ngrok-free.app" #CONFIG.BASE_URL_WEBSITE
+URL_CALLBACK = "https://599e-42-112-72-4.ngrok-free.app" #CONFIG.BASE_URL_WEBSITE
 
 ipnUrl = f"{URL_CALLBACK}/api/v1/zalo/payment_notify"
 

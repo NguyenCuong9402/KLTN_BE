@@ -623,7 +623,7 @@ class PaymentOnline(db.Model):
     id = db.Column(db.String(50), primary_key=True)
     order_payment_id =  db.Column(db.String(100), nullable=False)
     request_payment_id = db.Column(db.String(50), nullable=False)
-    result_momo = db.Column(db.JSON, nullable=True, default=None)
+    result_payment = db.Column(db.JSON, nullable=True, default=None)
     status_payment = db.Column(db.Boolean, nullable=False, default=False)
     type = db.Column(db.String(20), nullable=True) # momo / zalo
 
