@@ -17,6 +17,11 @@ STATUS_ORDER = {
     'RESOLVED': 'resolved',
 }
 
+TYPE_PAYMENT_ONLINE = {
+    'MOMO': 'momo',
+    'ZALO': 'zalo',
+}
+
 LAYER_COMMENT = 2
 
 TYPE_FILE_LINK = {

@@ -8,6 +8,7 @@ import requests
 import hmac
 import hashlib
 
+from app.enums import TYPE_PAYMENT_ONLINE
 from app.extensions import db
 from app.models import PaymentOnline
 
@@ -51,7 +52,9 @@ def create_payment():
         h = hmac.new(bytes(secretKey, 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
         signature = h.hexdigest()
 
-        payment_momo = PaymentOnline(id=str(uuid()), mac_signature=signature, type="momo", order_momo_id=orderId, request_momo_id=requestId)
+        payment_momo = PaymentOnline(id=str(uuid()), mac_signature=signature,
+                                     type=TYPE_PAYMENT_ONLINE.get('MOMO', 'momo'),
+                                     order_momo_id=orderId, request_momo_id=requestId)
         db.session.add(payment_momo)
         db.session.flush()
         db.session.commit()
