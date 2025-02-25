@@ -624,7 +624,7 @@ class PaymentMomo(db.Model):
     order_momo_id =  db.Column(db.String(100), nullable=False)
     request_momo_id = db.Column(db.String(50), nullable=False)
     result_momo = db.Column(db.JSON, nullable=True, default=None)
-
+    status_payment = db.Column(db.Boolean, nullable=False, default=False)
 
 class OrderReport(db.Model):
     __tablename__ = 'order_report'

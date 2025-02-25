@@ -13,7 +13,8 @@ from app.models import PaymentMomo
 
 api = Blueprint('momo', __name__)
 
-endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
+momo_api_create_payment = "https://test-payment.momo.vn/v2/gateway/api/create"
+momo_api_check_payment = "https://test-payment.momo.vn/v2/gateway/api/query"
 accessKey = "F8BBA842ECF85"
 secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
 partnerCode = "MOMO"
@@ -27,6 +28,8 @@ storeId = "Test Store"
 orderGroupId = ""
 
 
+STATUS_PAYMENT_MOMO_SUCCESS = 0
+
 @api.route("/create_payment", methods=['POST'])
 def create_payment():
     try:
@@ -34,6 +37,12 @@ def create_payment():
         amount = "60000"
         orderId = str(uuid())
         requestId = str(uuid())
+
+        payment_momo = PaymentMomo(id=str(uuid()), order_momo_id=orderId, request_momo_id=requestId)
+        db.session.add(payment_momo)
+        db.session.flush()
+        db.session.commit()
+
         redirectUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{orderId}/{requestId}/payment_return"
         ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{orderId}/{requestId}/payment_notify"
         orderInfo = f"Thanh toán hóa đơn {orderId}"
@@ -65,32 +74,72 @@ def create_payment():
         data = json.dumps(data)
 
         clen = len(data)
-        response = requests.post(endpoint, data=data,
+        response = requests.post(momo_api_create_payment, data=data,
                                  headers={'Content-Type': 'application/json', 'Content-Length': str(clen)})
         # Trả về phản hồi
         data = response.json()
-
-        payment_momo = PaymentMomo(id=str(uuid()),order_momo_id=orderId, request_momo_id=requestId)
-        db.session.add(payment_momo)
-        db.session.flush()
-        db.session.commit()
-
         return send_result(data=data)
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))
 
+@api.route("<payment_momo_id>", methods=['GET'])
+def check_payment(payment_momo_id):
+    try:
+        payment_momo = PaymentMomo.query.filter_by(id=payment_momo_id).first()
+
+        if payment_momo is None:
+            return send_error(message="Không tìm thấy giao dịch.")
+
+        rawSignature = ("accessKey=" + accessKey + "&orderId=" + payment_momo.order_momo_id + "&partnerCode=" + partnerCode +
+                        "&requestId=" + payment_momo.request_momo_id)
+
+
+        h = hmac.new(bytes(secretKey, 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
+        signature = h.hexdigest()
+
+        data = {
+            'partnerCode': partnerCode,
+            'orderId': payment_momo.order_momo_id,
+            'requestId': payment_momo.request_momo_id,
+            'signature': signature,
+            'lang': lang,
+
+        }
+
+        response = requests.post(momo_api_check_payment, json=data, headers={'Content-Type': 'application/json'})
+
+
+        data = response.json()
+
+        if isinstance(data, dict):
+            if payment_momo.result_momo is None:
+                payment_momo.result_momo = data
+                if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
+                    payment_momo.status_payment = True
+
+                db.session.flush()
+                db.session.commit()
+            else:
+                if isinstance(payment_momo.result_momo, dict):
+                    current_result_code = payment_momo.result_momo.get('resultCode', None)
+                    if current_result_code != STATUS_PAYMENT_MOMO_SUCCESS and data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
+                        payment_momo.result_momo = data
+                        payment_momo.status_payment = True
+                        db.session.flush()
+                        db.session.commit()
+
+
+        return send_result(message=data)
+
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex))
 
 @api.route('/<order_momo_id>/<request_momo_id>/payment_return', methods=['GET'])
 def payment_return(order_momo_id, request_momo_id):
     try:
         response_data = request.args.to_dict()
-        # payment_momo = PaymentMomo.query.filter(PaymentMomo.order_momo_id == order_momo_id,
-        #                          PaymentMomo.request_momo_id == request_id).first()
-        # if payment_momo:
-        #     payment_momo.result = response_data
-        #     db.session.flush()
-        #     db.session.commit()
         return send_result(data=response_data)
 
     except Exception as ex:
@@ -105,10 +154,16 @@ def payment_notify(order_momo_id, request_momo_id):
         print("đã vào BE", data)
         payment_momo = PaymentMomo.query.filter(PaymentMomo.order_momo_id == order_momo_id,
                                                 PaymentMomo.request_momo_id == request_momo_id).first()
-        if payment_momo:
+
+
+        if payment_momo is None:
+            return send_error(message='Không tìm thấy giao dịch.')
+        if isinstance(data, dict):
             payment_momo.result_momo = data
-            db.session.flush()
-            db.session.commit()
+            if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
+                payment_momo.status_payment = True
+        db.session.flush()
+        db.session.commit()
 
         return send_result(data=data)
 
