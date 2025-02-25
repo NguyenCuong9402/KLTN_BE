@@ -23,7 +23,8 @@ ZALO_CONFIG = {
     "app_id":2553,
     "app_user": "user123",
     "bank_code": "zalopayapp",
-    "endpoint_create_payment": "https://sb-openapi.zalopay.vn/v2/create"
+    "endpoint_create_payment": "https://sb-openapi.zalopay.vn/v2/create",
+    "status_success": 1
 }
 
 STATUS_PAYMENT_MOMO_SUCCESS = 0
@@ -88,12 +89,18 @@ def payment_notify(type_payment, payment_online):
             return send_error(message='Không tìm thấy giao dịch.')
         if isinstance(data, dict):
             payment_online.result_payment = data
-            if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
-                payment_online.status_payment = True
-        # db.session.flush()
-        # db.session.commit()
-        return send_result(data=data)
+            if type_payment == TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo'):
+                if data.get('type', None) == ZALO_CONFIG.get("status_success"):
+                    payment_online.status_payment = True
 
+            elif type_payment == TYPE_PAYMENT_ONLINE.get('MOMO', 'momo'):
+                if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
+                    payment_online.status_payment = True
+
+            db.session.flush()
+            db.session.commit()
+
+        return send_result(data=data)
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))
