@@ -1,61 +1,41 @@
-import json
-import uuid
+# coding=utf-8
+# Python 3.6
+
+from time import time
+from datetime import datetime
+import json, hmac, hashlib, urllib.request, urllib.parse, random
+from shortuuid import uuid
 import requests
-import hmac
-import hashlib
-URL= "https://e25d-42-112-72-4.ngrok-free.app"
-endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
-accessKey = "F8BBA842ECF85"
-secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
-orderInfo = "pay with MoMo"
-partnerCode = "MOMO"
-redirectUrl = f"{URL}/api/v1/momo/payment_return"
-ipnUrl = f"{URL}/api/v1/momo/payment_notify"
-amount = "60000"
-orderId = str(uuid.uuid4())
-requestId = str(uuid.uuid4())
-extraData = ""  # pass empty value or Encode base64 JsonString
-partnerName = "MoMo Payment"
-requestType = "payWithMethod"
-storeId = "Test Store"
-orderGroupId = ""
-autoCapture = True
-lang = "vi"
-orderGroupId = ""
+config = {
+  "app_id": 2553,
+  "key1": "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL",
+  "key2": "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz",
+  "endpoint": "https://sb-openapi.zalopay.vn/v2/create"
+}
+transID = random.randrange(1000000)
 
-# before sign HMAC SHA256 with format: accessKey=$accessKey&amount=$amount&extraData=$extraData&ipnUrl=$ipnUrl
-# &orderId=$orderId&orderInfo=$orderInfo&partnerCode=$partnerCode&redirectUrl=$redirectUrl&requestId=$requestId
-# &requestType=$requestType
-rawSignature = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + extraData + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId \
-               + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl\
-               + "&requestId=" + requestId + "&requestType=" + requestType
 
-h = hmac.new(bytes(secretKey, 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
-signature = h.hexdigest()
-
-data = {
-    'partnerCode': partnerCode,
-    'orderId': orderId,
-    'partnerName': partnerName,
-    'storeId': storeId,
-    'ipnUrl': ipnUrl,
-    'amount': amount,
-    'lang': lang,
-    'requestType': requestType,
-    'redirectUrl': redirectUrl,
-    'autoCapture': autoCapture,
-    'orderInfo': orderInfo,
-    'requestId': requestId,
-    'extraData': extraData,
-    'signature': signature,
-    'orderGroupId': orderGroupId
+order = {
+  "app_id": config["app_id"],
+  "app_trans_id": "{:%y%m%d}_{}".format(datetime.today(), transID), # mã giao dich có định dạng yyMMdd_xxxx
+  "app_user": "user123",
+  "app_time": int(round(time() * 1000)), # miliseconds
+  "embed_data": json.dumps({}),
+  "item": json.dumps([{}]),
+  "amount": 50000,
+  "description": "Lazada - Payment for the order #"+str(transID),
+  "bank_code": "zalopayapp"
 }
 
-data = json.dumps(data)
+# app_id|app_trans_id|app_user|amount|apptime|embed_data|item
+data = "{}|{}|{}|{}|{}|{}|{}".format(order["app_id"], order["app_trans_id"], order["app_user"],
+order["amount"], order["app_time"], order["embed_data"], order["item"])
 
-clen = len(data)
-response = requests.post(endpoint, data=data, headers={'Content-Type': 'application/json', 'Content-Length': str(clen)})
+order["mac"] = hmac.new(config['key1'].encode(), data.encode(), hashlib.sha256).hexdigest()
 
-# f.close()
-print("--------------------JSON response----------------\n")
-print(response.json())
+response = requests.post(config["endpoint"], data=order)
+
+# Đọc kết quả JSON
+result = response.json()
+
+print(result)
