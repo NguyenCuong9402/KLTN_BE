@@ -43,6 +43,33 @@ FILE_TYPE = {
     'avatar': 2
 }
 
+MOMO_CONFIG = {
+    "momo_api_create_payment": "https://test-payment.momo.vn/v2/gateway/api/create",
+    "momo_api_check_payment": "https://test-payment.momo.vn/v2/gateway/api/query",
+    "redirectUrl": "about:blank",
+    "accessKey": "F8BBA842ECF85",
+    "secretKey": "K951B6PE1waDMi640xX08PD3vg6EkVlz",
+    "partnerCode": "MOMO",
+    "partnerName" : "MoMo Payment",
+    "requestType": "payWithMethod",
+    "extraData": "",
+    "autoCapture": True,
+    "lang": "vi",
+    "storeId": "Test Store",
+    "orderGroupId": "",
+    "status_success": 0
+}
+
+ZALO_CONFIG = {
+    "key1": "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL",
+    "key2": "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz",
+    "app_id":2553,
+    "app_user": "user123",
+    "bank_code": "zalopayapp",
+    "endpoint_create_payment": "https://sb-openapi.zalopay.vn/v2/create",
+    "status_success": 1
+}
+
 DURATION_SESSION_MINUTES = 100
 
 regions = {

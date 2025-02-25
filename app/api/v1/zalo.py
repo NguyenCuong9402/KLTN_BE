@@ -1,8 +1,7 @@
-import os
 from shortuuid import uuid
 from flask import Blueprint, request
 from app.api.helper import send_result, send_error, CONFIG
-from app.enums import TYPE_PAYMENT_ONLINE
+from app.enums import TYPE_PAYMENT_ONLINE, MOMO_CONFIG, ZALO_CONFIG
 
 from app.extensions import db
 from time import time
@@ -17,17 +16,8 @@ api = Blueprint('zalo', __name__)
 
 APP_ID = 2553
 APP_USER = "user123"
-ZALO_CONFIG = {
-    "key1": "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL",
-    "key2": "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz",
-    "app_id":2553,
-    "app_user": "user123",
-    "bank_code": "zalopayapp",
-    "endpoint_create_payment": "https://sb-openapi.zalopay.vn/v2/create",
-    "status_success": 1
-}
 
-STATUS_PAYMENT_MOMO_SUCCESS = 0
+
 
 @api.route("/create_payment", methods=['POST'])
 def create_payment():
@@ -101,7 +91,7 @@ def payment_notify(type_payment, payment_online):
                     payment_online.status_payment = True
 
             elif type_payment == TYPE_PAYMENT_ONLINE.get('MOMO', 'momo'):
-                if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
+                if data.get('resultCode', None) == MOMO_CONFIG.get("status_success"):
                     payment_online.status_payment = True
 
             db.session.flush()

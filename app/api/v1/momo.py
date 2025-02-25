@@ -1,4 +1,3 @@
-import os
 from shortuuid import uuid
 
 from flask import Blueprint, request
@@ -9,29 +8,14 @@ import hmac
 import hashlib
 
 from app.api.v1.zalo import ZALO_CONFIG
-from app.enums import TYPE_PAYMENT_ONLINE
+from app.enums import TYPE_PAYMENT_ONLINE, MOMO_CONFIG
 from app.extensions import db
 from app.models import PaymentOnline
 
 api = Blueprint('momo', __name__)
 
 
-MOMO_CONFIG = {
-    "momo_api_create_payment": "https://test-payment.momo.vn/v2/gateway/api/create",
-    "momo_api_check_payment": "https://test-payment.momo.vn/v2/gateway/api/query",
-    "redirectUrl": "about:blank",
-    "accessKey": "F8BBA842ECF85",
-    "secretKey": "K951B6PE1waDMi640xX08PD3vg6EkVlz",
-    "partnerCode": "MOMO",
-    "partnerName" : "MoMo Payment",
-    "requestType": "payWithMethod",
-    "extraData": "",
-    "autoCapture": True,
-    "lang": "vi",
-    "storeId": "Test Store",
-    "orderGroupId": "",
-    "status_success": 0
-}
+
 
 
 
