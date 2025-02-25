@@ -44,12 +44,12 @@ class Worker:
             ],
             "files": [
                 {
-                    "file_id": "Z5CZYy3TxG8zYJqUEKW6Cq",
-                    "file_path": "/files/Z5CZYy3TxG8zYJqUEKW6Cq.jpg"
+                    "file_path": "/files/7pQYK7r6i2oQF69ncnfx7B.png",
+                    "id": "7pQYK7r6i2oQF69ncnfx7B"
                 },
                 {
-                    "file_id": "7kqVDEec6f5kLcajSMKoZd",
-                    "file_path": "/files/7kqVDEec6f5kLcajSMKoZd.jpg"
+                    "file_path": "/files/CaWXriBdi6vMEuWBwMuusG.jpg",
+                    "id": "CaWXriBdi6vMEuWBwMuusG"
                 }
             ]
         }
@@ -79,7 +79,7 @@ class Worker:
                 db.session.bulk_save_objects(color_objects)
                 db.session.flush()
 
-                file_objects = [FileLink(id=str(uuid()), table_id=product.id, file_id=file["file_id"], table_type = TYPE_FILE_LINK.get('PRODUCT', 'product'),
+                file_objects = [FileLink(id=str(uuid()), table_id=product.id, file_id=file["id"], table_type = TYPE_FILE_LINK.get('PRODUCT', 'product'),
                                                 index=index, created_date=get_timestamp_now() + index)
                                 for index, file in enumerate(files)]
                 db.session.bulk_save_objects(file_objects)
