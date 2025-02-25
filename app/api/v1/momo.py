@@ -41,7 +41,7 @@ def create_payment():
         orderId = str(uuid())
         requestId = str(uuid())
         payment_online_id = str(uuid())
-        ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{payment_online_id}/payment_notify"
+        ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{TYPE_PAYMENT_ONLINE.get("momo")}/{payment_online_id}/payment_notify"
         orderInfo = "pay with MoMo"
         # Trang momo đt chuyển đến link web mình muốn
         # redirectUrl = f"https://www.facebook.com/"
@@ -146,12 +146,12 @@ def check_payment(payment_momo_id):
         return send_error(message=str(ex))
 
 # API xử lý thông báo thanh toán từ Momo (dành cho backend)
-@api.route('/<payment_online_id>/payment_notify', methods=['POST'])
-def payment_notify(payment_online_id):
+@api.route('/<type_payment>/<payment_online_id>/payment_notify', methods=['POST'])
+def payment_notify(type_payment, payment_online_id):
     try:
         data = request.get_json()
         print("đã vào BE", data)
-        payment_momo = PaymentOnline.query.filter(PaymentOnline.id == payment_online_id).first()
+        payment_momo = PaymentOnline.query.filter(PaymentOnline.id == payment_online_id, type=type_payment ).first()
         if payment_momo is None:
             return send_error(message='Không tìm thấy giao dịch.')
         if isinstance(data, dict):

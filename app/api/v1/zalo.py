@@ -58,7 +58,7 @@ def create_payment():
                                      type=TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo'),)
 
         # set link callback
-        callback_url = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/zalo/{payment_zalo.id}/payment_notify"
+        callback_url = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/zalo/zalo/{payment_zalo.id}/payment_notify"
         order["callback_url"] = callback_url
 
 
@@ -78,18 +78,18 @@ def create_payment():
 
 
 # API xử lý thông báo thanh toán từ Momo (dành cho backend)
-@api.route('/<payment_online>/payment_notify', methods=['POST'])
-def payment_notify(payment_online):
+@api.route('/<type_payment>/<payment_online>/payment_notify', methods=['POST'])
+def payment_notify(type_payment, payment_online):
     try:
         data = request.get_json()
         print("đã vào BE", data)
-        payment_online = PaymentOnline.query.filter_by(id=payment_online).first()
+        payment_online = PaymentOnline.query.filter_by(id=payment_online, type=type_payment).first()
         if payment_online is None:
             return send_error(message='Không tìm thấy giao dịch.')
-        # if isinstance(data, dict):
-        #     payment_online.result_payment = data
-        #     if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
-        #         payment_online.status_payment = True
+        if isinstance(data, dict):
+            payment_online.result_payment = data
+            if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
+                payment_online.status_payment = True
         # db.session.flush()
         # db.session.commit()
         return send_result(data=data)
