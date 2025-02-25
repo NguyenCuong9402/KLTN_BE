@@ -6,13 +6,16 @@ from datetime import datetime
 import json, hmac, hashlib, urllib.request, urllib.parse, random
 from shortuuid import uuid
 import requests
+
+from app.utils import get_timestamp_now
+
 config = {
   "app_id": 2553,
   "key1": "PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL",
   "key2": "kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz",
   "endpoint": "https://sb-openapi.zalopay.vn/v2/create"
 }
-transID = random.randrange(1000000)
+transID = get_timestamp_now()
 
 
 order = {
