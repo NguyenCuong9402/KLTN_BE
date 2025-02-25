@@ -42,7 +42,7 @@ def create_payment():
 
         # Trang momo đt chuyển đến link web mình muốn
 
-        redirectUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{orderId}/{requestId}/payment_return"
+        redirectUrl = f"https://www.facebook.com/"
 
         # Trang momo đt không làm gì sau khi thanh toán
         redirectUrl = "about:blank"
@@ -142,16 +142,6 @@ def check_payment(payment_momo_id):
 
 
         return send_result(message=data)
-
-    except Exception as ex:
-        db.session.rollback()
-        return send_error(message=str(ex))
-
-@api.route('/<order_momo_id>/<request_momo_id>/payment_return', methods=['GET'])
-def payment_return(order_momo_id, request_momo_id):
-    try:
-        response_data = request.args.to_dict()
-        return send_result(data=response_data)
 
     except Exception as ex:
         db.session.rollback()
