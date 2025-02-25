@@ -1,5 +1,16 @@
 # Hướng dẫn chạy local cho Lộc
 
+* Cài đặt ví momo và zalo
+-https://beta-docs.zalopay.vn/docs/developer-tools/test-instructions/test-wallets/
+-https://developers.momo.vn/v3/vi/download/
+* Cách nạp tiền ví zalo
+- Xác thực căn cước công dân
+- Mở https://docs.zalopay.vn/v1/start/#A , chọn phần trải nghiệm với zaloPay II Nạp tiền vào tài khoản
+* Nạp tiền ví momo
+- Liên kết ngân hàng bidv ( Nhập bừa theo hướng dẫn, mã 000000)
+- Nạp tiền vào.
+
+
 * Cài đặt base và data
 ```
 - Tải mysql và cài tạo 1 db dev_kltn với cấu hình
