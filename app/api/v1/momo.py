@@ -14,19 +14,22 @@ from app.models import PaymentOnline
 
 api = Blueprint('momo', __name__)
 
-momo_api_create_payment = "https://test-payment.momo.vn/v2/gateway/api/create"
-momo_api_check_payment = "https://test-payment.momo.vn/v2/gateway/api/query"
-accessKey = "F8BBA842ECF85"
-secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
-partnerCode = "MOMO"
-partnerName = "MoMo Payment"
-requestType = "payWithMethod"
-extraData = ""  # pass empty value or Encode base64 JsonString
-autoCapture = True
-lang = "vi"
 
-storeId = "Test Store"
-orderGroupId = ""
+MOMO_CONFIG = {
+    "momo_api_create_payment": "https://test-payment.momo.vn/v2/gateway/api/create",
+    "momo_api_check_payment": "https://test-payment.momo.vn/v2/gateway/api/query",
+    "redirectUrl": "about:blank",
+    "accessKey": "F8BBA842ECF85",
+    "secretKey": "K951B6PE1waDMi640xX08PD3vg6EkVlz",
+    "partnerCode": "MOMO",
+    "partnerName" : "MoMo Payment",
+    "requestType": "payWithMethod",
+    "extraData": "",
+    "autoCapture": True,
+    "lang": "vi",
+    "storeId": "Test Store",
+    "orderGroupId": ""
+}
 
 
 STATUS_PAYMENT_MOMO_SUCCESS = 0
@@ -35,57 +38,53 @@ STATUS_PAYMENT_MOMO_SUCCESS = 0
 def create_payment():
     try:
 
-        amount = "5000"
+        amount = 5000
         orderId = str(uuid())
         requestId = str(uuid())
-
-
-        # Trang momo đt chuyển đến link web mình muốn
-
-        redirectUrl = f"https://www.facebook.com/"
-
-        # Trang momo đt không làm gì sau khi thanh toán
-        redirectUrl = "about:blank"
-
-        ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{orderId}/{requestId}/payment_notify"
+        payment_online_id = str(uuid())
+        ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{payment_online_id}/payment_notify"
         orderInfo = "pay with MoMo"
+        # Trang momo đt chuyển đến link web mình muốn
+        # redirectUrl = f"https://www.facebook.com/"
+        # Trang momo đt không làm gì sau khi thanh toán
 
-        rawSignature = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + extraData + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId \
-                       + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl \
-                       + "&requestId=" + requestId + "&requestType=" + requestType
+        
+        rawSignature = "accessKey=" + MOMO_CONFIG.get("accessKey") + "&amount=" + str(amount) + "&extraData=" + MOMO_CONFIG.get("extraData") + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId \
+                       + "&orderInfo=" + orderInfo + "&partnerCode=" + MOMO_CONFIG.get("partnerCode")+ "&redirectUrl=" + MOMO_CONFIG.get("redirectUrl") \
+                       + "&requestId=" + requestId + "&requestType=" + MOMO_CONFIG.get("requestType")
 
-        h = hmac.new(bytes(secretKey, 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
+        h = hmac.new(bytes(MOMO_CONFIG.get("secretKey"), 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
         signature = h.hexdigest()
 
-        payment_momo = PaymentOnline(id=str(uuid()), mac_signature=signature,
+        payment_momo = PaymentOnline(id=payment_online_id,
                                      type=TYPE_PAYMENT_ONLINE.get('MOMO', 'momo'),
-                                     order_momo_id=orderId, request_momo_id=requestId)
+                                     order_payment_id=orderId, request_payment_id=requestId)
         db.session.add(payment_momo)
         db.session.flush()
         db.session.commit()
 
         data = {
-            'partnerCode': partnerCode,
-            'orderId': orderId,
-            'partnerName': partnerName,
-            'storeId': storeId,
-            'ipnUrl': ipnUrl,
-            'amount': amount,
-            'lang': lang,
-            'requestType': requestType,
-            'redirectUrl': redirectUrl,
-            'autoCapture': autoCapture,
+            'partnerCode': MOMO_CONFIG.get("partnerCode"),
+            'orderId': MOMO_CONFIG.get("orderId"),
+            'partnerName': MOMO_CONFIG.get("partnerName"),
+            'storeId': MOMO_CONFIG.get("storeId"),
+            'extraData': MOMO_CONFIG.get("extraData"),
+            'orderGroupId': MOMO_CONFIG.get("orderGroupId"),
+            'lang': MOMO_CONFIG.get("lang"),
+            'requestType': MOMO_CONFIG.get("requestType"),
+            'redirectUrl': MOMO_CONFIG.get("redirectUrl"),
+            'autoCapture': MOMO_CONFIG.get("autoCapture"),
             'orderInfo': orderInfo,
             'requestId': requestId,
-            'extraData': extraData,
-            'signature': signature,
-            'orderGroupId': orderGroupId
+            'ipnUrl': ipnUrl,
+            'amount': str(amount),
+            'signature': signature
         }
 
         data = json.dumps(data)
 
         clen = len(data)
-        response = requests.post(momo_api_create_payment, data=data,
+        response = requests.post(MOMO_CONFIG.get("momo_api_create_payment"), data=data,
                                  headers={'Content-Type': 'application/json', 'Content-Length': str(clen)})
         # Trả về phản hồi
         data = response.json()
@@ -102,23 +101,23 @@ def check_payment(payment_momo_id):
         if payment_momo is None:
             return send_error(message="Không tìm thấy giao dịch.")
 
-        rawSignature = ("accessKey=" + accessKey + "&orderId=" + payment_momo.order_momo_id + "&partnerCode=" + partnerCode +
-                        "&requestId=" + payment_momo.request_momo_id)
+        rawSignature = ("accessKey=" + MOMO_CONFIG.get("accessKey") + "&orderId=" + payment_momo.order_payment_id + "&partnerCode=" + MOMO_CONFIG.get("partnerCode") +
+                        "&requestId=" + payment_momo.request_payment_id)
 
 
-        h = hmac.new(bytes(secretKey, 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
+        h = hmac.new(bytes(MOMO_CONFIG.get("secretKey"), 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
         signature = h.hexdigest()
 
         data = {
-            'partnerCode': partnerCode,
-            'orderId': payment_momo.order_momo_id,
-            'requestId': payment_momo.request_momo_id,
+            'partnerCode': MOMO_CONFIG.get("partnerCode"),
+            'orderId': payment_momo.order_payment_id,
+            'requestId': payment_momo.request_payment_id,
             'signature': signature,
-            'lang': lang,
+            'lang': MOMO_CONFIG.get("lang"),
 
         }
 
-        response = requests.post(momo_api_check_payment, json=data, headers={'Content-Type': 'application/json'})
+        response = requests.post(MOMO_CONFIG.get("momo_api_check_payment"), json=data, headers={'Content-Type': 'application/json'})
 
 
         data = response.json()
@@ -148,15 +147,12 @@ def check_payment(payment_momo_id):
         return send_error(message=str(ex))
 
 # API xử lý thông báo thanh toán từ Momo (dành cho backend)
-@api.route('/<order_momo_id>/<request_momo_id>/payment_notify', methods=['POST'])
-def payment_notify(order_momo_id, request_momo_id):
+@api.route('/<payment_online_id>/payment_notify', methods=['POST'])
+def payment_notify(payment_online_id):
     try:
         data = request.get_json()
         print("đã vào BE", data)
-        payment_momo = PaymentOnline.query.filter(PaymentOnline.order_momo_id == order_momo_id,
-                                                PaymentOnline.request_momo_id == request_momo_id).first()
-
-
+        payment_momo = PaymentOnline.query.filter(PaymentOnline.id == payment_online_id).first()
         if payment_momo is None:
             return send_error(message='Không tìm thấy giao dịch.')
         if isinstance(data, dict):

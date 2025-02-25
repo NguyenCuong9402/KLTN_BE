@@ -621,9 +621,8 @@ class Orders(db.Model):
 class PaymentOnline(db.Model):
     __tablename__ = 'payment_online'
     id = db.Column(db.String(50), primary_key=True)
-    order_momo_id =  db.Column(db.String(100), nullable=False)
-    request_momo_id = db.Column(db.String(50), nullable=False)
-    mac_signature =  db.Column(db.Text(), nullable=False)
+    order_payment_id =  db.Column(db.String(100), nullable=False)
+    request_payment_id = db.Column(db.String(50), nullable=False)
     result_momo = db.Column(db.JSON, nullable=True, default=None)
     status_payment = db.Column(db.Boolean, nullable=False, default=False)
     type = db.Column(db.String(20), nullable=True) # momo / zalo
