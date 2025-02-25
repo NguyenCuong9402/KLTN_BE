@@ -14,10 +14,6 @@ from app.utils import get_timestamp_now
 
 api = Blueprint('zalo', __name__)
 
-APP_ID = 2553
-APP_USER = "user123"
-
-
 
 @api.route("/create_payment", methods=['POST'])
 def create_payment():
@@ -49,7 +45,7 @@ def create_payment():
                                      type=TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo'),)
 
         # set link callback
-        callback_url = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/zalo/zalo/{payment_zalo.id}/payment_notify"
+        callback_url = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get("ZALO", "zalo")}/{payment_zalo.id}/payment_notify"
         order["callback_url"] = callback_url
 
 
@@ -70,34 +66,6 @@ def create_payment():
             data_result['pay_url'] = result.get("order_url")
 
         return send_result(data=data_result)
-    except Exception as ex:
-        db.session.rollback()
-        return send_error(message=str(ex))
-
-
-# API xử lý thông báo thanh toán từ Momo (dành cho backend)
-@api.route('/<type_payment>/<payment_online>/payment_notify', methods=['POST'])
-def payment_notify(type_payment, payment_online):
-    try:
-        data = request.get_json()
-        print("đã vào BE", data)
-        payment_online = PaymentOnline.query.filter_by(id=payment_online, type=type_payment).first()
-        if payment_online is None:
-            return send_error(message='Không tìm thấy giao dịch.')
-        if isinstance(data, dict):
-            payment_online.result_payment = data
-            if type_payment == TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo'):
-                if data.get('type', None) == ZALO_CONFIG.get("status_success"):
-                    payment_online.status_payment = True
-
-            elif type_payment == TYPE_PAYMENT_ONLINE.get('MOMO', 'momo'):
-                if data.get('resultCode', None) == MOMO_CONFIG.get("status_success"):
-                    payment_online.status_payment = True
-
-            db.session.flush()
-            db.session.commit()
-
-        return send_result(data=data)
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))

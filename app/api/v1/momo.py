@@ -14,11 +14,6 @@ from app.models import PaymentOnline
 
 api = Blueprint('momo', __name__)
 
-
-
-
-
-
 @api.route("/create_payment", methods=['POST'])
 def create_payment():
     try:
@@ -26,7 +21,7 @@ def create_payment():
         orderId = str(uuid())
         requestId = str(uuid())
         payment_online_id = str(uuid())
-        ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{TYPE_PAYMENT_ONLINE.get("MOMO", "momo")}/{payment_online_id}/payment_notify"
+        ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get("MOMO", "momo")}/{payment_online_id}/payment_notify"
         orderInfo = "pay with MoMo"
         # Trang momo đt chuyển đến link web mình muốn
         # redirectUrl = f"https://www.facebook.com/"
@@ -80,86 +75,6 @@ def create_payment():
             data_result['pay_url'] = data.get("payUrl")
 
         return send_result(data=data_result)
-    except Exception as ex:
-        db.session.rollback()
-        return send_error(message=str(ex))
-
-@api.route("<payment_momo_id>", methods=['GET'])
-def check_payment(payment_momo_id):
-    try:
-        payment_momo = PaymentOnline.query.filter_by(id=payment_momo_id).first()
-
-        if payment_momo is None:
-            return send_error(message="Không tìm thấy giao dịch.")
-
-        rawSignature = ("accessKey=" + MOMO_CONFIG.get("accessKey") + "&orderId=" + payment_momo.order_payment_id + "&partnerCode=" + MOMO_CONFIG.get("partnerCode") +
-                        "&requestId=" + payment_momo.request_payment_id)
-
-
-        h = hmac.new(bytes(MOMO_CONFIG.get("secretKey"), 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
-        signature = h.hexdigest()
-
-        data = {
-            'partnerCode': MOMO_CONFIG.get("partnerCode"),
-            'orderId': payment_momo.order_payment_id,
-            'requestId': payment_momo.request_payment_id,
-            'signature': signature,
-            'lang': MOMO_CONFIG.get("lang"),
-
-        }
-
-        response = requests.post(MOMO_CONFIG.get("momo_api_check_payment"), json=data, headers={'Content-Type': 'application/json'})
-
-
-        data = response.json()
-
-        if isinstance(data, dict):
-            if payment_momo.result_payment is None:
-                payment_momo.result_payment = data
-                if data.get('resultCode', None) == MOMO_CONFIG.get("status_success"):
-                    payment_momo.status_payment = True
-
-                db.session.flush()
-                db.session.commit()
-            else:
-                if isinstance(payment_momo.result_payment, dict):
-                    current_result_code = payment_momo.result_payment.get('resultCode', None)
-                    if current_result_code != MOMO_CONFIG.get("status_success") and data.get('resultCode', None) == MOMO_CONFIG.get("status_success"):
-                        payment_momo.result_payment = data
-                        payment_momo.status_payment = True
-                        db.session.flush()
-                        db.session.commit()
-
-
-        return send_result(message=data)
-
-    except Exception as ex:
-        db.session.rollback()
-        return send_error(message=str(ex))
-
-# API xử lý thông báo thanh toán từ Momo (dành cho backend)
-@api.route('/<type_payment>/<payment_online>/payment_notify', methods=['POST'])
-def payment_notify(type_payment, payment_online):
-    try:
-        data = request.get_json()
-        print("đã vào BE", data)
-        payment_online = PaymentOnline.query.filter_by(id=payment_online, type=type_payment).first()
-        if payment_online is None:
-            return send_error(message='Không tìm thấy giao dịch.')
-        if isinstance(data, dict):
-            payment_online.result_payment = data
-            if type_payment == TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo'):
-                if data.get('type', None) == ZALO_CONFIG.get("status_success"):
-                    payment_online.status_payment = True
-
-            elif type_payment == TYPE_PAYMENT_ONLINE.get('MOMO', 'momo'):
-                if data.get('resultCode', None) == MOMO_CONFIG.get("status_success"):
-                    payment_online.status_payment = True
-
-            db.session.flush()
-            db.session.commit()
-
-        return send_result(data=data)
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))
