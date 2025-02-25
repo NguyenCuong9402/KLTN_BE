@@ -28,7 +28,7 @@ order = {
   "app_time": int(round(time() * 1000)), # miliseconds
   "embed_data": json.dumps({}),
   "item": json.dumps([{}]),
-  "amount": 50000,
+  "amount": 500,
   "description": "Lazada - Payment for the order #"+str(transID),
   "bank_code": "zalopayapp",
   "callback_url": ipnUrl
