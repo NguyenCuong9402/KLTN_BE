@@ -1,15 +1,29 @@
 # Hướng dẫn chạy local cho Lộc
 
+* Cài đặt base và data
 ```
-- Tải mysql và cài tạo 1 db dev_kltn với cấu hình 
-- cd app
-- flask db upgrade
-- Sửa setting Devconfig: mật khẩu mysql server vào PASSWORD
+- Tải mysql và cài tạo 1 db dev_kltn với cấu hình
+- Chạy lệnh: 
++ cd app
++ flask db upgrade
++ Sửa setting Devconfig: mật khẩu mysql server vào PASSWORD
      SQLALCHEMY_DATABASE_URI = 'mysql://root:PASSWORD@127.0.0.1:3306/dev_kltn?charset=utf8mb4'
-- run file Server.py
-
-- run 3 file.py init db ở folder init_db
+- run file.py init db ở folder init_db
 ```
+* Chạy chương trình
+```
+
+- Cài đặt ngrok -> Sau đó bật ngrok chạy lệnh:
+ + ngrok http 5012
+ + Thấy dòng https://599e-42-112-72-4.ngrok-free.app -> http://localhost:5012
+- Đặt env:
+ BASE_URL_WEBSITE=https://599e-42-112-72-4.ngrok-free.app
+     
+- run file Server.py
+```
+
+
+
 
 # Table of Contents
 1. [Installation](#Installation)
