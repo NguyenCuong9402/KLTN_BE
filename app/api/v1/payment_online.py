@@ -96,8 +96,12 @@ def check_payment(payment_id):
 @api.route("/momo", methods=['POST'])
 def create_payment():
     try:
+        # lay tu sesssion
         amount = 5000
         orderId = str(uuid())
+
+
+
         requestId = str(uuid())
         payment_online_id = str(uuid())
         ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get("MOMO", "momo")}/{payment_online_id}/payment_notify"
@@ -163,8 +167,13 @@ def create_payment():
 @api.route("/zalo", methods=['POST'])
 def zalo_create_payment():
     try:
+        # lay tu sesssion
+
         amount = 10000
         order_id = str(uuid())
+
+
+
         request_id = "{:%y%m%d}_{}".format(datetime.today(), get_timestamp_now())
         order = {
             "app_id": ZALO_CONFIG.get("app_id"),

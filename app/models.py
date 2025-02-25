@@ -626,6 +626,8 @@ class PaymentOnline(db.Model):
     result_payment = db.Column(db.JSON, nullable=True, default=None)
     status_payment = db.Column(db.Boolean, nullable=False, default=False)
     type = db.Column(db.String(20), nullable=True) # momo / zalo
+    created_date = db.Column(db.Integer, default=get_timestamp_now())
+
 
 class OrderReport(db.Model):
     __tablename__ = 'order_report'
