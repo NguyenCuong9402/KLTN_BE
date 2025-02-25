@@ -29,16 +29,16 @@ class DevConfig(Config):
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
 
     # mysql config
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:cuong942002@127.0.0.1:3306/dev_kltn?charset=utf8mb4'
     TIME_ZONE = 'Asia/Ho_Chi_Minh'
-    ADMIN_EMAIL = 'cuong09042002@gmail.com'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    BK_HOST_MYSQL = '127.0.0.1'
-    BK_PORT_MYSQL = '3306'
-    BK_USERNAME_MYSQL = 'root'
-    BK_PASSWORD_MYSQL = 'cuong942002'
-    BK_DBNAME_MYSQL = 'dev_kltn'
+    BK_HOST_MYSQL =  os.environ.get('BK_HOST_MYSQL', "127.0.0.1")
+    BK_PORT_MYSQL = os.environ.get('BK_HOST_MYSQL', "3306")
+    BK_USERNAME_MYSQL = os.environ.get('BK_HOST_MYSQL', "root")
+    BK_PASSWORD_MYSQL = os.environ.get('BK_HOST_MYSQL', "cuong942002")
+    BK_DBNAME_MYSQL = os.environ.get('BK_HOST_MYSQL', "dev_kltn")
+    SQLALCHEMY_DATABASE_URI = f'mysql://{BK_USERNAME_MYSQL}:{BK_PASSWORD_MYSQL}@{BK_HOST_MYSQL}:{BK_PORT_MYSQL}/{BK_DBNAME_MYSQL}?charset=utf8mb4'
 
+    os.environ.get('REDIS_HOST', "127.0.0.1")
     # redis config
     REDIS_HOST = '127.0.0.1'
     REDIS_PORT = 6379
@@ -46,11 +46,12 @@ class DevConfig(Config):
     REDIS_PASSWORD = 'cuong942002'
 
     # email config
+    ADMIN_EMAIL = os.environ.get('MAIL_USERNAME', "cuong09042002@gmail.com" )
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 465
-    MAIL_USERNAME = 'cuong09042002@gmail.com'
-    MAIL_PASSWORD = 'cyeb cioq ynmo zirk'
-    MAIL_DEFAULT_SENDER = 'cuong09042002@gmail.com'
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', "cuong09042002@gmail.com" )
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', "cyeb cioq ynmo zirk" )
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_USERNAME', "cuong09042002@gmail.com" )
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
 
