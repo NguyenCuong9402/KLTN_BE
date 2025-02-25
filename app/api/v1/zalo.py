@@ -72,7 +72,14 @@ def create_payment():
         # Đọc kết quả JSON
         result = response.json()
 
-        return send_result(data=result)
+        data_result = {
+            'result': result,
+        }
+
+        if result.get("order_url", None) and result.get("return_code", None) == 1:
+            data_result['pay_url'] = result.get("order_url")
+
+        return send_result(data=data_result)
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))

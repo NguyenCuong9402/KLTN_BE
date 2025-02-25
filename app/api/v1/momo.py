@@ -8,6 +8,7 @@ import requests
 import hmac
 import hashlib
 
+from app.api.v1.zalo import ZALO_CONFIG
 from app.enums import TYPE_PAYMENT_ONLINE
 from app.extensions import db
 from app.models import PaymentOnline
@@ -146,23 +147,28 @@ def check_payment(payment_momo_id):
         return send_error(message=str(ex))
 
 # API xử lý thông báo thanh toán từ Momo (dành cho backend)
-@api.route('/<type_payment>/<payment_online_id>/payment_notify', methods=['POST'])
-def payment_notify(type_payment, payment_online_id):
+@api.route('/<type_payment>/<payment_online>/payment_notify', methods=['POST'])
+def payment_notify(type_payment, payment_online):
     try:
         data = request.get_json()
         print("đã vào BE", data)
-        payment_momo = PaymentOnline.query.filter(PaymentOnline.id == payment_online_id, type=type_payment ).first()
-        if payment_momo is None:
+        payment_online = PaymentOnline.query.filter_by(id=payment_online, type=type_payment).first()
+        if payment_online is None:
             return send_error(message='Không tìm thấy giao dịch.')
         if isinstance(data, dict):
-            payment_momo.result_payment = data
-            if data.get('resultCode', None) == MOMO_CONFIG.get("status_success"):
-                payment_momo.status_payment = True
-        db.session.flush()
-        db.session.commit()
+            payment_online.result_payment = data
+            if type_payment == TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo'):
+                if data.get('type', None) == ZALO_CONFIG.get("status_success"):
+                    payment_online.status_payment = True
+
+            elif type_payment == TYPE_PAYMENT_ONLINE.get('MOMO', 'momo'):
+                if data.get('resultCode', None) == MOMO_CONFIG.get("status_success"):
+                    payment_online.status_payment = True
+
+            db.session.flush()
+            db.session.commit()
 
         return send_result(data=data)
-
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))
