@@ -40,8 +40,13 @@ def create_payment():
         requestId = str(uuid())
 
 
+        # Trang momo đt chuyển đến link web mình muốn
 
         redirectUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{orderId}/{requestId}/payment_return"
+
+        # Trang momo đt không làm gì sau khi thanh toán
+        redirectUrl = "about:blank"
+
         ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{orderId}/{requestId}/payment_notify"
         orderInfo = "pay with MoMo"
 
