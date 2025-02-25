@@ -32,10 +32,10 @@ class DevConfig(Config):
     TIME_ZONE = 'Asia/Ho_Chi_Minh'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     BK_HOST_MYSQL =  os.environ.get('BK_HOST_MYSQL', "127.0.0.1")
-    BK_PORT_MYSQL = os.environ.get('BK_HOST_MYSQL', "3306")
-    BK_USERNAME_MYSQL = os.environ.get('BK_HOST_MYSQL', "root")
-    BK_PASSWORD_MYSQL = os.environ.get('BK_HOST_MYSQL', "cuong942002")
-    BK_DBNAME_MYSQL = os.environ.get('BK_HOST_MYSQL', "dev_kltn")
+    BK_PORT_MYSQL = os.environ.get('BK_PORT_MYSQL', "3306")
+    BK_USERNAME_MYSQL = os.environ.get('BK_USERNAME_MYSQL', "root")
+    BK_PASSWORD_MYSQL = os.environ.get('BK_PASSWORD_MYSQL', "cuong942002")
+    BK_DBNAME_MYSQL = os.environ.get('BK_DBNAME_MYSQL', "dev_kltn")
     SQLALCHEMY_DATABASE_URI = f'mysql://{BK_USERNAME_MYSQL}:{BK_PASSWORD_MYSQL}@{BK_HOST_MYSQL}:{BK_PORT_MYSQL}/{BK_DBNAME_MYSQL}?charset=utf8mb4'
 
     os.environ.get('REDIS_HOST', "127.0.0.1")
