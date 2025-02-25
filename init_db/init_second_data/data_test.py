@@ -6,7 +6,7 @@ import pandas as pd
 from flask import Flask
 
 from app.enums import TYPE_FILE_LINK
-from app.models import Product, Size, Color, FileLink
+from app.models import Product, Size, Color, FileLink, TypeProduct
 from app.extensions import db
 from app.settings import DevConfig
 from app.utils import get_timestamp_now
@@ -29,7 +29,7 @@ class Worker:
         data = {
             "name": "Áo phông",
             "describe": "Áo đẹp giá tốt",
-            "type_product_id": "mt7kiahfSYXN6iANorjUcH",
+            "type_product_key": "ao_bo",
             "discount_from_date": 1735365861,
             "discount_to_date": 1735521538,
             "sizes": [
@@ -60,27 +60,33 @@ class Worker:
         sizes = data.pop('sizes')
         colors = data.pop('colors')
         name = data.pop('name')
-        for i in range(1, 40):
-            product = Product(**data, id=str(uuid()), original_price=random.choice(values),
-                              name=f'Sản phẩm {name} {i}', discount=random.randint(1, 20),
-                              created_date=get_timestamp_now() + i)
-            db.session.add(product)
-            db.session.flush()
 
-            size_objects = [Size(id=str(uuid()), name=size, product_id=product.id, index=index,
-                                 created_date=get_timestamp_now() + index) for index, size in enumerate(sizes)]
-            color_objects = [Color(id=str(uuid()), name=color, product_id=product.id, index=index,
-                                   created_date=get_timestamp_now() + index) for index, color in enumerate(colors)]
-            db.session.bulk_save_objects(size_objects)
-            db.session.bulk_save_objects(color_objects)
-            db.session.flush()
+        type_key = data.pop('type_product_key')
 
-            file_objects = [FileLink(id=str(uuid()), table_id=product.id, file_id=file["file_id"], table_type = TYPE_FILE_LINK.get('PRODUCT', 'product'),
-                                            index=index, created_date=get_timestamp_now() + index)
-                            for index, file in enumerate(files)]
-            db.session.bulk_save_objects(file_objects)
-            db.session.flush()
-            db.session.commit()
+        type_product = TypeProduct.query.filter_by(key=type_key).first()
+
+        if type_product:
+            for i in range(1, 40):
+                product = Product(**data, type_product_id=type_product.id, id=str(uuid()), original_price=random.choice(values),
+                                  name=f'Sản phẩm {name} {i}', discount=random.randint(1, 20),
+                                  created_date=get_timestamp_now() + i)
+                db.session.add(product)
+                db.session.flush()
+
+                size_objects = [Size(id=str(uuid()), name=size, product_id=product.id, index=index,
+                                     created_date=get_timestamp_now() + index) for index, size in enumerate(sizes)]
+                color_objects = [Color(id=str(uuid()), name=color, product_id=product.id, index=index,
+                                       created_date=get_timestamp_now() + index) for index, color in enumerate(colors)]
+                db.session.bulk_save_objects(size_objects)
+                db.session.bulk_save_objects(color_objects)
+                db.session.flush()
+
+                file_objects = [FileLink(id=str(uuid()), table_id=product.id, file_id=file["file_id"], table_type = TYPE_FILE_LINK.get('PRODUCT', 'product'),
+                                                index=index, created_date=get_timestamp_now() + index)
+                                for index, file in enumerate(files)]
+                db.session.bulk_save_objects(file_objects)
+                db.session.flush()
+                db.session.commit()
 
 
 if __name__ == '__main__':
