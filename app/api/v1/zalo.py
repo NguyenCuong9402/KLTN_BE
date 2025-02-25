@@ -123,27 +123,26 @@ def create_payment():
 #         db.session.rollback()
 #         return send_error(message=str(ex))
 #
-# # API xử lý thông báo thanh toán từ Momo (dành cho backend)
-# @api.route('/<order_momo_id>/<request_momo_id>/payment_notify', methods=['POST'])
-# def payment_notify(order_momo_id, request_momo_id):
-#     try:
-#         data = request.get_json()
-#         print("đã vào BE", data)
-#         payment_momo = PaymentMomo.query.filter(PaymentMomo.order_momo_id == order_momo_id,
-#                                                 PaymentMomo.request_momo_id == request_momo_id).first()
-#
-#
-#         if payment_momo is None:
-#             return send_error(message='Không tìm thấy giao dịch.')
-#         if isinstance(data, dict):
-#             payment_momo.result_momo = data
-#             if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
-#                 payment_momo.status_payment = True
-#         db.session.flush()
-#         db.session.commit()
-#
-#         return send_result(data=data)
-#
-#     except Exception as ex:
-#         db.session.rollback()
-#         return send_error(message=str(ex))
+# API xử lý thông báo thanh toán từ Momo (dành cho backend)
+@api.route('/payment_notify', methods=['POST'])
+def payment_notify():
+    try:
+        data = request.get_json()
+        print("đã vào BE", data)
+        # payment_momo = PaymentMomo.query.filter(PaymentMomo.order_momo_id == order_momo_id,
+        #                                         PaymentMomo.request_momo_id == request_momo_id).first()
+        #
+        #
+        # if payment_momo is None:
+        #     return send_error(message='Không tìm thấy giao dịch.')
+        # if isinstance(data, dict):
+        #     payment_momo.result_momo = data
+        #     if data.get('resultCode', None) == STATUS_PAYMENT_MOMO_SUCCESS:
+        #         payment_momo.status_payment = True
+        # db.session.flush()
+        # db.session.commit()
+        return send_result(data=data)
+
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex))

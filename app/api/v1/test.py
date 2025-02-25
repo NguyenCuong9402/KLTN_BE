@@ -17,6 +17,9 @@ config = {
 }
 transID = get_timestamp_now()
 
+URL_CALLBACK = "https://c928-203-191-8-78.ngrok-free.app" #CONFIG.BASE_URL_WEBSITE
+
+ipnUrl = f"{URL_CALLBACK}/api/v1/zalo/payment_notify"
 
 order = {
   "app_id": config["app_id"],
@@ -27,7 +30,8 @@ order = {
   "item": json.dumps([{}]),
   "amount": 50000,
   "description": "Lazada - Payment for the order #"+str(transID),
-  "bank_code": "zalopayapp"
+  "bank_code": "zalopayapp",
+  "callback_url": ipnUrl
 }
 
 # app_id|app_trans_id|app_user|amount|apptime|embed_data|item
