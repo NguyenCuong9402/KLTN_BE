@@ -147,11 +147,6 @@ def register_blueprints(app):
     app.register_blueprint(api_v1.type_product.api, url_prefix='/api/v1/type_product')
     app.register_blueprint(api_v1.payment_online.api, url_prefix='/api/v1/payment_online')
 
-    #payment
-    app.register_blueprint(api_v1.momo.api, url_prefix='/api/v1/momo')
-    app.register_blueprint(api_v1.zalo.api, url_prefix='/api/v1/zalo')
-
-
 
 
 

@@ -91,3 +91,126 @@ def check_payment(payment_id):
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))
+
+#momo create payment
+@api.route("/momo", methods=['POST'])
+def create_payment():
+    try:
+        amount = 5000
+        orderId = str(uuid())
+        requestId = str(uuid())
+        payment_online_id = str(uuid())
+        ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get("MOMO", "momo")}/{payment_online_id}/payment_notify"
+        orderInfo = "pay with MoMo"
+        # Trang momo đt chuyển đến link web mình muốn
+        # redirectUrl = f"https://www.facebook.com/"
+        # Trang momo đt không làm gì sau khi thanh toán
+
+        rawSignature = "accessKey=" + MOMO_CONFIG.get("accessKey") + "&amount=" + str(
+            amount) + "&extraData=" + MOMO_CONFIG.get("extraData") + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId \
+                       + "&orderInfo=" + orderInfo + "&partnerCode=" + MOMO_CONFIG.get(
+            "partnerCode") + "&redirectUrl=" + MOMO_CONFIG.get("redirectUrl") \
+                       + "&requestId=" + requestId + "&requestType=" + MOMO_CONFIG.get("requestType")
+
+        h = hmac.new(bytes(MOMO_CONFIG.get("secretKey"), 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
+        signature = h.hexdigest()
+
+        payment_momo = PaymentOnline(id=payment_online_id,
+                                     type=TYPE_PAYMENT_ONLINE.get('MOMO', 'momo'),
+                                     order_payment_id=orderId, request_payment_id=requestId)
+        db.session.add(payment_momo)
+        db.session.flush()
+        db.session.commit()
+
+        data = {
+            'partnerCode': MOMO_CONFIG.get("partnerCode"),
+            'partnerName': MOMO_CONFIG.get("partnerName"),
+            'storeId': MOMO_CONFIG.get("storeId"),
+            'extraData': MOMO_CONFIG.get("extraData"),
+            'orderGroupId': MOMO_CONFIG.get("orderGroupId"),
+            'lang': MOMO_CONFIG.get("lang"),
+            'requestType': MOMO_CONFIG.get("requestType"),
+            'redirectUrl': MOMO_CONFIG.get("redirectUrl"),
+            'autoCapture': MOMO_CONFIG.get("autoCapture"),
+            'orderId': orderId,
+            'orderInfo': orderInfo,
+            'requestId': requestId,
+            'ipnUrl': ipnUrl,
+            'amount': str(amount),
+            'signature': signature
+        }
+
+        data = json.dumps(data)
+
+        clen = len(data)
+        response = requests.post(MOMO_CONFIG.get("momo_api_create_payment"), data=data,
+                                 headers={'Content-Type': 'application/json', 'Content-Length': str(clen)})
+        # Trả về phản hồi
+        data = response.json()
+
+        data_result = {
+            'result': data,
+        }
+        if data.get("payUrl", None) and data.get("resultCode", None) == 0:
+            data_result['pay_url'] = data.get("payUrl")
+
+        return send_result(data=data_result)
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex))
+
+#zalo
+@api.route("/zalo", methods=['POST'])
+def zalo_create_payment():
+    try:
+        amount = 10000
+        order_id = str(uuid())
+        request_id = "{:%y%m%d}_{}".format(datetime.today(), get_timestamp_now())
+        order = {
+            "app_id": ZALO_CONFIG.get("app_id"),
+            "app_trans_id": request_id ,  # mã giao dich có định dạng yyMMdd_xxxx
+            "app_user": ZALO_CONFIG.get("app_user"),
+            "app_time": int(round(time() * 1000)),  # miliseconds
+            "embed_data": json.dumps({}),
+            "item": json.dumps([{}]),
+            "amount": amount,
+            "description": "Payment for the order #" + str(order_id),
+            "bank_code": ZALO_CONFIG.get("bank_code"),
+        }
+
+        # app_id|app_trans_id|app_user|amount|apptime|embed_data|item
+        raw_signature = "{}|{}|{}|{}|{}|{}|{}".format(order["app_id"], order["app_trans_id"], order["app_user"],
+                                             order["amount"], order["app_time"], order["embed_data"], order["item"])
+
+        # signature
+        mac_signature = hmac.new(ZALO_CONFIG['key1'].encode(), raw_signature.encode(), hashlib.sha256).hexdigest()
+        order["mac"] = mac_signature
+
+        payment_zalo = PaymentOnline(id=str(uuid()), order_payment_id=order_id, request_payment_id=request_id,
+                                     type=TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo'),)
+
+        # set link callback
+        callback_url = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get("ZALO", "zalo")}/{payment_zalo.id}/payment_notify"
+        order["callback_url"] = callback_url
+
+
+        db.session.add(payment_zalo)
+        db.session.flush()
+        db.session.commit()
+
+        response = requests.post(ZALO_CONFIG.get("endpoint_create_payment"), data=order)
+
+        # Đọc kết quả JSON
+        result = response.json()
+
+        data_result = {
+            'result': result,
+        }
+
+        if result.get("order_url", None) and result.get("return_code", None) == 1:
+            data_result['pay_url'] = result.get("order_url")
+
+        return send_result(data=data_result)
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex))
