@@ -9,7 +9,7 @@ import hmac
 import hashlib
 
 from app.extensions import db
-from app.models import PaymentMomo
+from app.models import PaymentOnline
 
 api = Blueprint('momo', __name__)
 
@@ -34,18 +34,15 @@ STATUS_PAYMENT_MOMO_SUCCESS = 0
 def create_payment():
     try:
 
-        amount = "60000"
+        amount = "5000"
         orderId = str(uuid())
         requestId = str(uuid())
 
-        payment_momo = PaymentMomo(id=str(uuid()), order_momo_id=orderId, request_momo_id=requestId)
-        db.session.add(payment_momo)
-        db.session.flush()
-        db.session.commit()
+
 
         redirectUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{orderId}/{requestId}/payment_return"
         ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/momo/{orderId}/{requestId}/payment_notify"
-        orderInfo = f"Thanh toán hóa đơn {orderId}"
+        orderInfo = "pay with MoMo"
 
         rawSignature = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + extraData + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId \
                        + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl \
@@ -53,6 +50,12 @@ def create_payment():
 
         h = hmac.new(bytes(secretKey, 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
         signature = h.hexdigest()
+
+        payment_momo = PaymentOnline(id=str(uuid()), mac_signature=signature, type="momo", order_momo_id=orderId, request_momo_id=requestId)
+        db.session.add(payment_momo)
+        db.session.flush()
+        db.session.commit()
+
         data = {
             'partnerCode': partnerCode,
             'orderId': orderId,
@@ -86,7 +89,7 @@ def create_payment():
 @api.route("<payment_momo_id>", methods=['GET'])
 def check_payment(payment_momo_id):
     try:
-        payment_momo = PaymentMomo.query.filter_by(id=payment_momo_id).first()
+        payment_momo = PaymentOnline.query.filter_by(id=payment_momo_id).first()
 
         if payment_momo is None:
             return send_error(message="Không tìm thấy giao dịch.")
@@ -152,8 +155,8 @@ def payment_notify(order_momo_id, request_momo_id):
     try:
         data = request.get_json()
         print("đã vào BE", data)
-        payment_momo = PaymentMomo.query.filter(PaymentMomo.order_momo_id == order_momo_id,
-                                                PaymentMomo.request_momo_id == request_momo_id).first()
+        payment_momo = PaymentOnline.query.filter(PaymentOnline.order_momo_id == order_momo_id,
+                                                PaymentOnline.request_momo_id == request_momo_id).first()
 
 
         if payment_momo is None:

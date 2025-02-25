@@ -601,7 +601,7 @@ class Orders(db.Model):
                             order_by="asc(OrderItems.created_date)")
     online_payment = db.Column(db.Boolean, nullable=False, default=False)
 
-    payment_momo_id = db.Column(db.String(50), db.ForeignKey('payment_momo.id', ondelete='SET NULL', onupdate='SET NULL'))
+    payment_online= db.Column(db.String(50), db.ForeignKey('payment_online.id', ondelete='SET NULL', onupdate='SET NULL'))
 
     @property
     def address(self):
@@ -618,13 +618,15 @@ class Orders(db.Model):
         return data
 
 
-class PaymentMomo(db.Model):
-    __tablename__ = 'payment_momo'
+class PaymentOnline(db.Model):
+    __tablename__ = 'payment_online'
     id = db.Column(db.String(50), primary_key=True)
     order_momo_id =  db.Column(db.String(100), nullable=False)
     request_momo_id = db.Column(db.String(50), nullable=False)
+    mac_signature =  db.Column(db.Text(), nullable=False)
     result_momo = db.Column(db.JSON, nullable=True, default=None)
     status_payment = db.Column(db.Boolean, nullable=False, default=False)
+    type = db.Column(db.String(20), nullable=True) # momo / zalo
 
 class OrderReport(db.Model):
     __tablename__ = 'order_report'

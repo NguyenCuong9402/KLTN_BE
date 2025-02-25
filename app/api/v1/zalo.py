@@ -5,7 +5,6 @@ from flask import Blueprint, request
 from app.api.helper import send_result, send_error, CONFIG
 
 from app.extensions import db
-from app.models import PaymentMomo
 from time import time
 from datetime import datetime
 import json, hmac, hashlib, urllib.request, urllib.parse
