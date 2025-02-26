@@ -136,8 +136,6 @@ def check_payment_zalo(payment_id):
                         payment_zalo.status_payment = True
                         db.session.flush()
                         db.session.commit()
-            print(data)
-
         return send_result(message=data)
 
     except Exception as ex:
