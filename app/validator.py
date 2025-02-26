@@ -5,7 +5,7 @@ from datetime import date
 from marshmallow import Schema, fields, validate, ValidationError, types, pre_load
 from sqlalchemy import desc, asc
 
-from app.enums import TYPE_REACTION
+from app.enums import TYPE_REACTION, TYPE_PAYMENT_ONLINE
 from app.extensions import db
 from app.models import Reaction, Comment
 from app.utils import REGEX_EMAIL, REGEX_VALID_PASSWORD, REGEX_FULLNAME_VIETNAMESE, REGEX_PHONE_NUMBER
@@ -191,6 +191,14 @@ class StaffValidation(BaseValidation):
     identification_card = fields.String(allow_none=True)
     number_dependent = fields.Integer(allow_none=True)
 
+
+class PaymentValidation(BaseValidation):
+    ship_id = fields.String(required=True)
+    address_order_id = fields.String(required=True)
+    payment_type = fields.String(
+        required=True,
+        validate=validate.OneOf(choices=TYPE_PAYMENT_ONLINE.values(), error="Payment type must be 'momo' or 'zalo'")
+    )
 
 class ArticleValidate(BaseValidation):
     tags = fields.List(
