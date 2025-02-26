@@ -92,6 +92,58 @@ def check_payment(payment_id):
         db.session.rollback()
         return send_error(message=str(ex))
 
+# check payment zalo
+@api.route("/zalo/<payment_id>", methods=['GET'])
+def check_payment_zalo(payment_id):
+    try:
+        payment_zalo = PaymentOnline.query.filter_by(id=payment_id, type=TYPE_PAYMENT_ONLINE.get("ZALO", "zalo")).first()
+
+        if payment_zalo is None:
+            return send_error(message="Không tìm thấy giao dịch.")
+
+        params = {
+            "app_id": ZALO_CONFIG.get("app_id"),
+            "app_trans_id": payment_zalo.request_payment_id  # Input your app_trans_id"
+        }
+        raw_signature = "{}|{}|{}".format(ZALO_CONFIG.get("app_id"), params["app_trans_id"], ZALO_CONFIG.get("key1"))
+        mac_signature = hmac.new(ZALO_CONFIG['key1'].encode(), raw_signature.encode(), hashlib.sha256).hexdigest()
+        params["mac"] = mac_signature
+
+        response = requests.post(
+            ZALO_CONFIG["zalo_api_check_payment"],
+            json=params,
+            headers={'Content-Type': 'application/json'}
+        )
+
+        data = response.json()
+
+        if isinstance(data, dict):
+            if payment_zalo.result_payment is None:
+                if data.get('return_code', None) == ZALO_CONFIG.get("status_success"):
+                    payment_zalo.status_payment = True
+                    data['type'] = ZALO_CONFIG.get("status_success")
+                else:
+                    data['type'] = 0
+                payment_zalo.result_payment = data
+                db.session.flush()
+                db.session.commit()
+            else:
+                if isinstance(payment_zalo.result_payment, dict):
+                    current_result_code = payment_zalo.result_payment.get('type', None)
+                    if current_result_code != ZALO_CONFIG.get("status_success") and data.get('return_code', None) == ZALO_CONFIG.get("status_success"):
+                        data['type'] = ZALO_CONFIG.get("status_success")
+                        payment_zalo.result_payment = data
+                        payment_zalo.status_payment = True
+                        db.session.flush()
+                        db.session.commit()
+            print(data)
+
+        return send_result(message=data)
+
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex))
+
 #momo create payment
 @api.route("/momo", methods=['POST'])
 def create_payment():
@@ -207,7 +259,7 @@ def zalo_create_payment():
         db.session.flush()
         db.session.commit()
 
-        response = requests.post(ZALO_CONFIG.get("endpoint_create_payment"), data=order)
+        response = requests.post(ZALO_CONFIG.get("zalo_api_create_payment"), data=order)
 
         # Đọc kết quả JSON
         result = response.json()

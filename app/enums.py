@@ -66,7 +66,8 @@ ZALO_CONFIG = {
     "app_id":2553,
     "app_user": "user123",
     "bank_code": "zalopayapp",
-    "endpoint_create_payment": "https://sb-openapi.zalopay.vn/v2/create",
+    "zalo_api_create_payment": "https://sb-openapi.zalopay.vn/v2/create",
+    "zalo_api_check_payment": "https://sb-openapi.zalopay.vn/v2/query",
     "status_success": 1
 }
 
