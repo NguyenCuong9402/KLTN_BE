@@ -192,7 +192,7 @@ def create_payment(session_id):
         if payment_type == TYPE_PAYMENT_ONLINE.get('MOMO', 'momo'):
             request_id = str(uuid())
             ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get('MOMO', 'momo')}/{payment_online_id}/payment_notify"
-            orderInfo = f"Pay with MoMo #{request_id} ID-{payment_online_id}"
+            orderInfo = f"Pay with MoMo #{request_id}"
             # Trang momo đt chuyển đến link web mình muốn
             # redirectUrl = f"https://www.facebook.com/"
             # Trang momo đt không làm gì sau khi thanh toán
@@ -228,6 +228,7 @@ def create_payment(session_id):
                 'result': result,
                 'payment_online_id': payment_online_id,
                 'amount': amount,
+                'code_trade': f'ID-{payment_online_id}',
                 'description': orderInfo
             }
             if result.get("payUrl", None) and result.get("resultCode", None) == MOMO_CONFIG.get("status_success"):
@@ -245,7 +246,7 @@ def create_payment(session_id):
                 "embed_data": json.dumps({}),
                 "item": json.dumps([{}]),
                 "amount": amount,
-                "description": f"Pay with Zalo #{request_id} ID-{payment_online_id}",
+                "description": f"Pay with Zalo #{request_id}",
                 "bank_code": ZALO_CONFIG.get("bank_code"),
                 "callback_url": callback_url
             }
@@ -265,8 +266,8 @@ def create_payment(session_id):
                 'result': result,
                 'payment_online_id': payment_online_id,
                 'amount': amount,
+                'code_trade': f'ID-{payment_online_id}',
                 'description': order.get("description")
-
             }
             if result.get("order_url", None) and result.get("return_code", None) == ZALO_CONFIG.get("status_success"):
                 data_result['pay_url'] = result.get("order_url")
