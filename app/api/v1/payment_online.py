@@ -227,6 +227,8 @@ def create_payment(session_id):
             data_result = {
                 'result': result,
                 'payment_online_id': payment_online_id,
+                'amount': amount,
+                'description': orderInfo
             }
             if result.get("payUrl", None) and result.get("resultCode", None) == MOMO_CONFIG.get("status_success"):
                 data_result['pay_url'] = result.get("payUrl")
@@ -262,6 +264,9 @@ def create_payment(session_id):
             data_result = {
                 'result': result,
                 'payment_online_id': payment_online_id,
+                'amount': amount,
+                'description': order.get("description")
+
             }
             if result.get("order_url", None) and result.get("return_code", None) == ZALO_CONFIG.get("status_success"):
                 data_result['pay_url'] = result.get("order_url")
