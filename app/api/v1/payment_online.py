@@ -71,7 +71,7 @@ def check_payment(payment_id):
             if isinstance(data, dict):
                 if payment_online.result_payment is None:
                     if data.get('return_code', None) == ZALO_CONFIG.get("status_success"):
-                        payment_zalo.status_payment = True
+                        payment_online.status_payment = True
                         data['type'] = ZALO_CONFIG.get("status_success")
                     else:
                         data['type'] = 0
@@ -83,8 +83,8 @@ def check_payment(payment_id):
                         current_result_code = payment_online.result_payment.get('type', None)
                         if current_result_code != ZALO_CONFIG.get("status_success") and data.get('return_code', None) == ZALO_CONFIG.get("status_success"):
                             data['type'] = ZALO_CONFIG.get("status_success")
-                            payment_zalo.result_payment = data
-                            payment_zalo.status_payment = True
+                            payment_online.result_payment = data
+                            payment_online.status_payment = True
                             db.session.flush()
                             db.session.commit()
             return send_result(message=data)
