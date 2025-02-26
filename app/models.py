@@ -602,9 +602,9 @@ class Orders(db.Model):
     status = db.Column(db.String(20), default='pending')
     items = db.relationship('OrderItems', lazy=True,
                             order_by="asc(OrderItems.created_date)")
-    online_payment = db.Column(db.Boolean, nullable=False, default=False)
+    payment_status = db.Column(db.Boolean, nullable=False, default=False)
 
-    payment_online= db.Column(db.String(50), db.ForeignKey('payment_online.id', ondelete='SET NULL', onupdate='SET NULL'))
+    payment_online_id = db.Column(db.String(50), db.ForeignKey('payment_online.id', ondelete='SET NULL', onupdate='SET NULL'))
 
     @property
     def address(self):

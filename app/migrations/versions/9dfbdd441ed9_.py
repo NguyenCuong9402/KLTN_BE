@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: a44b18ddbcee
+Revision ID: 9dfbdd441ed9
 Revises: 
-Create Date: 2025-02-18 14:32:39.586207
+Create Date: 2025-02-26 14:25:57.505210
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'a44b18ddbcee'
+revision = '9dfbdd441ed9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -92,6 +92,16 @@ def upgrade():
     sa.Column('object', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('payment_online',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('order_payment_id', sa.String(length=100), nullable=False),
+    sa.Column('request_payment_id', sa.String(length=50), nullable=False),
+    sa.Column('result_payment', sa.JSON(), nullable=True),
+    sa.Column('status_payment', sa.Boolean(), nullable=False),
+    sa.Column('type', sa.String(length=20), nullable=True),
+    sa.Column('created_date', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('permission',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('key', sa.String(length=100), nullable=False),
@@ -118,9 +128,12 @@ def upgrade():
     sa.Column('key', sa.Text(), nullable=True),
     sa.Column('name', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
     sa.Column('type_id', sa.String(length=50), nullable=True),
+    sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
     sa.ForeignKeyConstraint(['type_id'], ['type_product.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_type_product_created_date'), 'type_product', ['created_date'], unique=False)
     op.create_table('file_link',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('file_id', sa.String(length=50), nullable=True),
@@ -256,7 +269,10 @@ def upgrade():
     sa.Column('ship_id', sa.String(length=50), nullable=True),
     sa.Column('price_ship', sa.Integer(), nullable=True),
     sa.Column('status', sa.String(length=20), nullable=True),
+    sa.Column('payment_status', sa.Boolean(), nullable=False),
+    sa.Column('payment_online_id', sa.String(length=50), nullable=True),
     sa.ForeignKeyConstraint(['address_id'], ['address.id'], onupdate='CASCADE', ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['payment_online_id'], ['payment_online.id'], onupdate='SET NULL', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['ship_id'], ['shipper.id'], onupdate='SET NULL', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -519,10 +535,12 @@ def downgrade():
     op.drop_table('price_ship')
     op.drop_index(op.f('ix_file_link_created_date'), table_name='file_link')
     op.drop_table('file_link')
+    op.drop_index(op.f('ix_type_product_created_date'), table_name='type_product')
     op.drop_table('type_product')
     op.drop_table('shipper')
     op.drop_table('region')
     op.drop_table('permission')
+    op.drop_table('payment_online')
     op.drop_table('message')
     op.drop_index(op.f('ix_mail_created_date'), table_name='mail')
     op.drop_table('mail')
