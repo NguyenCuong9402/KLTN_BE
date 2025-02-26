@@ -230,6 +230,8 @@ def momo_create_payment(session_id):
 
         data_result = {
             'result': data,
+            'payment_online_id': payment_online_id,
+
         }
         if data.get("payUrl", None) and data.get("resultCode", None) == 0:
             data_result['pay_url'] = data.get("payUrl")
@@ -326,6 +328,7 @@ def zalo_create_payment(session_id):
 
         data_result = {
             'result': result,
+            'payment_online_id': payment_online_id,
         }
 
         if result.get("order_url", None) and result.get("return_code", None) == 1:
