@@ -1,7 +1,8 @@
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from shortuuid import uuid
 from flask import Blueprint, request
 from app.api.helper import send_result, send_error, CONFIG
-from app.enums import TYPE_PAYMENT_ONLINE, MOMO_CONFIG, ZALO_CONFIG
+from app.enums import TYPE_PAYMENT_ONLINE, MOMO_CONFIG, ZALO_CONFIG, regions
 
 from app.extensions import db
 from time import time
@@ -9,7 +10,7 @@ from datetime import datetime
 import json, hmac, hashlib
 import requests
 
-from app.models import PaymentOnline
+from app.models import PaymentOnline, User, SessionOrder, Shipper, AddressOrder, PriceShip
 from app.utils import get_timestamp_now
 
 api = Blueprint('payment_online', __name__)
@@ -134,25 +135,59 @@ def check_payment(payment_id):
         return send_error(message=str(ex))
 
 #momo create payment
-@api.route("/momo", methods=['POST'])
-def create_payment():
+@api.route("/momo/<session_id>", methods=['POST'])
+@jwt_required
+def momo_create_payment(session_id):
     try:
-        # lay tu sesssion
-        amount = 5000
-        orderId = str(uuid())
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+        if user is None:
+            return send_error(message='Người dùng không hợp lệ.')
+        session_order_query = SessionOrder.query.filter(SessionOrder.user_id == user_id, SessionOrder.id == session_id,
+                                                        SessionOrder.duration > get_timestamp_now())
 
+        session_order = session_order_query.first()
+        if session_order is None:
+            return send_error(message='Phiên thanh toán đã hết hạn')
+
+        body_request = request.get_json()
+        address_order_id = body_request.get('address_order_id')
+        ship_id = body_request.get('ship_id', '')
+
+        shipper = Shipper.query.filter(Shipper.id == ship_id).first()
+        if shipper is None:
+            return send_error(message='Shipper hiện giờ không làm việc.')
+
+        address_order = AddressOrder.query.filter_by(user_id=user_id, id=address_order_id).first()
+        if address_order is None:
+            return send_error(message='Vui lòng thêm địa chỉ địa chỉ.')
+
+        province = address_order.address.get('province')
+        region_id = ''
+        for key, value in regions.items():
+            if province in value:
+                region_id = key
+                break
+
+        find_price = PriceShip.query.filter_by(region_id=region_id, shipper_id=shipper.id).first()
+        amount =  find_price.price + sum(
+            item.cart_detail.quantity * item.cart_detail.product.detail.get('price', 0)
+            for item in session_order.items
+        )
+
+        ### phần payment
 
 
         requestId = str(uuid())
         payment_online_id = str(uuid())
         ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get('MOMO', 'momo')}/{payment_online_id}/payment_notify"
-        orderInfo = "pay with MoMo"
+        orderInfo = f"Pay with MoMo #{requestId} ID-{payment_online_id}"
         # Trang momo đt chuyển đến link web mình muốn
         # redirectUrl = f"https://www.facebook.com/"
         # Trang momo đt không làm gì sau khi thanh toán
 
         rawSignature = "accessKey=" + MOMO_CONFIG.get("accessKey") + "&amount=" + str(
-            amount) + "&extraData=" + MOMO_CONFIG.get("extraData") + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId \
+            amount) + "&extraData=" + MOMO_CONFIG.get("extraData") + "&ipnUrl=" + ipnUrl + "&orderId=" + session_id \
                        + "&orderInfo=" + orderInfo + "&partnerCode=" + MOMO_CONFIG.get(
             "partnerCode") + "&redirectUrl=" + MOMO_CONFIG.get("redirectUrl") \
                        + "&requestId=" + requestId + "&requestType=" + MOMO_CONFIG.get("requestType")
@@ -162,7 +197,7 @@ def create_payment():
 
         payment_momo = PaymentOnline(id=payment_online_id,
                                      type=TYPE_PAYMENT_ONLINE.get('MOMO', 'momo'),
-                                     order_payment_id=orderId, request_payment_id=requestId)
+                                     order_payment_id=session_id, request_payment_id=requestId)
         db.session.add(payment_momo)
         db.session.flush()
         db.session.commit()
@@ -177,7 +212,7 @@ def create_payment():
             'requestType': MOMO_CONFIG.get("requestType"),
             'redirectUrl': MOMO_CONFIG.get("redirectUrl"),
             'autoCapture': MOMO_CONFIG.get("autoCapture"),
-            'orderId': orderId,
+            'orderId': session_id,
             'orderInfo': orderInfo,
             'requestId': requestId,
             'ipnUrl': ipnUrl,
@@ -205,17 +240,53 @@ def create_payment():
         return send_error(message=str(ex))
 
 #zalo
-@api.route("/zalo", methods=['POST'])
-def zalo_create_payment():
+@api.route("/zalo/<session_id>", methods=['POST'])
+@jwt_required
+def zalo_create_payment(session_id):
     try:
-        # lay tu sesssion
 
-        amount = 10000
-        order_id = str(uuid())
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+        if user is None:
+            return send_error(message='Người dùng không hợp lệ.')
+        session_order_query = SessionOrder.query.filter(SessionOrder.user_id == user_id, SessionOrder.id == session_id,
+                                                        SessionOrder.duration > get_timestamp_now())
 
+        session_order = session_order_query.first()
+        if session_order is None:
+            return send_error(message='Phiên thanh toán đã hết hạn')
+
+        body_request = request.get_json()
+        address_order_id = body_request.get('address_order_id')
+        ship_id = body_request.get('ship_id', '')
+
+        shipper = Shipper.query.filter(Shipper.id == ship_id).first()
+        if shipper is None:
+            return send_error(message='Shipper hiện giờ không làm việc.')
+
+        address_order = AddressOrder.query.filter_by(user_id=user_id, id=address_order_id).first()
+        if address_order is None:
+            return send_error(message='Vui lòng thêm địa chỉ địa chỉ.')
+
+        province = address_order.address.get('province')
+        region_id = ''
+        for key, value in regions.items():
+            if province in value:
+                region_id = key
+                break
+
+        find_price = PriceShip.query.filter_by(region_id=region_id, shipper_id=shipper.id).first()
+        amount = find_price.price + sum(
+            item.cart_detail.quantity * item.cart_detail.product.detail.get('price', 0)
+            for item in session_order.items
+        )
+
+        ### phần payment
 
 
         request_id = "{:%y%m%d}_{}".format(datetime.today(), get_timestamp_now())
+        payment_online_id = str(uuid())
+
         order = {
             "app_id": ZALO_CONFIG.get("app_id"),
             "app_trans_id": request_id ,  # mã giao dich có định dạng yyMMdd_xxxx
@@ -224,7 +295,7 @@ def zalo_create_payment():
             "embed_data": json.dumps({}),
             "item": json.dumps([{}]),
             "amount": amount,
-            "description": "Payment for the order #" + str(order_id),
+            "description": f"Pay with Zalo #{request_id} ID-{payment_online_id}",
             "bank_code": ZALO_CONFIG.get("bank_code"),
         }
 
@@ -236,7 +307,7 @@ def zalo_create_payment():
         mac_signature = hmac.new(ZALO_CONFIG['key1'].encode(), raw_signature.encode(), hashlib.sha256).hexdigest()
         order["mac"] = mac_signature
 
-        payment_zalo = PaymentOnline(id=str(uuid()), order_payment_id=order_id, request_payment_id=request_id,
+        payment_zalo = PaymentOnline(id=payment_online_id, order_payment_id=session_id, request_payment_id=request_id,
                                      type=TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo'),)
 
         # set link callback
