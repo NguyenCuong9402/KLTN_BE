@@ -223,6 +223,14 @@ def create_payment(session_id):
             }
             response = requests.post(MOMO_CONFIG.get("momo_api_create_payment"), data=json.dumps(data),
                                      headers={'Content-Type': 'application/json', 'Content-Length': str(len(data))})
+            result = response.json()
+            data_result = {
+                'result': result,
+                'payment_online_id': payment_online_id,
+            }
+            if result.get("payUrl", None) and result.get("resultCode", None) == MOMO_CONFIG.get("status_success"):
+                data_result['pay_url'] = result.get("payUrl")
+
         else:
             request_id = "{:%y%m%d}_{}".format(datetime.today(), get_timestamp_now())
             callback_url = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo')}/{payment_online_id}/payment_notify"
@@ -250,22 +258,19 @@ def create_payment(session_id):
             order["mac"] = mac_signature
             # set link callback
             response = requests.post(ZALO_CONFIG.get("zalo_api_create_payment"), data=order)
-
-
+            result = response.json()
+            data_result = {
+                'result': result,
+                'payment_online_id': payment_online_id,
+            }
+            if result.get("order_url", None) and result.get("return_code", None) == ZALO_CONFIG.get("status_success"):
+                data_result['pay_url'] = result.get("order_url")
 
         payment_online = PaymentOnline(id=payment_online_id, session_order_id=session_id,
                                        type=payment_type,
                                        order_payment_id=order_payment_id, request_payment_id=request_id)
         db.session.add(payment_online)
         db.session.flush()
-        result = response.json()
-        data_result = {
-            'result': result,
-            'payment_online_id': payment_online_id,
-        }
-        if result.get("order_url", None) and result.get("return_code", None) == 1:
-            data_result['pay_url'] = result.get("order_url")
-
         db.session.commit()
         return send_result(data=data_result)
     except Exception as ex:
