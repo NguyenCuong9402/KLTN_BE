@@ -193,6 +193,7 @@ class StaffValidation(BaseValidation):
 
 
 class PaymentValidation(BaseValidation):
+    message = fields.String(allow_none=True)
     ship_id = fields.String(required=True)
     address_order_id = fields.String(required=True)
     payment_type = fields.String(

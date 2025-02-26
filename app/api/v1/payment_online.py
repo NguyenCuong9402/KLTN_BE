@@ -188,7 +188,7 @@ def create_payment(session_id):
 
         ### phần payment
         payment_online_id = str(uuid())
-
+        order_payment_id = str(uuid())
         if payment_type == TYPE_PAYMENT_ONLINE.get('MOMO', 'momo'):
             request_id = str(uuid())
             ipnUrl = f"{CONFIG.BASE_URL_WEBSITE}/api/v1/payment_online/{TYPE_PAYMENT_ONLINE.get('MOMO', 'momo')}/{payment_online_id}/payment_notify"
@@ -198,7 +198,7 @@ def create_payment(session_id):
             # Trang momo đt không làm gì sau khi thanh toán
 
             rawSignature = "accessKey=" + MOMO_CONFIG.get("accessKey") + "&amount=" + str(
-                amount) + "&extraData=" + MOMO_CONFIG.get("extraData") + "&ipnUrl=" + ipnUrl + "&orderId=" + session_id \
+                amount) + "&extraData=" + MOMO_CONFIG.get("extraData") + "&ipnUrl=" + ipnUrl + "&orderId=" + order_payment_id \
                            + "&orderInfo=" + orderInfo + "&partnerCode=" + MOMO_CONFIG.get(
                 "partnerCode") + "&redirectUrl=" + MOMO_CONFIG.get("redirectUrl") \
                            + "&requestId=" + request_id + "&requestType=" + MOMO_CONFIG.get("requestType")
@@ -214,7 +214,7 @@ def create_payment(session_id):
                 'requestType': MOMO_CONFIG.get("requestType"),
                 'redirectUrl': MOMO_CONFIG.get("redirectUrl"),
                 'autoCapture': MOMO_CONFIG.get("autoCapture"),
-                'orderId': session_id,
+                'orderId': order_payment_id,
                 'orderInfo': orderInfo,
                 'requestId': request_id,
                 'ipnUrl': ipnUrl,
@@ -253,9 +253,9 @@ def create_payment(session_id):
 
 
 
-        payment_online = PaymentOnline(id=payment_online_id,
+        payment_online = PaymentOnline(id=payment_online_id, session_order_id=session_id,
                                        type=payment_type,
-                                       order_payment_id=session_id, request_payment_id=request_id)
+                                       order_payment_id=order_payment_id, request_payment_id=request_id)
         db.session.add(payment_online)
         db.session.flush()
         result = response.json()
