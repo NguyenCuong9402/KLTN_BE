@@ -8,8 +8,9 @@ from app.api.helper import send_result, send_error
 from app.enums import regions
 from app.models import db, User, SessionOrder, SessionOrderCartItems, Orders, OrderItems, CartItems, AddressOrder, \
     PriceShip, Shipper
-from app.utils import get_timestamp_now
-from app.validator import CartSchema, SessionSchema, ShipperSchema, AddressOrderSchema
+from app.utils import get_timestamp_now, trim_dict
+from app.validator import CartSchema, SessionSchema, ShipperSchema, AddressOrderSchema, PaymentValidation, \
+    SessionOrderValidate
 
 api = Blueprint('session_order', __name__)
 
@@ -175,10 +176,17 @@ def order_session(session_id):
         if session_order is None:
             return send_error(message='Phiên thanh toán đã hết hạn')
 
-        body_request = request.get_json()
-        message = body_request.get('message')
-        address_order_id = body_request.get('address_order_id')
-        ship_id = body_request.get('ship_id', '')
+        json_request = request.get_json()
+
+        json_body = trim_dict(json_request)
+        validator_input = SessionOrderValidate()
+        is_not_validate = validator_input.validate(json_body)
+        if is_not_validate:
+            return send_error(data=is_not_validate, message='Validate Error')
+
+        message = json_body.get('message')
+        address_order_id = json_body.get('address_order_id')
+        ship_id = json_body.get('ship_id')
 
         shipper = Shipper.query.filter(Shipper.id==ship_id).first()
         if shipper is None:

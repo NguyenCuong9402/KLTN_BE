@@ -200,6 +200,16 @@ class PaymentValidation(BaseValidation):
         validate=validate.OneOf(choices=TYPE_PAYMENT_ONLINE.values(), error="Payment type must be 'momo' or 'zalo'")
     )
 
+class SessionOrderValidate(BaseValidation):
+    message = fields.String(allow_none=True)
+    ship_id = fields.String(required=True)
+    address_order_id = fields.String(required=True)
+    payment_type = fields.String(
+        required=True,
+        validate=validate.OneOf(choices=['cod'], error="Payment type must be 'cod'")
+    )
+
+
 class ArticleValidate(BaseValidation):
     tags = fields.List(
         fields.String(),
