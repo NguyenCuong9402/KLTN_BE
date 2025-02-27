@@ -2,6 +2,7 @@ import requests
 
 from app.enums import TOKEN_BOT_TELE
 
+#https://api.telegram.org/botTOKEN/getChat?chat_id=1497977059
 
 # https://api.telegram.org/bot7681347480:AAFM7ytizPlasiURlOiIGQBs7eMGeUWrHAE/getUpdates
 # Thay bằng token bot của bạn
