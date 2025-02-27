@@ -428,6 +428,7 @@ class OrderSchema(Schema):
     price_ship = fields.Float()
     status = fields.String()
     items = fields.List(fields.Nested(OrderItemSchema))
+    payment_status = fields.Boolean()
 
 
 class CommunitySchema(Schema):
