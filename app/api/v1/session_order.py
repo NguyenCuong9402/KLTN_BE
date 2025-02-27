@@ -58,7 +58,8 @@ def get_items_in_session(session_id):
         if user is None:
             return send_error(message='Người dùng không hợp lệ.')
         session = SessionOrder.query.filter(SessionOrder.user_id==user_id, SessionOrder.id == session_id,
-                                          SessionOrder.duration > get_timestamp_now()).first()
+                                          SessionOrder.duration > get_timestamp_now(), SessionOrder.is_delete == False
+                                            ).first()
         if session is None:
             return send_error(message='Phiên thanh toán đã hết hạn')
         items = session.items
@@ -113,7 +114,8 @@ def update_ship_in_session(session_id):
         if user is None:
             return send_error(message='Người dùng không hợp lệ.')
         session = SessionOrder.query.filter(SessionOrder.user_id==user_id, SessionOrder.id == session_id,
-                                          SessionOrder.duration > get_timestamp_now()).first()
+                                          SessionOrder.duration > get_timestamp_now(), SessionOrder.is_delete == False
+                                            ).first()
         if session is None:
             return send_error(message='Phiên thanh toán đã hết hạn')
 
@@ -170,7 +172,8 @@ def order_session(session_id):
         if user is None:
             return send_error(message='Người dùng không hợp lệ.')
         session_order_query = SessionOrder.query.filter(SessionOrder.user_id == user_id, SessionOrder.id == session_id,
-                                                        SessionOrder.duration > get_timestamp_now())
+                                                        SessionOrder.duration > get_timestamp_now(),
+                                                        SessionOrder.is_delete == False)
 
         session_order = session_order_query.first()
         if session_order is None:
@@ -229,7 +232,7 @@ def order_session(session_id):
             CartItems.query.filter(CartItems.id==item.cart_id).delete()
             db.session.flush()
 
-        session_order_query.delete()
+        session_order_query.is_delete = True
         db.session.flush()
         order.count = count
         db.session.flush()

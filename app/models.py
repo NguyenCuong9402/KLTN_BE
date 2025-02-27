@@ -581,6 +581,8 @@ class SessionOrder(db.Model):
     items = db.relationship('SessionOrderCartItems', lazy=True,
                             order_by="asc(SessionOrderCartItems.index)")
 
+    is_delete = db.Column(db.Boolean, default=False)
+
 
 class Orders(db.Model):
     __tablename__ = 'orders'
