@@ -139,6 +139,28 @@ def check_payment(payment_id):
         db.session.rollback()
         return send_error(message=str(ex))
 
+
+@api.route("/session/<session_id>", methods=['GET'])
+@jwt_required
+def check_payment_session(session_id):
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+        if user is None:
+            return send_error(message='Người dùng không hợp lệ.')
+        session_order = SessionOrder.query.filter(SessionOrder.user_id == user_id,
+                                                  SessionOrder.id == session_id).first()
+        if session_order is None:
+            return send_error(message='Phiên thanh toán không tồn tại')
+
+        payment_online = PaymentOnline.query.filter_by(session_order_id=session_id,status_payment=True).first()
+
+        if payment_online:
+            return send_result(data={'paid': True})
+        return send_result(data={'paid': False})
+    except Exception as ex:
+        return send_error(message=str(ex))
+
 #momo create payment
 @api.route("/<session_id>", methods=['POST'])
 @jwt_required
@@ -148,10 +170,9 @@ def create_payment(session_id):
         user = User.query.filter_by(id=user_id).first()
         if user is None:
             return send_error(message='Người dùng không hợp lệ.')
-        session_order_query = SessionOrder.query.filter(SessionOrder.user_id == user_id, SessionOrder.id == session_id,
-                                                        SessionOrder.duration > get_timestamp_now())
-
-        session_order = session_order_query.first()
+        session_order = SessionOrder.query.filter(SessionOrder.user_id == user_id, SessionOrder.id == session_id,
+                                                        SessionOrder.duration > get_timestamp_now(),
+                                                        SessionOrder.is_delete == False).first()
         if session_order is None:
             return send_error(message='Phiên thanh toán đã hết hạn')
 
