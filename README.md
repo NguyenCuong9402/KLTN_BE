@@ -1,6 +1,6 @@
 # Hướng dẫn chạy local cho Lộc
 
-* Cài đặt ví momo và zalo
+* Cài đặt ví momo và zalo ( Chỉ cần khi test phần thanh toán QR)
 -https://beta-docs.zalopay.vn/docs/developer-tools/test-instructions/test-wallets/
 -https://developers.momo.vn/v3/vi/download/
 * Cách nạp tiền ví zalo
@@ -24,10 +24,10 @@
 * Chạy chương trình
 ```
 
-- Cài đặt ngrok -> Sau đó bật ngrok chạy lệnh:
+- Cài đặt ngrok -> Sau đó bật ngrok chạy lệnh: ( Chỉ cần khi test phần thanh toán QR)
  + ngrok http 5012
  + Thấy dòng https://599e-42-112-72-4.ngrok-free.app -> http://localhost:5012
-- Đặt env:
+- Đặt env:( Chỉ cần khi test phần thanh toán QR)
  BASE_URL_WEBSITE=https://599e-42-112-72-4.ngrok-free.app
      
 - run file Server.py
