@@ -8,8 +8,12 @@ from app.enums import TOKEN_BOT_TELE
 
 # web hook -> Khi bật ngrok sẽ có cách nhận luôn tin nhắn.
 # https://api.telegram.org/botTOKEN/setWebhook?url=YOUR_WEBHOOK_URL
-
 # https://api.telegram.org/botTOKEN/getWebhookInfo
+# https://api.telegram.org/botTOKEN/deleteWebhook
+
+# Gửi ảnh
+# https://api.telegram.org/botTOKEN/sendPhoto?chat_id=CHAT_ID&photo=IMAGE_URL
+
 
 # Thay bằng token bot của bạn
 chat_id_cuong = "1497977059"
