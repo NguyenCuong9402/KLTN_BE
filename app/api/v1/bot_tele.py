@@ -5,6 +5,12 @@ from app.enums import TOKEN_BOT_TELE
 #https://api.telegram.org/botTOKEN/getChat?chat_id=1497977059
 
 # https://api.telegram.org/bot7681347480:AAFM7ytizPlasiURlOiIGQBs7eMGeUWrHAE/getUpdates
+
+# web hook -> Khi bật ngrok sẽ có cách nhận luôn tin nhắn.
+# https://api.telegram.org/botTOKEN/setWebhook?url=YOUR_WEBHOOK_URL
+
+# https://api.telegram.org/botTOKEN/getWebhookInfo
+
 # Thay bằng token bot của bạn
 chat_id_cuong = "1497977059"
 chat_id_loc = "1540990172"# Chat ID của bạn
