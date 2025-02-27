@@ -46,11 +46,6 @@ GROUP_KEY_PARAM = {
     "admin":"/admin/dashboard"
 }
 
-FILE_TYPE = {
-    'product': 1,
-    'avatar': 2
-}
-
 MOMO_CONFIG = {
     "momo_api_create_payment": "https://test-payment.momo.vn/v2/gateway/api/create",
     "momo_api_check_payment": "https://test-payment.momo.vn/v2/gateway/api/query",

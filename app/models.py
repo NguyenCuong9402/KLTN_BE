@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey, TEXT, asc, desc
 from datetime import datetime
 
-from app.enums import FILE_TYPE, DURATION_SESSION_MINUTES, TYPE_REACTION
+from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION
 from app.extensions import db
 from app.utils import get_timestamp_now
 
