@@ -536,3 +536,12 @@ class ShipperSchema(Schema):
     index = fields.Integer()
     price_ship = fields.List(fields.Nested(PriceShipSchema()))
 
+class PaymentOnlineSchema(Schema):
+    id = fields.String()
+    order_payment_id = fields.String()
+    request_payment_id = fields.String()
+    session_order_id = fields.String()
+    result_payment = fields.Dict(allow_none=True)
+    status_payment = fields.Boolean()
+    type = fields.String()
+    created_date = fields.Integer()

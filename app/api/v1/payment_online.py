@@ -12,7 +12,7 @@ import requests
 
 from app.models import PaymentOnline, User, SessionOrder, Shipper, AddressOrder, PriceShip
 from app.utils import get_timestamp_now, trim_dict
-from app.validator import ProductValidation, PaymentValidation
+from app.validator import ProductValidation, PaymentValidation, PaymentOnlineSchema
 
 api = Blueprint('payment_online', __name__)
 
@@ -53,83 +53,87 @@ def check_payment(payment_id):
         if payment_online is None:
             return send_error(message="Không tìm thấy giao dịch.")
 
-        if payment_online.type == TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo'):
-            params = {
-                "app_id": ZALO_CONFIG.get("app_id"),
-                "app_trans_id": payment_online.request_payment_id  # Input your app_trans_id"
-            }
-            raw_signature = "{}|{}|{}".format(ZALO_CONFIG.get("app_id"), params["app_trans_id"], ZALO_CONFIG.get("key1"))
-            mac_signature = hmac.new(ZALO_CONFIG['key1'].encode(), raw_signature.encode(), hashlib.sha256).hexdigest()
-            params["mac"] = mac_signature
+        if payment_online.status_payment and payment_online.result_payment:
+            return send_result(data=PaymentOnlineSchema().dump(payment_online), message="Giao dịch thành công")
+        try:
+            if payment_online.type == TYPE_PAYMENT_ONLINE.get('ZALO', 'zalo'):
+                params = {
+                    "app_id": ZALO_CONFIG.get("app_id"),
+                    "app_trans_id": payment_online.request_payment_id  # Input your app_trans_id"
+                }
+                raw_signature = "{}|{}|{}".format(ZALO_CONFIG.get("app_id"), params["app_trans_id"], ZALO_CONFIG.get("key1"))
+                mac_signature = hmac.new(ZALO_CONFIG['key1'].encode(), raw_signature.encode(), hashlib.sha256).hexdigest()
+                params["mac"] = mac_signature
 
-            response = requests.post(
-                ZALO_CONFIG["zalo_api_check_payment"],
-                json=params,
-                headers={'Content-Type': 'application/json'}
-            )
+                response = requests.post(
+                    ZALO_CONFIG["zalo_api_check_payment"],
+                    json=params,
+                    headers={'Content-Type': 'application/json'}
+                )
 
-            data = response.json()
+                data = response.json()
 
-            if isinstance(data, dict):
-                if payment_online.result_payment is None:
-                    if data.get('return_code', None) == ZALO_CONFIG.get("status_success"):
-                        payment_online.status_payment = True
-                        data['type'] = ZALO_CONFIG.get("status_success")
-                    else:
-                        data['type'] = 0
-                    payment_online.result_payment = data
-                    db.session.flush()
-                    db.session.commit()
-                else:
-                    if isinstance(payment_online.result_payment, dict):
-                        current_result_code = payment_online.result_payment.get('type', None)
-                        if current_result_code != ZALO_CONFIG.get("status_success") and data.get('return_code', None) == ZALO_CONFIG.get("status_success"):
+                if isinstance(data, dict):
+                    if payment_online.result_payment is None:
+                        if data.get('return_code', None) == ZALO_CONFIG.get("status_success"):
+                            payment_online.status_payment = True
                             data['type'] = ZALO_CONFIG.get("status_success")
-                            payment_online.result_payment = data
+                        else:
+                            data['type'] = 0
+                        payment_online.result_payment = data
+                        db.session.flush()
+                        db.session.commit()
+                    else:
+                        if isinstance(payment_online.result_payment, dict):
+                            current_result_code = payment_online.result_payment.get('type', None)
+                            if current_result_code != ZALO_CONFIG.get("status_success") and data.get('return_code', None) == ZALO_CONFIG.get("status_success"):
+                                data['type'] = ZALO_CONFIG.get("status_success")
+                                payment_online.result_payment = data
+                                payment_online.status_payment = True
+                                db.session.flush()
+                                db.session.commit()
+            else:
+                rawSignature = ("accessKey=" + MOMO_CONFIG.get(
+                    "accessKey") + "&orderId=" + payment_online.order_payment_id + "&partnerCode=" + MOMO_CONFIG.get(
+                    "partnerCode") +
+                                "&requestId=" + payment_online.request_payment_id)
+
+                h = hmac.new(bytes(MOMO_CONFIG.get("secretKey"), 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
+                signature = h.hexdigest()
+
+                data = {
+                    'partnerCode': MOMO_CONFIG.get("partnerCode"),
+                    'orderId': payment_online.order_payment_id,
+                    'requestId': payment_online.request_payment_id,
+                    'signature': signature,
+                    'lang': MOMO_CONFIG.get("lang"),
+                }
+                response = requests.post(MOMO_CONFIG.get("momo_api_check_payment"), json=data,
+                                         headers={'Content-Type': 'application/json'})
+                data = response.json()
+
+                if isinstance(data, dict):
+                    if payment_online.result_payment is None:
+                        payment_online.result_payment = data
+                        if data.get('resultCode', None) == MOMO_CONFIG.get("status_success"):
                             payment_online.status_payment = True
-                            db.session.flush()
-                            db.session.commit()
-            return send_result(message=data)
-        else:
-            rawSignature = ("accessKey=" + MOMO_CONFIG.get(
-                "accessKey") + "&orderId=" + payment_online.order_payment_id + "&partnerCode=" + MOMO_CONFIG.get(
-                "partnerCode") +
-                            "&requestId=" + payment_online.request_payment_id)
 
-            h = hmac.new(bytes(MOMO_CONFIG.get("secretKey"), 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
-            signature = h.hexdigest()
+                        db.session.flush()
+                        db.session.commit()
+                    else:
+                        if isinstance(payment_online.result_payment, dict):
+                            current_result_code = payment_online.result_payment.get('resultCode', None)
+                            if current_result_code != MOMO_CONFIG.get("status_success") and data.get('resultCode',
+                                                                                                     None) == MOMO_CONFIG.get(
+                                    "status_success"):
+                                payment_online.result_payment = data
+                                payment_online.status_payment = True
+                                db.session.flush()
+                                db.session.commit()
 
-            data = {
-                'partnerCode': MOMO_CONFIG.get("partnerCode"),
-                'orderId': payment_online.order_payment_id,
-                'requestId': payment_online.request_payment_id,
-                'signature': signature,
-                'lang': MOMO_CONFIG.get("lang"),
-            }
-            response = requests.post(MOMO_CONFIG.get("momo_api_check_payment"), json=data,
-                                     headers={'Content-Type': 'application/json'})
-            data = response.json()
-
-            if isinstance(data, dict):
-                if payment_online.result_payment is None:
-                    payment_online.result_payment = data
-                    if data.get('resultCode', None) == MOMO_CONFIG.get("status_success"):
-                        payment_online.status_payment = True
-
-                    db.session.flush()
-                    db.session.commit()
-                else:
-                    if isinstance(payment_online.result_payment, dict):
-                        current_result_code = payment_online.result_payment.get('resultCode', None)
-                        if current_result_code != MOMO_CONFIG.get("status_success") and data.get('resultCode',
-                                                                                                 None) == MOMO_CONFIG.get(
-                                "status_success"):
-                            payment_online.result_payment = data
-                            payment_online.status_payment = True
-                            db.session.flush()
-                            db.session.commit()
-
-            return send_result(message=data)
+            return send_result(data=PaymentOnlineSchema().dump(payment_online), message="Kết quả giao dịch")
+        except Exception as ex:
+            return send_result(data=PaymentOnlineSchema().dump(payment_online), message=str(ex))
 
     except Exception as ex:
         db.session.rollback()
@@ -273,7 +277,7 @@ def create_payment(session_id):
                 data_result['pay_url'] = result.get("order_url")
 
         payment_online = PaymentOnline(id=payment_online_id, session_order_id=session_id,
-                                       type=payment_type,
+                                       type=payment_type, user_id=user_id,
                                        order_payment_id=order_payment_id, request_payment_id=request_id)
         db.session.add(payment_online)
         db.session.flush()

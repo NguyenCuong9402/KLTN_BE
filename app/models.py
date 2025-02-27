@@ -633,6 +633,10 @@ class PaymentOnline(db.Model):
         nullable=True  # Cho phép NULL
     )
 
+    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
+                        nullable=True)
+
+
     result_payment = db.Column(db.JSON, nullable=True, default=None)
     status_payment = db.Column(db.Boolean, nullable=False, default=False)
     type = db.Column(db.String(20), nullable=True) # momo / zalo
