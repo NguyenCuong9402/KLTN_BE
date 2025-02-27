@@ -5,9 +5,9 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy import asc, desc
 
 from app.api.helper import send_result, send_error
-from app.enums import regions
+from app.enums import regions, TYPE_PAYMENT_ONLINE
 from app.models import db, User, SessionOrder, SessionOrderCartItems, Orders, OrderItems, CartItems, AddressOrder, \
-    PriceShip, Shipper
+    PriceShip, Shipper, PaymentOnline
 from app.utils import get_timestamp_now, trim_dict
 from app.validator import CartSchema, SessionSchema, ShipperSchema, AddressOrderSchema, PaymentValidation, \
     SessionOrderValidate
@@ -171,11 +171,10 @@ def order_session(session_id):
         user = User.query.filter_by(id=user_id).first()
         if user is None:
             return send_error(message='Người dùng không hợp lệ.')
-        session_order_query = SessionOrder.query.filter(SessionOrder.user_id == user_id, SessionOrder.id == session_id,
+        session_order = SessionOrder.query.filter(SessionOrder.user_id == user_id, SessionOrder.id == session_id,
                                                         SessionOrder.duration > get_timestamp_now(),
-                                                        SessionOrder.is_delete == False)
+                                                        SessionOrder.is_delete == False).first()
 
-        session_order = session_order_query.first()
         if session_order is None:
             return send_error(message='Phiên thanh toán đã hết hạn')
 
@@ -190,6 +189,12 @@ def order_session(session_id):
         message = json_body.get('message')
         address_order_id = json_body.get('address_order_id')
         ship_id = json_body.get('ship_id')
+        payment_type = json_body.get('payment_type')
+        payment_online_id = json_body.get('payment_online_id', None)
+        if payment_type in  TYPE_PAYMENT_ONLINE.values():
+            payment_online = PaymentOnline.query.filter_by(id=payment_online_id).first()
+            if payment_online is None:
+                return send_error(message='Không tìm thấy thanh toán trước đó.')
 
         shipper = Shipper.query.filter(Shipper.id==ship_id).first()
         if shipper is None:
@@ -232,9 +237,12 @@ def order_session(session_id):
             CartItems.query.filter(CartItems.id==item.cart_id).delete()
             db.session.flush()
 
-        session_order_query.is_delete = True
-        db.session.flush()
+        session_order.is_delete = True
         order.count = count
+        if payment_type in  TYPE_PAYMENT_ONLINE.values():
+            order.payment_status = True
+            order.payment_online_id = payment_online_id
+
         db.session.flush()
         db.session.commit()
 

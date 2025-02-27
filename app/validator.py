@@ -2,10 +2,10 @@ import json
 import typing
 from datetime import date
 
-from marshmallow import Schema, fields, validate, ValidationError, types, pre_load
+from marshmallow import Schema, fields, validate, ValidationError, types, pre_load, validates_schema
 from sqlalchemy import desc, asc
 
-from app.enums import TYPE_REACTION, TYPE_PAYMENT_ONLINE
+from app.enums import TYPE_REACTION, TYPE_PAYMENT_ONLINE, TYPE_PAYMENT
 from app.extensions import db
 from app.models import Reaction, Comment
 from app.utils import REGEX_EMAIL, REGEX_VALID_PASSWORD, REGEX_FULLNAME_VIETNAMESE, REGEX_PHONE_NUMBER
@@ -207,8 +207,16 @@ class SessionOrderValidate(BaseValidation):
     address_order_id = fields.String(required=True)
     payment_type = fields.String(
         required=True,
-        validate=validate.OneOf(choices=['cod'], error="Payment type must be 'cod'")
+        validate=validate.OneOf(choices=TYPE_PAYMENT.values(), error="Payment type must be 'cod' or 'momo' or 'zalo'")
     )
+
+    payment_online_id = fields.String(allow_none=True)
+
+    @validates_schema
+    def validate_payment_online_id(self, data, **kwargs):
+        if data.get('payment_type') in TYPE_PAYMENT_ONLINE.values() and not data.get('payment_online_id'):
+            raise ValidationError("payment_online_id is required when payment_type is 'momo' or 'zalo'",
+                                  field_name='payment_online_id')
 
 
 class ArticleValidate(BaseValidation):

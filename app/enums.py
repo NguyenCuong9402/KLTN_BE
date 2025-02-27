@@ -22,6 +22,12 @@ TYPE_PAYMENT_ONLINE = {
     'ZALO': 'zalo',
 }
 
+TYPE_PAYMENT = {
+    'MOMO': 'momo',
+    'ZALO': 'zalo',
+    'COD' : 'cod'
+}
+
 LAYER_COMMENT = 2
 
 TYPE_FILE_LINK = {
