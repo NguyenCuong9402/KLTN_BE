@@ -82,7 +82,7 @@ class DevConfig(Config):
 
     HOST_RABBIT = os.environ.get("HOST_RABBIT", "localhost")
     PORT_RABBIT = int(os.environ.get("PORT_RABBIT", 5672))
-    USER_RABBIT = os.environ.get("USER_RABBIT", "guest")
-    PASSWORD_RABBIT = os.environ.get("PASSWORD_RABBIT", "guest")
+    USER_RABBIT = os.environ.get("USER_RABBIT", "admin")
+    PASSWORD_RABBIT = os.environ.get("PASSWORD_RABBIT", "admin")
 
 
