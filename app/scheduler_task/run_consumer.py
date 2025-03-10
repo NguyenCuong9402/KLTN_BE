@@ -1,6 +1,7 @@
 import threading
 
-from app.message_broker import RabbitMQConsumerSendMail, RabbitMQConsumerGenerateReport, RabbitMQConsumerStatistics
+from app.message_broker import (RabbitMQConsumerSendMailConsumer, RabbitMQConsumerGenerateReportConsumer
+, RabbitMQConsumerStatisticsConsumer)
 
 
 def start_consumer(consumer_class):
@@ -9,9 +10,9 @@ def start_consumer(consumer_class):
 
 def run_consumers_in_thread():
         consumers = [
-            RabbitMQConsumerSendMail,
-            RabbitMQConsumerGenerateReport,
-            RabbitMQConsumerStatistics
+            RabbitMQConsumerSendMailConsumer,
+            RabbitMQConsumerGenerateReportConsumer,
+            RabbitMQConsumerStatisticsConsumer
         ]
 
         for consumer_class in consumers:

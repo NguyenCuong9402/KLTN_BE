@@ -1,11 +1,12 @@
 import pika
 import json
-from app.settings import  DevConfig
-import os
+import abc
+from app.settings import DevConfig
 
 CONFIG = DevConfig
 
-class BaseRabbitMQProducer:
+
+class BaseRabbitMQProducer(abc.ABC):
     def __init__(self):
         self.exchange_name = CONFIG.EXCHANGE_NAME
         self.exchange_type = CONFIG.EXCHANGE_TYPE
@@ -14,11 +15,17 @@ class BaseRabbitMQProducer:
             pika.ConnectionParameters(host=CONFIG.HOST_RABBIT, port=CONFIG.PORT_RABBIT, credentials=self.credentials)
         )
         self.channel = self.connection.channel()
-        self.exchange_queue = self.channel.exchange_declare(
+        self.channel.exchange_declare(
             exchange=self.exchange_name,
             exchange_type=self.exchange_type,
             durable=True,
         )
+
+    @property
+    @abc.abstractmethod
+    def routing_key(self):
+        """Subclasses must define a routing key."""
+        pass
 
     def call(self, message):
         print(f"[{self.__class__.__name__}] Sending message: {message}")
@@ -26,7 +33,9 @@ class BaseRabbitMQProducer:
             exchange=self.exchange_name,
             routing_key=self.routing_key,
             body=json.dumps(message),
+            properties=pika.BasicProperties(delivery_mode=2),  # Ensure message durability
         )
+
 
 class RabbitMQProducerSendMail(BaseRabbitMQProducer):
     @property
@@ -35,7 +44,7 @@ class RabbitMQProducerSendMail(BaseRabbitMQProducer):
 
     def __init__(self):
         super().__init__()
-        self.queue = self.channel.queue_declare(queue=CONFIG.SEND_MAIL_QUEUE, durable=True)
+        self.channel.queue_declare(queue=CONFIG.SEND_MAIL_QUEUE, durable=True)
 
 
 class RabbitMQProducerGenerateReport(BaseRabbitMQProducer):
@@ -45,7 +54,7 @@ class RabbitMQProducerGenerateReport(BaseRabbitMQProducer):
 
     def __init__(self):
         super().__init__()
-        self.queue = self.channel.queue_declare(queue=CONFIG.GENERATE_REPORT_QUEUE, durable=True)
+        self.channel.queue_declare(queue=CONFIG.GENERATE_REPORT_QUEUE, durable=True)
 
 
 class RabbitMQProducerStatistics(BaseRabbitMQProducer):
@@ -55,4 +64,4 @@ class RabbitMQProducerStatistics(BaseRabbitMQProducer):
 
     def __init__(self):
         super().__init__()
-        self.queue = self.channel.queue_declare(queue=CONFIG.STATISTICS_QUEUE, durable=True)
+        self.channel.queue_declare(queue=CONFIG.STATISTICS_QUEUE, durable=True)

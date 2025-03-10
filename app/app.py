@@ -25,7 +25,7 @@ def create_app(config_object=CONFIG):
     register_monitor(app)
     CORS(app, expose_headers=["Content-Disposition"])
 
-    if config_object.ENV == 'prd':
+    if config_object.ENABLE_RABBITMQ_CONSUMER:
         run_consumers_in_thread()
 
     if config_object.ENV == 'prd':

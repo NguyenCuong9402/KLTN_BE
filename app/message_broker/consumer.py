@@ -15,8 +15,12 @@ class BaseRabbitMQConsumer:
             pika.ConnectionParameters(host=CONFIG.HOST_RABBIT, port=CONFIG.PORT_RABBIT, credentials=self.credentials)
         )
         self.channel = self.connection.channel()
+
+        self.channel.exchange_declare(exchange=CONFIG.EXCHANGE_NAME, exchange_type='direct', durable=True)
+
         self.channel.queue_declare(queue=self.queue_name, durable=True)
         self.channel.queue_bind(exchange=CONFIG.EXCHANGE_NAME, queue=self.queue_name, routing_key=self.routing_key)
+
 
     def callback(self, ch, method, properties, body):
         print(f"[{self.__class__.__name__}] Received message: {body.decode()}")
@@ -32,7 +36,7 @@ class BaseRabbitMQConsumer:
         raise NotImplementedError("Subclasses must implement process_message method")
 
 
-class RabbitMQConsumerSendMail(BaseRabbitMQConsumer):
+class RabbitMQConsumerSendMailConsumer(BaseRabbitMQConsumer):
     def __init__(self):
         super().__init__(CONFIG.SEND_MAIL_QUEUE, CONFIG.SEND_MAIL_ROUTING_KEY)
 
@@ -40,7 +44,7 @@ class RabbitMQConsumerSendMail(BaseRabbitMQConsumer):
         print(f"[SendMail] Processing email data: {message}")
 
 
-class RabbitMQConsumerGenerateReport(BaseRabbitMQConsumer):
+class RabbitMQConsumerGenerateReportConsumer(BaseRabbitMQConsumer):
     def __init__(self):
         super().__init__(CONFIG.GENERATE_REPORT_QUEUE, CONFIG.GENERATE_REPORT_ROUTING_KEY)
 
@@ -48,7 +52,7 @@ class RabbitMQConsumerGenerateReport(BaseRabbitMQConsumer):
         print(f"[GenerateReport] Generating report: {message}")
 
 
-class RabbitMQConsumerStatistics(BaseRabbitMQConsumer):
+class RabbitMQConsumerStatisticsConsumer(BaseRabbitMQConsumer):
     def __init__(self):
         super().__init__(CONFIG.STATISTICS_QUEUE, CONFIG.STATISTICS_ROUTING_KEY)
 
