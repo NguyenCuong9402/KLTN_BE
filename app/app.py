@@ -9,7 +9,7 @@ from app.extensions import logger, jwt, db, red, mail, migrate, scheduler
 from .api import v1 as api_v1
 from .api.helper import send_error
 from .enums import TIME_FORMAT_LOG
-from .scheduler_task import backup_data
+from .scheduler_task import backup_data, run_consumers_in_thread
 
 
 def create_app(config_object=CONFIG):
@@ -24,9 +24,14 @@ def create_app(config_object=CONFIG):
     register_blueprints(app)
     register_monitor(app)
     CORS(app, expose_headers=["Content-Disposition"])
+
+    if config_object.ENV == 'prd':
+        run_consumers_in_thread()
+
     if config_object.ENV == 'prd':
         # Task Scheduler backup data runs every 2 week at 03:00:00pm
         scheduler.add_job(backup_data, trigger='cron', hour='15', minute='00', second='00')
+
     return app
 
 

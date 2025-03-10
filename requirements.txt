@@ -54,3 +54,4 @@ python-benedict==0.34.0
 pymongo==4.3.3
 shortuuid==1.0.13
 python-dotenv==1.0.1
+pika==

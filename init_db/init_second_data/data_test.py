@@ -44,17 +44,21 @@ class Worker:
             ],
             "files": [
                 {
-                    "file_path": "/files/7pQYK7r6i2oQF69ncnfx7B.png",
-                    "id": "7pQYK7r6i2oQF69ncnfx7B"
+                    "file_path": "/files/8TYji9JMv6vNJ9zaBEE5WN.jpg",
+                    "id": "8TYji9JMv6vNJ9zaBEE5WN"
                 },
                 {
-                    "file_path": "/files/CaWXriBdi6vMEuWBwMuusG.jpg",
-                    "id": "CaWXriBdi6vMEuWBwMuusG"
+                    "file_path": "/files/huoZpcBBJsVUEmRG5Nq86g.jpg",
+                    "id": "huoZpcBBJsVUEmRG5Nq86g"
+                },
+                {
+                    "file_path": "/files/89sqWWsKgwpTmW5Eyb2hwk.jpg",
+                    "id": "89sqWWsKgwpTmW5Eyb2hwk"
                 }
             ]
         }
 
-        values = [200000, 250000, 300000, 350000, 400000]
+        values = [200000, 250000, 300000, 350000, 400000, 100000, 150000]
 
         files = data.pop('files')
         sizes = data.pop('sizes')
