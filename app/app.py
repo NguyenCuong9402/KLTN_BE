@@ -132,7 +132,7 @@ def register_blueprints(app):
     app.register_blueprint(api_v1.manage.user.api, url_prefix='/api/v1/manage/user')
     app.register_blueprint(api_v1.manage.shipper.api, url_prefix='/api/v1/manage/shipper')
     app.register_blueprint(api_v1.manage.region.api, url_prefix='/api/v1/manage/region')
-
+    app.register_blueprint(api_v1.manage.group.api, url_prefix='/api/v1/manage/group')
 
 
 
