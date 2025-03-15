@@ -194,16 +194,16 @@ class StaffValidation(BaseValidation):
     birthday = fields.String(required=True)
     detail_address = fields.String(required=True)
     address = fields.Dict(required=True)
-    join_date = fields.DateTime(required=True)
-    finish_date = fields.DateTime(required=True)
+    join_date = fields.String(required=True)
+    finish_date = fields.String(allow_none=True)
     tax_code = fields.String(required=True)
     identification_card = fields.String(required=True)
     number_dependent = fields.Integer(required=True)
     nationality = fields.String(required=True)
     ethnicity = fields.String(required=True)
-
+    social_insurance_number = fields.Integer(required=True)
     group_id = fields.String(required=True)
-    file_id = fields.String(required=True)
+    avatar_id = fields.String(allow_none=True)
 
 
 

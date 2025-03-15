@@ -33,7 +33,7 @@ def new():
         email = json_body.get('email')
         phone = json_body.get('phone')
         group_id = json_body.get('group_id')
-        file_id = json_body.get('file_id')
+        avatar_id = json_body.get('avatar_id', None)
 
         address = json_body.pop('address')
         if json_body.get('birthday', None):
@@ -66,20 +66,22 @@ def new():
         if check_group.key in KEY_GROUP_NOT_STAFF:
             return send_error(message='Chức vụ không phù hợp')
 
-        check_file = Files.query.filter_by(id=file_id).first()
-        if check_file is None:
-            return send_error(message='Vui lòng tải lại ảnh')
+        if avatar_id:
+            check_file = Files.query.filter_by(id=avatar_id).first()
+            if check_file is None:
+                return send_error(message='Vui lòng tải lại ảnh')
 
         json_body['password'] = generate_password()
 
         json_body['status'] = 0 # Khi nào User đăng nhập sẽ được kích hoạt
-        user = User(**json_body)
+        user = User(id=str(uuid()),**json_body)
 
         db.session.add(user)
-
         db.session.flush()
-
         db.session.commit()
+
+        #send mail
+
         return send_result(message='Thành công')
 
     except Exception as ex:

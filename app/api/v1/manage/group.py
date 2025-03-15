@@ -32,20 +32,12 @@ def get_item(group_id):
 @jwt_required
 def get_items():
     try:
-        try:
-            params = request.args.to_dict(flat=True)
-            params = QueryParamsAllSchema().load(params) if params else dict()
-        except ValidationError as err:
-            logger.error(json.dumps({
-                "message": err.messages,
-                "data": err.valid_data
-            }))
-            return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
-        page = params.get('page', 1)
-        page_size = params.get('page_size', 10)
-        order_by = params.get('order_by', 'created_date')
-        sort = params.get('sort', 'desc')
-        text_search = params.get('text_search', None)
+
+        page = request.args.get('page', 1, type=int)
+        page_size = request.args.get('page_size', 10, type=int)
+        order_by = request.args.get('order_by', 'name')
+        sort = request.args.get('sort', 'desc')
+        text_search = request.args.get('text_search', None)
 
         query = Group.query.filter(Group.key.notin_(KEY_GROUP_NOT_STAFF))
 
