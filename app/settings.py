@@ -46,11 +46,11 @@ class DevConfig(Config):
     REDIS_PASSWORD = 'cuong942002'
 
     # email config
-    ADMIN_EMAIL = os.environ.get('MAIL_USERNAME', "cuong09042002@gmail.com" )
+    ADMIN_EMAIL = os.environ.get('MAIL_USERNAME', "cn.company.enterprise@gmail.com" )
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 465
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', "cuong09042002@gmail.com" )
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', "cyeb cioq ynmo zirk" )
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', "cn.company.enterprise@gmail.com" )
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', "gmve beaj gvgc juqb" )
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_USERNAME', "cuong09042002@gmail.com" )
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True

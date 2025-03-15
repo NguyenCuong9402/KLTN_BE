@@ -1,6 +1,8 @@
+from app.settings import DevConfig
+
 TIME_FORMAT_LOG = "[%Y-%b-%d %H:%M]"
 
-ADMIN_EMAIL = 'cuong09042002@gmail.com'
+ADMIN_EMAIL = DevConfig.ADMIN_EMAIL
 
 ALLOWED_EXTENSIONS_IMG = ['.jpeg', '.jpg', '.png']
 
