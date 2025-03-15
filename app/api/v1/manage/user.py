@@ -41,7 +41,7 @@ def new():
 
 
 
-@api.route("/<user_id>", methods=["PUT"])
+@api.route("/active/<user_id>", methods=["PUT"])
 @jwt_required
 def active_user(user_id):
     try:
@@ -118,6 +118,23 @@ def get_staff():
         )
         return send_result(data=response_data)
     except Exception as ex:
+        return send_error(message=str(ex))
+
+
+@api.route("", methods=["DELETE"])
+@jwt_required
+def remove_item():
+    try:
+        body_request = request.get_json()
+        list_id = body_request.get('list_id', [])
+        if len(list_id) == 0:
+            return send_error(message='Chưa chọn item nào.')
+        User.query.filter(User.id.in_(list_id)).delete()
+        db.session.flush()
+        db.session.commit()
+        return send_result(message="Xóa sản phẩm thành công")
+    except Exception as ex:
+        db.session.rollback()
         return send_error(message=str(ex))
 
 
