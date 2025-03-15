@@ -72,7 +72,6 @@ class GroupSchema(Schema):
 class FileSchema(Schema):
     id = fields.String()
     file_path = fields.String()
-    index = fields.Integer()
     created_date = fields.Integer()
 
 class UserSchema(Schema):
@@ -85,10 +84,20 @@ class UserSchema(Schema):
     address = fields.Dict()
     detail_address = fields.String()
     group = fields.Nested(GroupSchema())
-    identification_card = fields.String()
-    tax_code = fields.String()
     avatar = fields.Nested(FileSchema())
     created_date = fields.Integer()
+
+
+    join_date = fields.Date()
+    finish_date = fields.Date()
+    identification_card = fields.String()
+    tax_code = fields.String()
+    social_insurance_number = fields.String()
+    number_dependent = fields.Integer()
+    ethnicity = fields.String()
+    nationality = fields.String()
+
+
 
 class AuthValidation(BaseValidation):
     password = fields.String(required=True,
@@ -177,19 +186,26 @@ class ProductValidation(BaseValidation):
     type_product_id = fields.String(required=True)
 
 class StaffValidation(BaseValidation):
-    email = fields.String(allow_none=True, validate=validate.Regexp(REGEX_EMAIL))
-    phone = fields.String(allow_none=True,
+    email = fields.String(required=True, validate=validate.Regexp(REGEX_EMAIL))
+    phone = fields.String(required=True,
                           validate=[validate.Length(min=10, max=20), validate.Regexp(REGEX_PHONE_NUMBER)])
-    full_name = fields.String(allow_none=True)
-    gender = fields.Boolean(allow_none=True)
-    birthday = fields.String(allow_none=True)
-    detail_address = fields.String(allow_none=True)
-    address = fields.Dict(allow_none=True)
-    join_date = fields.DateTime(allow_none=True)
-    finish_date = fields.DateTime(allow_none=True)
-    tax_code = fields.String(allow_none=True)
-    identification_card = fields.String(allow_none=True)
-    number_dependent = fields.Integer(allow_none=True)
+    full_name = fields.String(required=True)
+    gender = fields.Boolean(required=True)
+    birthday = fields.String(required=True)
+    detail_address = fields.String(required=True)
+    address = fields.Dict(required=True)
+    join_date = fields.DateTime(required=True)
+    finish_date = fields.DateTime(required=True)
+    tax_code = fields.String(required=True)
+    identification_card = fields.String(required=True)
+    number_dependent = fields.Integer(required=True)
+    nationality = fields.String(required=True)
+    ethnicity = fields.String(required=True)
+
+    group_id = fields.String(required=True)
+    file_id = fields.String(required=True)
+
+
 
 
 class PaymentValidation(BaseValidation):

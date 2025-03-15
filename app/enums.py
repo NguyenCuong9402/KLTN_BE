@@ -13,6 +13,8 @@ TYPE_REACTION = {
 
 ADMIN_KEY_GROUP = ['admin']
 
+KEY_GROUP_NOT_STAFF = ['admin', 'user']
+
 STATUS_ORDER = {
     'PENDING': 'pending',
     'DELIVERING': 'delivering',

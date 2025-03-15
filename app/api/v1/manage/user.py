@@ -6,12 +6,12 @@ from sqlalchemy import desc, asc
 from sqlalchemy_pagination import paginate
 from sqlalchemy import or_
 
-from app.enums import ADMIN_KEY_GROUP
+from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF
 from app.extensions import db, logger
 from flask_jwt_extended import jwt_required
-from app.api.helper import send_result, send_error
-from app.models import User, Group
-from app.utils import trim_dict, escape_wildcard, get_timestamp_now
+from app.api.helper import send_result, send_error, convert_to_datetime
+from app.models import User, Group, Files, Address
+from app.utils import trim_dict, escape_wildcard, get_timestamp_now, generate_password
 from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema
 
 api = Blueprint('manage/user', __name__)
@@ -28,6 +28,49 @@ def new():
         is_not_validate = validator_input.validate(json_body)
         if is_not_validate:
             return send_error(data=is_not_validate, message='Validate Error')
+
+
+        email = json_body.get('email')
+        phone = json_body.get('phone')
+        group_id = json_body.get('group_id')
+        file_id = json_body.get('file_id')
+
+        address = json_body.pop('address')
+        if json_body.get('birthday', None):
+            json_body['birthday'] = convert_to_datetime(json_body.get('birthday'))
+
+        for key, value in address.items():
+            if value is None or value.strip() == '':
+                return send_error(message='Vui lòng chọn địa chỉ')
+
+        address = Address.query.filter_by(province=address.get('province'), district=address.get('district'),
+                                          ward=address.get('ward')).first()
+        if address is None:
+            return send_error(message="Địa chỉ không hợp lệ.")
+
+        json_body['address_id'] = address.id
+
+
+        check_email = User.query.filter_by(email=email).first()
+        if check_email:
+            return send_error(message='Email đã được đăng ký')
+
+        check_phone = User.query.filter_by(phone=phone).first()
+        if check_phone:
+            return send_error(message='SĐT đã được đăng ký')
+
+        check_group = Group.query.filter_by(id=group_id).first()
+        if check_group is None:
+            return send_error(message='Chức vụ không tồn tại')
+
+        if check_group.key in KEY_GROUP_NOT_STAFF:
+            return send_error(message='Chức vụ không phù hợp')
+
+        check_file = Files.query.filter_by(id=file_id).first()
+        if check_file is None:
+            return send_error(message='Vui lòng tải lại ảnh')
+
+        json_body['password'] = generate_password()
 
 
         db.session.flush()

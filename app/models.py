@@ -31,6 +31,8 @@ class User(db.Model):
     gender = db.Column(db.Boolean, default=0)
     full_name = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"))
     avatar_id = db.Column(db.String(50), db.ForeignKey('files.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
+    avatar = db.relationship("Files", viewonly=True)
+
     birthday = db.Column(db.DATE, nullable=True)
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
     modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
@@ -53,7 +55,6 @@ class User(db.Model):
     number_dependent = db.Column(INTEGER(unsigned=True), default=0) # người phụ thuộc
     ethnicity = db.Column(db.String(100), nullable=True) # Dan toc
     nationality = db.Column(db.String(100), nullable=True) # Quoc Tich
-    avatar = db.relationship("Files", viewonly=True)
 
     attendances = db.relationship('Attendance', back_populates='user', cascade="all, delete-orphan")
     salaries = db.relationship('Salary', back_populates='user', cascade="all, delete-orphan")
@@ -256,12 +257,13 @@ class Files(db.Model):
 class FileLink(db.Model):
     __tablename__ = "file_link"
 
+    # TYPE_FILE_LINK = {
+    #     'USER': 'user',
+    #     'PRODUCT': 'product',
+    #     'ORDER_REPORT': 'order_report',
+    # }
     id = db.Column(db.String(50), primary_key=True)
     file_id = db.Column(db.String(50), db.ForeignKey('files.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
-    # user_id =  db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
-    # order_report_id = db.Column(db.String(50), db.ForeignKey('order_report.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
-    # product_id = db.Column(db.String(50), db.ForeignKey('product.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
-
     table_id = db.Column(db.String(50), nullable=True)
     table_type = db.Column(db.String(50), nullable=False)
 
