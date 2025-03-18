@@ -8,6 +8,7 @@ from sqlalchemy import asc, desc
 from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
+from app.enums import STATUS_ORDER
 from app.extensions import logger
 from app.models import db, Product, User, Orders
 from app.utils import escape_wildcard
@@ -84,3 +85,25 @@ def get_items():
         return send_result(data=response_data)
     except Exception as ex:
         return send_error(message=str(ex))
+
+
+@api.route('/<order_id>', methods=['PUT'])
+@jwt_required
+def complete_order(order_id):
+    try:
+        user_id = get_jwt_identity()
+        order = Orders.query.filter_by(id=order_id, user_id=user_id).first()
+        if order is None:
+            return send_error(message='Đơn hàng không tồn tại')
+
+        if order.status != STATUS_ORDER.get("DELIVERING"):
+            return send_error(message='Status không đúng')
+
+        order.status = STATUS_ORDER.get("RESOLVED")
+        db.session.flush()
+        db.session.commit()
+
+        return send_result(message=f"Xác nhận đã nhận đơn #{order_id}")
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex), code=442)
