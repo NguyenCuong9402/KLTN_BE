@@ -132,9 +132,10 @@ def get_staff():
         sort = params.get('sort', 'desc')
         text_search = params.get('text_search', None)
 
-        query = User.query.filter(
-                User.group.has(Group.is_staff == True),
-                User.group.has(Group.key.notin_(ADMIN_KEY_GROUP)))
+        query = User.query.join(Group).filter(
+            Group.is_staff == True,
+            Group.key.notin_(ADMIN_KEY_GROUP)
+        )
 
 
         if text_search:
@@ -150,7 +151,10 @@ def get_staff():
                 )
             )
 
-        column_sorted = getattr(User, order_by)
+        if order_by == "group_name":
+            column_sorted = Group.name  # Thay vì User.group.name
+        else:
+            column_sorted = getattr(User, order_by)
 
         query = query.order_by(desc(column_sorted)) if sort == "desc" else query.order_by(asc(column_sorted))
 

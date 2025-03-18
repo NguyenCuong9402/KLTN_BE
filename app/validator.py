@@ -432,6 +432,10 @@ class OrderItemSchema(Schema):
     count = fields.Float()
     quantity = fields.Integer()
 
+class PaymentOnlineSchema(Schema):
+    id = fields.String()
+    type = fields.String()
+
 class OrderSchema(Schema):
     id = fields.String()
     full_name = fields.String()
@@ -445,6 +449,9 @@ class OrderSchema(Schema):
     status = fields.String()
     items = fields.List(fields.Nested(OrderItemSchema))
     payment_status = fields.Boolean()
+    payment_online = fields.Nested(PaymentOnlineSchema)
+    is_paid = fields.Boolean()
+
 
 
 class CommunitySchema(Schema):

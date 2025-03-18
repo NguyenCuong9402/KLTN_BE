@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey, TEXT, asc, desc
 from datetime import datetime
 
-from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION
+from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION, STATUS_ORDER
 from app.extensions import db
 from app.utils import get_timestamp_now
 
@@ -608,9 +608,19 @@ class Orders(db.Model):
     status = db.Column(db.String(20), default='pending')
     items = db.relationship('OrderItems', lazy=True,
                             order_by="asc(OrderItems.created_date)")
-    payment_status = db.Column(db.Boolean, nullable=False, default=False)
-
+    payment_status = db.Column(db.Boolean, nullable=False, default=False) # Thanh toán online hay tiền mặt
     payment_online_id = db.Column(db.String(50), db.ForeignKey('payment_online.id', ondelete='SET NULL', onupdate='SET NULL'))
+
+    payment_online = db.relationship("PaymentOnline", viewonly=True)
+
+
+    @property
+    def is_paid(self):
+        if self.payment_status and self.payment_online_id:
+            return True
+        if self.status == STATUS_ORDER.get("RESOLVED"):
+            return True
+        return False
 
     @property
     def address(self):
