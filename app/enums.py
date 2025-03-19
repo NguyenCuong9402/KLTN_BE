@@ -1,4 +1,5 @@
 from app.settings import DevConfig
+from datetime import datetime, date, time
 
 TIME_FORMAT_LOG = "[%Y-%b-%d %H:%M]"
 
@@ -19,6 +20,12 @@ STATUS_ORDER = {
     'PENDING': 'pending',
     'DELIVERING': 'delivering',
     'RESOLVED': 'resolved',
+}
+
+ATTENDANCE = {
+    'CHECK_IN': time(8, 0),  # 8:00 AM
+    'LATE_CHECK_IN': time(13, 30),  # 1:30 PM
+    'CHECK_OUT': time(18, 0)
 }
 
 TYPE_PAYMENT_ONLINE = {

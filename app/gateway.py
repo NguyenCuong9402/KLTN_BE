@@ -34,7 +34,7 @@ def authorization_require():
             if permission_route in list_permission:
                 return fn(*args, **kwargs)
             else:
-                return send_error(message='You do not have permission')
+                return send_error(message='Tài khoản không có quyền')
 
         return decorator
 

@@ -66,8 +66,7 @@ def get_user_id_request():
     return user_id
 
 def send_result(data: any = None, message_id: str = '', message: str = "OK", code: int = 200,
-                status: str = 'success', show: bool = False, duration: int = 0,
-                val_error: dict = {}, is_dynamic: bool = False):
+                status: str = 'success', show: bool = False, duration: int = 0, is_dynamic: bool = False):
     """
     Args:
         data: simple result object like dict, string or list
@@ -92,18 +91,6 @@ def send_result(data: any = None, message_id: str = '', message: str = "OK", cod
         "duration": duration,
         "dynamic": is_dynamic
     }
-    message_obj: Message = Message.query.get(message_id)
-    if message_obj:
-        if message_dict['dynamic'] == 0:
-            message_dict['text'] = message_obj.message
-        else:
-            if not message == 'OK':
-                message_dict['text'] = message
-            else:
-                message_dict['text'] = message_obj.message.format(**val_error)
-        message_dict['status'] = message_obj.status
-        message_dict['show'] = message_obj.show
-        message_dict['duration'] = message_obj.duration
 
     res = {
         "code": code,
@@ -117,7 +104,7 @@ def send_result(data: any = None, message_id: str = '', message: str = "OK", cod
 
 def send_error(data: any = None, message_id: str = '', message: str = "Error", code: int = 400,
                status: str = 'error', show: bool = False, duration: int = 0,
-               val_error: dict = {}, is_dynamic: bool = False):
+               is_dynamic: bool = False):
     """
 
     :param data:
@@ -137,19 +124,6 @@ def send_error(data: any = None, message_id: str = '', message: str = "Error", c
         "duration": duration,
         "dynamic": is_dynamic
     }
-    message_obj = Message.query.get(message_id)
-    if message_obj:
-        if message_dict['dynamic'] == 0:
-            message_dict['text'] = message_obj.message
-        else:
-            if not message == 'Error':
-                message_dict['text'] = message
-            else:
-                message_dict['text'] = message_obj.message.format(**val_error)
-
-        message_dict['status'] = message_obj.status
-        message_dict['show'] = message_obj.show
-        message_dict['duration'] = message_obj.duration
 
     res = {
         "code": code,

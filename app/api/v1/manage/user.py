@@ -1,16 +1,18 @@
 import json
 from shortuuid import uuid
+from datetime import datetime, date, time
+
 from flask import Blueprint, request
 from marshmallow import ValidationError
 from sqlalchemy import desc, asc
 from sqlalchemy_pagination import paginate
 from sqlalchemy import or_
 
-from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF
+from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, ATTENDANCE
 from app.extensions import db, logger
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helper import send_result, send_error, convert_to_datetime
-from app.models import User, Group, Files, Address
+from app.models import User, Group, Files, Address, Attendance
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now, generate_password
 from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema
 
@@ -81,6 +83,88 @@ def new():
         db.session.commit()
 
         #send mail
+
+        return send_result(message='Thành công')
+
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex), code=442)
+
+
+@api.route('/check_in', methods=['POST'])
+@jwt_required
+def check_in():
+    try:
+        user_id = get_jwt_identity()
+
+        user = User.query.filter_by(id=user_id).first()
+
+        if user is None:
+            return send_error(message='Tài khoản không tồn tại ')
+
+        if user.group.key in KEY_GROUP_NOT_STAFF:
+            return send_error(message='Tài khoản không có quyền')
+
+        today = date.today()
+        now = datetime.now().time()
+
+        attendance = Attendance.query.filter_by(user_id=user_id, work_date=today).first()
+
+        # Nếu đã check-in trước đó
+        if attendance and attendance.check_in:
+            return send_result(message='Bạn đã check in rồi')
+
+        # Nếu chưa có bản ghi, tạo mới
+        if not attendance:
+            attendance = Attendance(user_id=user_id, work_date=today)
+
+        # Kiểm tra thời gian check-in hợp lệ
+        if now > ATTENDANCE['LATE_CHECK_IN']:
+            return send_error(message='Bạn đã quá giờ check in')
+
+        # Ghi nhận giờ check-in
+        attendance.check_in = now
+        db.session.add(attendance)
+        db.session.commit()
+
+        return send_result(message='Thành công')
+
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex))
+
+
+@api.route('/check_out', methods=['POST'])
+@jwt_required
+def check_in():
+    try:
+        user_id = get_jwt_identity()
+
+        user = User.query.filter_by(id=user_id).first()
+
+        if user is None:
+            return send_error(message='Tài khoản không tồn tại ')
+
+        if user.group.key in KEY_GROUP_NOT_STAFF:
+            return send_error(message='Tài khoản không có quyền')
+
+        today = date.today()
+        now = datetime.now().time()
+
+        attendance = Attendance.query.filter_by(user_id=user_id, work_date=today).first()
+
+        # Nếu chưa có bản ghi, tạo mới
+        if not attendance:
+            return send_error(message='Bạn chưa check in')
+
+        # Kiểm tra thời gian check-in hợp lệ
+        if now < ATTENDANCE['CHECK_OUT']:
+            return send_error(message='Chưa đến giờ check out')
+
+        # Ghi nhận giờ check-in
+        attendance.check_out = now
+        db.session.flush()
+        db.session.commit()
 
         return send_result(message='Thành công')
 

@@ -303,12 +303,12 @@ def expired_token_callback():
     The original ones may not be in a very pretty format (opinionated)
     :return:
     """
-    return send_error(code=401, message_id='SESSION_TOKEN_EXPIRED')
+    return send_error(code=401, message_id='SESSION_TOKEN_EXPIRED', message='Token hết hạn')
 
 
 @jwt.revoked_token_loader
 def revoked_token_callback():
-    return send_error(code=401, message_id='SESSION_TOKEN_EXPIRED')
+    return send_error(code=401, message_id='SESSION_TOKEN_EXPIRED', message='Token hết hạn')
 
 
 # @jwt.token_in_blacklist_loader
