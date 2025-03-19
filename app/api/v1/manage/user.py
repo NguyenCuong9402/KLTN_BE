@@ -136,7 +136,7 @@ def check_in():
 
 @api.route('/check_out', methods=['POST'])
 @jwt_required
-def check_in():
+def check_out():
     try:
         user_id = get_jwt_identity()
 

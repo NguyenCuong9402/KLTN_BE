@@ -1,13 +1,11 @@
 # coding: utf-8
-from email.policy import default
-
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey, TEXT, asc, desc
-from datetime import datetime
+from sqlalchemy.orm import validates
 
-from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION, STATUS_ORDER
+from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION, STATUS_ORDER, WORK_UNIT_CHOICE
 from app.extensions import db
 from app.utils import get_timestamp_now
 
@@ -85,6 +83,13 @@ class Attendance(db.Model):
     check_in = db.Column(db.Time, nullable=True)
     check_out = db.Column(db.Time, nullable=True)
 
+    work_unit = db.Column(db.String(30), nullable=False) # full / half
+
+    @validates('work_unit')
+    def validate_work_unit(self, key, value):
+        if value not in list(WORK_UNIT_CHOICE.values()):
+            raise ValueError("work_unit must be either 'full' or 'half'")
+        return value
 
 class Salary(db.Model):
     __tablename__ = 'salary'

@@ -28,6 +28,11 @@ ATTENDANCE = {
     'CHECK_OUT': time(18, 0)
 }
 
+WORK_UNIT_CHOICE = {
+    "HALF": "half",
+    "FULL": "full"
+}
+
 TYPE_PAYMENT_ONLINE = {
     'MOMO': 'momo',
     'ZALO': 'zalo',
