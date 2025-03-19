@@ -7,6 +7,7 @@ from marshmallow import ValidationError
 from sqlalchemy import desc, asc
 from sqlalchemy_pagination import paginate
 from sqlalchemy import or_
+from sqlalchemy import extract
 
 from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, ATTENDANCE
 from app.extensions import db, logger
@@ -14,7 +15,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helper import send_result, send_error, convert_to_datetime
 from app.models import User, Group, Files, Address, Attendance
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now, generate_password
-from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema
+from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema, AttendanceSchema
 
 api = Blueprint('manage/user', __name__)
 
@@ -172,7 +173,47 @@ def check_out():
         db.session.rollback()
         return send_error(message=str(ex), code=442)
 
+@api.route('/timekeeping', methods=['GET'])
+@jwt_required()
+def timekeeping():
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
 
+        if user is None:
+            return send_error(message="Tài khoản không tồn tại")
+
+        if user.group.key in KEY_GROUP_NOT_STAFF:
+            return send_error(message="Tài khoản không có quyền")
+
+        # Lấy tham số thời gian (mm-yyyy)
+        time_str = request.args.get("time", type=str)
+        if not time_str:
+            time_obj = datetime.now()
+        else:
+            try:
+                time_obj = datetime.strptime(time_str, "%m-%Y")
+            except ValueError:
+                return send_error(message="Định dạng time không hợp lệ, yêu cầu MM-YYYY")
+
+        # Lấy tháng và năm từ time_obj
+        month = time_obj.month
+        year = time_obj.year
+
+        # Truy vấn danh sách Attendance
+        attendances = Attendance.query.filter(
+            Attendance.user_id == user_id,
+            extract("month", Attendance.work_date) == month,
+            extract("year", Attendance.work_date) == year
+        ).order_by(Attendance.work_date.asc()).all()
+
+        # Serialize dữ liệu
+        result = AttendanceSchema(many=True).dump(attendances)
+
+        return send_result(data=result, message="Thành công")
+
+    except Exception as ex:
+        return send_error(message=str(ex))
 
 @api.route("/active/<user_id>", methods=["PUT"])
 @jwt_required

@@ -206,6 +206,14 @@ class StaffValidation(BaseValidation):
     avatar_id = fields.String(allow_none=True)
 
 
+class AttendanceSchema(Schema):
+    id = fields.String()
+    user = fields.Nested(UserSchema(only=("id","full_name")))
+    work_date = fields.Date()  # Ngày làm việc
+    check_in = fields.Time(format="%H:%M")  # Định dạng giờ check-in
+    check_out = fields.Time(format="%H:%M")  # Định dạng giờ check-out
+    work_unit = fields.String()
+
 
 
 class PaymentValidation(BaseValidation):
