@@ -174,7 +174,7 @@ def check_out():
         return send_error(message=str(ex), code=442)
 
 @api.route('/timekeeping', methods=['GET'])
-@jwt_required()
+@jwt_required
 def timekeeping():
     try:
         user_id = get_jwt_identity()
