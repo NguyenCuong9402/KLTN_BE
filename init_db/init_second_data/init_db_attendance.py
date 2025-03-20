@@ -45,7 +45,6 @@ class Worker:
                     work_date=start_date,
                     check_in=time(7, 0),
                     check_out=time(18, 30),
-                    work_unit=WORK_UNIT_CHOICE.get("FULL")
                 )
                 attendances.append(attendance)
 

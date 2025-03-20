@@ -83,14 +83,6 @@ class Attendance(db.Model):
     check_in = db.Column(db.Time, nullable=True)
     check_out = db.Column(db.Time, nullable=True)
 
-    work_unit = db.Column(db.String(30), nullable=False) # full / half
-
-    @validates('work_unit')
-    def validate_work_unit(self, key, value):
-        if value not in list(WORK_UNIT_CHOICE.values()):
-            raise ValueError("work_unit must be either 'full' or 'half'")
-        return value
-
 class Salary(db.Model):
     __tablename__ = 'salary'
 
