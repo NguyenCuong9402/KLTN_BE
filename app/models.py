@@ -1,11 +1,13 @@
 # coding: utf-8
+from datetime import time, timedelta
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey, TEXT, asc, desc
 from sqlalchemy.orm import validates
 
-from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION, STATUS_ORDER, WORK_UNIT_CHOICE
+from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION, STATUS_ORDER, WORK_UNIT_CHOICE, ATTENDANCE, \
+    ATTENDANCE_STATUS
 from app.extensions import db
 from app.utils import get_timestamp_now
 
@@ -82,6 +84,36 @@ class Attendance(db.Model):
     work_date = db.Column(db.Date, nullable=False)
     check_in = db.Column(db.Time, nullable=True)
     check_out = db.Column(db.Time, nullable=True)
+
+    @property
+    def work_unit(self):
+        if self.check_in and self.check_out:
+            # Điều kiện trả về "full"
+            if self.check_in <= (ATTENDANCE['CHECK_IN'] + timedelta(hours=1)) and self.check_out >= (
+                    ATTENDANCE['CHECK_OUT'] - timedelta(minutes=30)):
+                return "full"
+
+            # Điều kiện trả về "half"
+            elif self.check_in <= ATTENDANCE['LATE_CHECK_IN'] and self.check_out >= (
+                    ATTENDANCE['CHECK_OUT'] - timedelta(minutes=30)):
+                return "half"
+
+        return None
+
+    @property
+    def status(self):
+        if self.check_in and self.check_out:
+            return ATTENDANCE_STATUS['PRESENT']
+
+        if self.check_in and not self.check_out:
+            return ATTENDANCE_STATUS['MISSING']
+
+        if self.work_date.weekday() in [5, 6]:  # Thứ 7, Chủ nhật
+            if not self.check_in and not self.check_out:
+                return ATTENDANCE_STATUS['ACCEPTABLE_ABSENT']
+
+        return ATTENDANCE_STATUS['ABSENT']
+
 
 class Salary(db.Model):
     __tablename__ = 'salary'

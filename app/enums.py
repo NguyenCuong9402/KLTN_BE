@@ -22,6 +22,13 @@ STATUS_ORDER = {
     'RESOLVED': 'resolved',
 }
 
+ATTENDANCE_STATUS = {
+    'PRESENT': 'present',   # Đầy đủ
+    'MISSING': 'missing',   # Thiếu
+    'ABSENT': 'absent',       # Nghỉ
+    'ACCEPT_ABSENT': 'accept_absent'  # Nghỉ chấp nhận được (Thứ 7, Chủ nhật)
+}
+
 ATTENDANCE = {
     'CHECK_IN': time(8, 0),  # 8:00 AM
     'LATE_CHECK_IN': time(13, 30),  # 1:30 PM

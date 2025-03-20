@@ -213,7 +213,7 @@ class AttendanceSchema(Schema):
     check_in = fields.Time(format="%H:%M")  # Định dạng giờ check-in
     check_out = fields.Time(format="%H:%M")  # Định dạng giờ check-out
     work_unit = fields.String()
-
+    status = fields.String()
 
 
 class PaymentValidation(BaseValidation):
