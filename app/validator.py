@@ -208,7 +208,7 @@ class StaffValidation(BaseValidation):
 
 class AttendanceSchema(Schema):
     id = fields.String()
-    user = fields.Nested(UserSchema(only=("id","full_name", "join_date", "group")))
+    user = fields.Nested(UserSchema(only=("id","full_name")))
     work_date = fields.Date()  # Ngày làm việc
     check_in = fields.Time(format="%H:%M")  # Định dạng giờ check-in
     check_out = fields.Time(format="%H:%M")  # Định dạng giờ check-out
