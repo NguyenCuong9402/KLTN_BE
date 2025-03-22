@@ -24,35 +24,33 @@ class Worker:
 
     def init_attendance(self):
 
-        user = User.query.filter_by(email="cuongdirector@gmail.com").first()
+        users = User.query.filter(User.group.has(is_staff=True)).all()
 
-        if not user:
-            print("User không tồn tại")
-            return
+        for user in users:
 
-        start_date = date(2025, 1, 1)
-        end_date = date(2025, 3, 22)
-        delta = timedelta(days=1)
+            start_date = user.join_date
+            end_date = date(2025, 3, 22)
+            delta = timedelta(days=1)
 
-        attendances = []
-        while start_date <= end_date:
-            # Bỏ qua Thứ Bảy và Chủ Nhật (nếu chỉ muốn ngày làm việc)
-            if start_date.weekday() < 5:  # 0 = Thứ Hai, 4 = Thứ Sáu , 5:Thứ 7, 6 là chủ nhật
-                attendance = Attendance(
-                    id=str(uuid()),  # Tạo UUID ngẫu nhiên
-                    user_id=user.id,
-                    work_date=start_date,
-                    check_in=time(7, 0),
-                    check_out=time(18, 30),
-                )
-                attendances.append(attendance)
+            attendances = []
+            while start_date <= end_date:
+                # Bỏ qua Thứ Bảy và Chủ Nhật (nếu chỉ muốn ngày làm việc)
+                if start_date.weekday() < 5:  # 0 = Thứ Hai, 4 = Thứ Sáu , 5:Thứ 7, 6 là chủ nhật
+                    attendance = Attendance(
+                        id=str(uuid()),  # Tạo UUID ngẫu nhiên
+                        user_id=user.id,
+                        work_date=start_date,
+                        check_in=time(7, 0),
+                        check_out=time(18, 30),
+                    )
+                    attendances.append(attendance)
 
-            start_date += delta  # Tăng ngày lên 1
+                start_date += delta  # Tăng ngày lên 1
 
-        # Lưu vào database
-        db.session.bulk_save_objects(attendances)
-        db.session.commit()
-        print(f"Đã tạo {len(attendances)} bản ghi điểm danh cho {user.email}")
+            # Lưu vào database
+            db.session.bulk_save_objects(attendances)
+            db.session.commit()
+            print(f"Đã tạo {len(attendances)} bản ghi điểm danh cho {user.email}")
 
     def delete_attendance(self):
         Attendance.query.filter().delete()

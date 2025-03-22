@@ -67,6 +67,7 @@ class GroupSchema(Schema):
     name = fields.String()
     key = fields.String()
     is_staff = fields.Boolean()
+    is_super_admin = fields.Boolean()
 
 
 class FileSchema(Schema):
