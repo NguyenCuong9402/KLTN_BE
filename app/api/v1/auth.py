@@ -87,7 +87,15 @@ def login():
     data: dict = UserSchema().dump(user)
     data.setdefault('access_token', access_token)
     data.setdefault('refresh_token', refresh_token)
-    data.setdefault('param_router', GROUP_KEY_PARAM.get(user.group.key, '/'))
+
+    if user.group.is_super_admin:
+        data.setdefault('param_router', GROUP_KEY_PARAM.get("is_supper_admin", '/'))
+    elif user.group.is_staff:
+        data.setdefault('param_router', GROUP_KEY_PARAM.get("is_staff", '/'))
+
+    else:
+        data.setdefault('param_router', GROUP_KEY_PARAM.get("user", '/'))
+
 
     return send_result(data=data)
 

@@ -65,8 +65,9 @@ MAIL_VERITY_CODE = 'verity_register'
 GROUP_ADMIN_KEY = 'admin'
 GROUP_USER_KEY = 'user'
 GROUP_KEY_PARAM = {
+    "is_supper_admin": "/admin/dashboard",
+    "is_staff": "/timekeeping",
     "user": "/",
-    "admin":"/admin/dashboard"
 }
 
 MOMO_CONFIG = {
