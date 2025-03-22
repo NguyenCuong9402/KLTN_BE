@@ -35,7 +35,7 @@ ATTENDANCE = {
     'CHECK_OUT': time(18, 0)
 }
 
-WORK_UNIT_CHOICE = {
+WORK_UNIT_TYPE = {
     "HALF": "half",
     "FULL": "full"
 }

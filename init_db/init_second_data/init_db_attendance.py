@@ -6,7 +6,6 @@ from flask import Flask
 from datetime import datetime, date, timedelta, time
 
 from app.api.helper import send_result
-from app.enums import WORK_UNIT_CHOICE
 from app.models import Group, Community, Attendance, User
 from app.extensions import db
 from app.settings import DevConfig
@@ -32,7 +31,7 @@ class Worker:
             return
 
         start_date = date(2025, 1, 1)
-        end_date = date(2025, 3, 19)
+        end_date = date(2025, 3, 22)
         delta = timedelta(days=1)
 
         attendances = []

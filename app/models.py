@@ -1,13 +1,13 @@
 # coding: utf-8
-from datetime import time, timedelta
+from datetime import time, timedelta, datetime
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey, TEXT, asc, desc
 from sqlalchemy.orm import validates
 
-from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION, STATUS_ORDER, WORK_UNIT_CHOICE, ATTENDANCE, \
-    ATTENDANCE_STATUS
+from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION, STATUS_ORDER, ATTENDANCE, \
+    ATTENDANCE_STATUS, WORK_UNIT_TYPE
 from app.extensions import db
 from app.utils import get_timestamp_now
 
@@ -88,31 +88,44 @@ class Attendance(db.Model):
     @property
     def work_unit(self):
         if self.check_in and self.check_out:
-            # Điều kiện trả về "full"
-            if self.check_in <= (ATTENDANCE['CHECK_IN'] + timedelta(hours=1)) and self.check_out >= (
-                    ATTENDANCE['CHECK_OUT'] - timedelta(minutes=30)):
-                return "full"
+            # Chọn một ngày cơ sở (ví dụ: ngày hôm nay)
+            base_date = datetime.today().date()
+            # Chuyển đổi check_in và check_out của nhân viên thành datetime
+            check_in_dt = datetime.combine(base_date, self.check_in)
+            check_out_dt = datetime.combine(base_date, self.check_out)
+            # Chuyển đổi thời gian của ATTENDANCE thành datetime
+            check_in_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_IN'])
+            late_check_in_attendance = datetime.combine(base_date, ATTENDANCE['LATE_CHECK_IN'])
+            check_out_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_OUT'])
 
+            # Điều kiện trả về "full"
+            if check_in_dt <= (check_in_attendance + timedelta(hours=1)) and check_out_dt >= (
+                    check_out_attendance - timedelta(minutes=30)):
+                return WORK_UNIT_TYPE.get('FULL')
             # Điều kiện trả về "half"
-            elif self.check_in <= ATTENDANCE['LATE_CHECK_IN'] and self.check_out >= (
-                    ATTENDANCE['CHECK_OUT'] - timedelta(minutes=30)):
-                return "half"
+            elif check_in_dt <= late_check_in_attendance and check_out_dt >= (
+                    check_out_attendance - timedelta(minutes=30)):
+                return WORK_UNIT_TYPE.get('HALF')
 
         return None
 
     @property
     def status(self):
-        if self.check_in and self.check_out:
-            return ATTENDANCE_STATUS['PRESENT']
+        if self.check_in:
+            if self.check_out:
+                if self.work_unit == WORK_UNIT_TYPE.get('FULL'):
+                    return ATTENDANCE_STATUS['PRESENT']
+                elif self.work_unit == WORK_UNIT_TYPE.get('HALF', 'half'):
+                    return ATTENDANCE_STATUS['MISSING']
+                else:
+                    return ATTENDANCE_STATUS['ABSENT']
 
-        if self.check_in and not self.check_out:
-            return ATTENDANCE_STATUS['MISSING']
+            else:
+                return ATTENDANCE_STATUS['ABSENT']
 
-        if self.work_date.weekday() in [5, 6]:  # Thứ 7, Chủ nhật
-            if not self.check_in and not self.check_out:
-                return ATTENDANCE_STATUS['ACCEPTABLE_ABSENT']
+        return ATTENDANCE_STATUS['ACCEPTABLE_ABSENT']
 
-        return ATTENDANCE_STATUS['ABSENT']
+
 
 
 class Salary(db.Model):
