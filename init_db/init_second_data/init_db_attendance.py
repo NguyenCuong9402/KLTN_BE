@@ -1,5 +1,7 @@
 import json
 import os
+import random
+
 from shortuuid import uuid
 import pandas as pd
 from flask import Flask
@@ -22,6 +24,31 @@ class Worker:
         app_context = app.app_context()
         app_context.push()
 
+    def random_time(self, start: time, end: time) -> time:
+        start_seconds = start.hour * 3600 + start.minute * 60 + start.second
+        end_seconds = end.hour * 3600 + end.minute * 60 + end.second
+        random_seconds = random.randint(start_seconds, end_seconds)
+        hour = random_seconds // 3600
+        minute = (random_seconds % 3600) // 60
+        second = random_seconds % 60
+
+        return time(hour, minute, second)
+
+    def random_time_checkout(self, start: time, end: time) -> time:
+        start_seconds = start.hour * 3600 + start.minute * 60 + start.second
+        end_seconds = end.hour * 3600 + end.minute * 60 + end.second
+        random_seconds = random.randint(start_seconds, end_seconds)
+        hour = random_seconds // 3600
+        minute = (random_seconds % 3600) // 60
+        second = random_seconds % 60
+
+        # Xác suất 2/3 có check_out, 1/3 không có (None)
+        check_out = random.choice([time(hour, minute, second),
+                                   time(hour, minute, second),
+                                   None])
+
+        return check_out
+    
     def init_attendance(self):
 
         users = User.query.filter(User.group.has(is_staff=True)).all()
@@ -35,13 +62,13 @@ class Worker:
             attendances = []
             while start_date <= end_date:
                 # Bỏ qua Thứ Bảy và Chủ Nhật (nếu chỉ muốn ngày làm việc)
-                if start_date.weekday() < 5:  # 0 = Thứ Hai, 4 = Thứ Sáu , 5:Thứ 7, 6 là chủ nhật
+                if start_date.weekday() < 6:  # 0 = Thứ Hai, 4 = Thứ Sáu , 5:Thứ 7, 6 là chủ nhật
                     attendance = Attendance(
                         id=str(uuid()),  # Tạo UUID ngẫu nhiên
                         user_id=user.id,
                         work_date=start_date,
-                        check_in=time(7, 0),
-                        check_out=time(18, 30),
+                        check_in=self.random_time(time(7, 0), time(13, 30)),
+                        check_out=self.random_time_checkout(time(16, 0), time(19, 0))
                     )
                     attendances.append(attendance)
 

@@ -32,7 +32,7 @@ ATTENDANCE_STATUS = {
 ATTENDANCE = {
     'CHECK_IN': time(8, 0),  # 8:00 AM
     'LATE_CHECK_IN': time(13, 30),  # 1:30 PM
-    'CHECK_OUT': time(18, 0)
+    'CHECK_OUT': time(17, 30)
 }
 
 WORK_UNIT_TYPE = {

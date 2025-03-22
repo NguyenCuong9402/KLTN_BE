@@ -187,7 +187,7 @@ def timekeeping():
             return send_error(message="Tài khoản không có quyền")
 
         # Lấy tham số thời gian (mm-yyyy)
-        time_str = request.args.get("time", type=str)
+        time_str = request.args.get("time_str", type=str)
         if not time_str:
             time_obj = datetime.now()
         else:
