@@ -210,7 +210,12 @@ def timekeeping():
         # Serialize dữ liệu
         result = AttendanceSchema(many=True).dump(attendances)
 
-        return send_result(data=result, message="Thành công")
+        data = {
+            "result": result,
+            "join_date": str(user.join_date)
+        }
+
+        return send_result(data=data, message="Thành công")
 
     except Exception as ex:
         return send_error(message=str(ex))

@@ -50,8 +50,8 @@ class User(db.Model):
     identification_card = db.Column(db.String(100), nullable=True) # can cuoc cong dan
     tax_code = db.Column(db.String(100), nullable=True) # ma so thue
     social_insurance_number = db.Column(db.String(100), nullable=True) # Mã BHXH
-    join_date = db.Column(db.DateTime, nullable=True)
-    finish_date = db.Column(db.DateTime, nullable=True)
+    join_date = db.Column(db.DATE, nullable=True)
+    finish_date = db.Column(db.DATE, nullable=True)
     number_dependent = db.Column(INTEGER(unsigned=True), default=0) # người phụ thuộc
     ethnicity = db.Column(db.String(100), nullable=True) # Dan toc
     nationality = db.Column(db.String(100), nullable=True) # Quoc Tich
