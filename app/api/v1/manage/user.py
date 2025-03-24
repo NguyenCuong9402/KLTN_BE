@@ -117,11 +117,11 @@ def check_in():
 
         # Nếu chưa có bản ghi, tạo mới
         if not attendance:
-            attendance = Attendance(user_id=user_id, work_date=today)
+            attendance = Attendance(id=str(uuid()),user_id=user_id, work_date=today)
 
-        # Kiểm tra thời gian check-in hợp lệ
-        if now > ATTENDANCE['LATE_CHECK_IN']:
-            return send_error(message='Bạn đã quá giờ check in')
+        # # Kiểm tra thời gian check-in hợp lệ
+        # if now > ATTENDANCE['LATE_CHECK_IN']:
+        #     return send_error(message='Bạn đã quá giờ check in')
 
         # Ghi nhận giờ check-in
         attendance.check_in = now
