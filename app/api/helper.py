@@ -8,7 +8,7 @@ from flask_mail import Message as MessageMail
 from jinja2 import Template
 
 from app.extensions import logger, mail, red, db, mongo_db
-from app.models import User, GroupRole, RolePermission, Message, Role
+from app.models import User, GroupRole, RolePermission, Role
 from app.settings import DevConfig
 from app.utils import get_timestamp_now, no_accent_vietnamese
 

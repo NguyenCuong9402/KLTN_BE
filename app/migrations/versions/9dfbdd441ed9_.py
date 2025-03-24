@@ -81,17 +81,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_mail_created_date'), 'mail', ['created_date'], unique=False)
-    op.create_table('message',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('description', sa.String(length=255), nullable=True),
-    sa.Column('show', sa.Boolean(), nullable=True),
-    sa.Column('duration', sa.Integer(), nullable=True),
-    sa.Column('status', sa.String(length=20), nullable=True),
-    sa.Column('message', sa.String(length=500), nullable=False),
-    sa.Column('dynamic', sa.Boolean(), nullable=True),
-    sa.Column('object', sa.String(length=255), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('payment_online',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('order_payment_id', sa.String(length=100), nullable=False),
@@ -173,7 +162,6 @@ def upgrade():
     sa.Column('email', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
     sa.Column('phone', sa.String(length=50), nullable=True),
     sa.Column('password', sa.String(length=255), nullable=True),
-    sa.Column('password_hash', sa.String(length=255), nullable=True),
     sa.Column('gender', sa.Boolean(), nullable=True),
     sa.Column('full_name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
     sa.Column('avatar_id', sa.String(length=50), nullable=True),
@@ -290,20 +278,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_reaction_created_date'), 'reaction', ['created_date'], unique=False)
-    op.create_table('reviews',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('product_id', sa.String(length=50), nullable=True),
-    sa.Column('user_id', sa.String(length=50), nullable=True),
-    sa.Column('body', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
-    sa.Column('body_type', sa.String(length=20), nullable=True),
-    sa.Column('created_date', sa.Integer(), nullable=True),
-    sa.Column('modified_date', sa.Integer(), nullable=True),
-    sa.Column('review_id', sa.String(length=50), nullable=True),
-    sa.ForeignKeyConstraint(['product_id'], ['product.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['review_id'], ['reviews.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('role',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('key', sa.String(length=100), nullable=True),
@@ -348,17 +322,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_size_created_date'), 'size', ['created_date'], unique=False)
-    op.create_table('user_setting',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('display_column', sa.Text(), nullable=True),
-    sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.Column('user_id', sa.String(length=50), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_user_setting_created_date'), 'user_setting', ['created_date'], unique=False)
-    op.create_index(op.f('ix_user_setting_user_id'), 'user_setting', ['user_id'], unique=False)
     op.create_table('verity_code',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('code', sa.String(length=20), nullable=True),
@@ -507,16 +470,12 @@ def downgrade():
     op.drop_table('cart_items')
     op.drop_table('article_tag_product')
     op.drop_table('verity_code')
-    op.drop_index(op.f('ix_user_setting_user_id'), table_name='user_setting')
-    op.drop_index(op.f('ix_user_setting_created_date'), table_name='user_setting')
-    op.drop_table('user_setting')
     op.drop_index(op.f('ix_size_created_date'), table_name='size')
     op.drop_table('size')
     op.drop_table('session_order')
     op.drop_index(op.f('ix_salary_created_date'), table_name='salary')
     op.drop_table('salary')
     op.drop_table('role')
-    op.drop_table('reviews')
     op.drop_index(op.f('ix_reaction_created_date'), table_name='reaction')
     op.drop_table('reaction')
     op.drop_index(op.f('ix_orders_address_id'), table_name='orders')
@@ -541,7 +500,6 @@ def downgrade():
     op.drop_table('region')
     op.drop_table('permission')
     op.drop_table('payment_online')
-    op.drop_table('message')
     op.drop_index(op.f('ix_mail_created_date'), table_name='mail')
     op.drop_table('mail')
     op.drop_index(op.f('ix_group_created_date'), table_name='group')

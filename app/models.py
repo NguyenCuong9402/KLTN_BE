@@ -27,7 +27,6 @@ class User(db.Model):
     email = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"))
     phone = db.Column(db.String(50))
     password = db.Column(db.String(255))
-    password_hash = db.Column(db.String(255))
     gender = db.Column(db.Boolean, default=0)
     full_name = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"))
     avatar_id = db.Column(db.String(50), db.ForeignKey('files.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
@@ -313,16 +312,6 @@ class FileLink(db.Model):
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
 
 
-class UserSetting(db.Model):
-    __tablename__ = "user_setting"
-
-    id = db.Column(db.String(50), primary_key=True)
-    display_column = db.Column(db.Text())
-    created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)  # timestamp
-    modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())  # timestamp
-    user_id = db.Column(ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
-
-
 class Permission(db.Model):
     __tablename__ = 'permission'
 
@@ -412,19 +401,6 @@ class Group(db.Model):
         if self.created_user_fk:
             return User.query.filter_by(id=self.created_user_fk).first()
         return None
-
-
-class Message(db.Model):
-    __tablename__ = 'message'
-
-    id = db.Column(db.String(50), primary_key=True)
-    description = db.Column(db.String(255))
-    show = db.Column(db.Boolean, default=0)
-    duration = db.Column(db.Integer, default=5)
-    status = db.Column(db.String(20), default='success')
-    message = db.Column(db.String(500), nullable=False)
-    dynamic = db.Column(db.Boolean, default=0)
-    object = db.Column(db.String(255))
 
 
 class EmailTemplate(db.Model):
@@ -751,17 +727,3 @@ class OrderItems(db.Model):
     color = db.relationship("Color", viewonly=True)
     size = db.relationship("Size", viewonly=True)
 
-
-class Reviews(db.Model):
-    __tablename__ = 'reviews'
-    id = db.Column(db.String(50), primary_key=True)
-    product_id = db.Column(db.String(50), db.ForeignKey('product.id', ondelete='CASCADE', onupdate='CASCADE'),
-                           nullable=True)
-    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
-                        nullable=True)
-    body = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
-    body_type = db.Column(db.String(20), nullable=True)
-    created_date = db.Column(db.Integer, default=get_timestamp_now())
-    modified_date = db.Column(db.Integer, default=get_timestamp_now())
-    review_id = db.Column(db.String(50), db.ForeignKey('reviews.id', ondelete='CASCADE',
-                                                       onupdate='CASCADE'), nullable=True)
