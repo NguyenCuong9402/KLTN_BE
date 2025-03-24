@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: dc7775e63f4f
+Revision ID: ec4c164db6bd
 Revises: 
-Create Date: 2025-03-24 10:49:24.810720
+Create Date: 2025-03-24 11:16:54.498995
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'dc7775e63f4f'
+revision = 'ec4c164db6bd'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -87,8 +87,6 @@ def upgrade():
     sa.Column('key', sa.String(length=100), nullable=False),
     sa.Column('name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=False),
     sa.Column('resource', sa.String(length=500), nullable=False),
-    sa.Column('is_show', sa.Boolean(), nullable=True),
-    sa.Column('privacy', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('region',
@@ -96,6 +94,17 @@ def upgrade():
     sa.Column('name', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
     sa.Column('region', sa.JSON(), nullable=True),
     sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('role',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('key', sa.String(length=100), nullable=True),
+    sa.Column('name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=False),
+    sa.Column('description', sa.String(length=500), nullable=True),
+    sa.Column('type', sa.SmallInteger(), nullable=True),
+    sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
     )
     op.create_table('shipper',
     sa.Column('id', sa.String(length=50), nullable=False),
@@ -125,6 +134,16 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_file_link_created_date'), 'file_link', ['created_date'], unique=False)
+    op.create_table('group_role',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('role_id', sa.String(length=50), nullable=True),
+    sa.Column('group_id', sa.String(length=50), nullable=True),
+    sa.ForeignKeyConstraint(['group_id'], ['group.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['role_id'], ['role.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_group_role_group_id'), 'group_role', ['group_id'], unique=False)
+    op.create_index(op.f('ix_group_role_role_id'), 'group_role', ['role_id'], unique=False)
     op.create_table('price_ship',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('region_id', sa.String(length=50), nullable=True),
@@ -148,6 +167,16 @@ def upgrade():
     sa.ForeignKeyConstraint(['type_product_id'], ['type_product.id'], onupdate='CASCADE', ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('role_permission',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('role_id', sa.String(length=50), nullable=False),
+    sa.Column('permission_id', sa.String(length=50), nullable=False),
+    sa.ForeignKeyConstraint(['permission_id'], ['permission.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['role_id'], ['role.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_role_permission_permission_id'), 'role_permission', ['permission_id'], unique=False)
+    op.create_index(op.f('ix_role_permission_role_id'), 'role_permission', ['role_id'], unique=False)
     op.create_table('user',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
@@ -249,21 +278,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_reaction_created_date'), 'reaction', ['created_date'], unique=False)
-    op.create_table('role',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('key', sa.String(length=100), nullable=True),
-    sa.Column('name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=False),
-    sa.Column('description', sa.String(length=500), nullable=True),
-    sa.Column('type', sa.SmallInteger(), nullable=True),
-    sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.Column('last_modified_user', sa.String(length=50), nullable=True),
-    sa.Column('created_user', sa.String(length=50), nullable=True),
-    sa.ForeignKeyConstraint(['created_user'], ['user.id'], onupdate='CASCADE', ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['last_modified_user'], ['user.id'], onupdate='CASCADE', ondelete='SET NULL'),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
-    )
     op.create_table('salary',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('user_id', sa.String(length=50), nullable=False),
@@ -343,16 +357,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_comment_created_date'), 'comment', ['created_date'], unique=False)
-    op.create_table('group_role',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('role_id', sa.String(length=50), nullable=True),
-    sa.Column('group_id', sa.String(length=50), nullable=True),
-    sa.ForeignKeyConstraint(['group_id'], ['group.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['role_id'], ['role.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_group_role_group_id'), 'group_role', ['group_id'], unique=False)
-    op.create_index(op.f('ix_group_role_role_id'), 'group_role', ['role_id'], unique=False)
     op.create_table('payment_online',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('order_payment_id', sa.String(length=100), nullable=False),
@@ -365,16 +369,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['session_order_id'], ['session_order.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('role_permission',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('role_id', sa.String(length=50), nullable=False),
-    sa.Column('permission_id', sa.String(length=50), nullable=False),
-    sa.ForeignKeyConstraint(['permission_id'], ['permission.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['role_id'], ['role.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_role_permission_permission_id'), 'role_permission', ['permission_id'], unique=False)
-    op.create_index(op.f('ix_role_permission_role_id'), 'role_permission', ['role_id'], unique=False)
     op.create_table('salary_report',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('user_id', sa.String(length=50), nullable=False),
@@ -468,13 +462,7 @@ def downgrade():
     op.drop_table('orders')
     op.drop_index(op.f('ix_salary_report_created_date'), table_name='salary_report')
     op.drop_table('salary_report')
-    op.drop_index(op.f('ix_role_permission_role_id'), table_name='role_permission')
-    op.drop_index(op.f('ix_role_permission_permission_id'), table_name='role_permission')
-    op.drop_table('role_permission')
     op.drop_table('payment_online')
-    op.drop_index(op.f('ix_group_role_role_id'), table_name='group_role')
-    op.drop_index(op.f('ix_group_role_group_id'), table_name='group_role')
-    op.drop_table('group_role')
     op.drop_index(op.f('ix_comment_created_date'), table_name='comment')
     op.drop_table('comment')
     op.drop_table('cart_items')
@@ -485,7 +473,6 @@ def downgrade():
     op.drop_table('session_order')
     op.drop_index(op.f('ix_salary_created_date'), table_name='salary')
     op.drop_table('salary')
-    op.drop_table('role')
     op.drop_index(op.f('ix_reaction_created_date'), table_name='reaction')
     op.drop_table('reaction')
     op.drop_index(op.f('ix_document_storage_created_date'), table_name='document_storage')
@@ -498,13 +485,20 @@ def downgrade():
     op.drop_table('address_order')
     op.drop_index(op.f('ix_user_created_date'), table_name='user')
     op.drop_table('user')
+    op.drop_index(op.f('ix_role_permission_role_id'), table_name='role_permission')
+    op.drop_index(op.f('ix_role_permission_permission_id'), table_name='role_permission')
+    op.drop_table('role_permission')
     op.drop_table('product')
     op.drop_table('price_ship')
+    op.drop_index(op.f('ix_group_role_role_id'), table_name='group_role')
+    op.drop_index(op.f('ix_group_role_group_id'), table_name='group_role')
+    op.drop_table('group_role')
     op.drop_index(op.f('ix_file_link_created_date'), table_name='file_link')
     op.drop_table('file_link')
     op.drop_index(op.f('ix_type_product_created_date'), table_name='type_product')
     op.drop_table('type_product')
     op.drop_table('shipper')
+    op.drop_table('role')
     op.drop_table('region')
     op.drop_table('permission')
     op.drop_index(op.f('ix_mail_created_date'), table_name='mail')

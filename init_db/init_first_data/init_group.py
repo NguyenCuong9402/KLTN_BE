@@ -49,7 +49,7 @@ class Worker:
                 'key': 'admin',
                 'name': 'admin',
                 'description': 'admin',
-                'is_staff': True,
+                'is_super_admin': True,
 
             },
             {
@@ -126,7 +126,7 @@ class Worker:
 
         for role in roles:
             for user in users:
-                join_date = get_datetime_now()
+                join_date = datetime.datetime(2024, 1, 1)
                 finish_date = join_date + datetime.timedelta(days=3 * 365)  # +3 năm
 
                 list_user.append({
