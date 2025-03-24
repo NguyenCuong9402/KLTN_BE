@@ -113,7 +113,7 @@ def check_in():
 
         # Nếu đã check-in trước đó
         if attendance and attendance.check_in:
-            return send_result(message='Bạn đã check in rồi')
+            return send_result(message=f'Bạn đã check in {attendance.check_in} rồi')
 
         # Nếu chưa có bản ghi, tạo mới
         if not attendance:
@@ -128,7 +128,9 @@ def check_in():
         db.session.add(attendance)
         db.session.commit()
 
-        return send_result(message='Thành công')
+        data = AttendanceSchema().dump(attendance)
+
+        return send_result(data=data, message=f'Check in thành công lúc {attendance.check_in}')
 
     except Exception as ex:
         db.session.rollback()
@@ -166,8 +168,9 @@ def check_out():
         attendance.check_out = now
         db.session.flush()
         db.session.commit()
+        data = AttendanceSchema().dump(attendance)
 
-        return send_result(message='Thành công')
+        return send_result(data=data, message='Thành công')
 
     except Exception as ex:
         db.session.rollback()
@@ -210,11 +213,37 @@ def timekeeping():
         # Serialize dữ liệu
         result = AttendanceSchema(many=True).dump(attendances)
 
+        return send_result(data=result, message="Thành công")
+
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+@api.route('/time_check', methods=['GET'])
+@jwt_required
+def time_check():
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+
+        if user is None:
+            return send_error(message="Tài khoản không tồn tại")
+
+        if user.group.key in KEY_GROUP_NOT_STAFF:
+            return send_error(message="Tài khoản không có quyền")
+
+        # Truy vấn danh sách Attendance
+        attendances = Attendance.query.filter(
+            Attendance.user_id == user_id,
+            Attendance.work_date == date.today()
+        ).first()
+
+        # Serialize dữ liệu
+        result = AttendanceSchema().dump(attendances)
+
         data = {
             "result": result,
             "join_date": str(user.join_date)
         }
-
         return send_result(data=data, message="Thành công")
 
     except Exception as ex:
