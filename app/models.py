@@ -319,9 +319,6 @@ class Permission(db.Model):
     key = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=False, unique=False)
     resource = db.Column(db.String(500), nullable=False, unique=False)
-    is_show = db.Column(db.Boolean, default=1)
-    privacy = db.Column(db.Boolean, default=0)
-
 
 class Role(db.Model):
     __tablename__ = 'role'
@@ -333,21 +330,8 @@ class Role(db.Model):
     type = db.Column(db.SmallInteger, default=1)  # tổng của 4 loại quyền sau 1: Xem, 2: Thêm, 4: Sửa, 8: Xóa
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
     modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
-    last_modified_user = db.Column(ForeignKey('user.id', ondelete='SET NULL', onupdate='CASCADE'))
-    created_user = db.Column(ForeignKey('user.id', ondelete='SET NULL', onupdate='CASCADE'))
-
-    modified_user_data = relationship('User', foreign_keys="Role.last_modified_user")
-    created_user_data = relationship('User', foreign_keys="Role.created_user")
     group_role = relationship('GroupRole', primaryjoin='GroupRole.role_id == Role.id', viewonly=True)
     role_permission = relationship('RolePermission', primaryjoin='RolePermission.role_id == Role.id', viewonly=True)
-
-    @classmethod
-    def get_by_id(cls, _id):
-        return cls.query.get(_id)
-
-    @property
-    def number_of_group_role(self):
-        return len(self.group_role)
 
 
 class RolePermission(db.Model):
@@ -395,12 +379,6 @@ class Group(db.Model):
     @property
     def roles(self):
         return [gr.role for gr in self.group_roles]
-
-    @property
-    def created_user(self):
-        if self.created_user_fk:
-            return User.query.filter_by(id=self.created_user_fk).first()
-        return None
 
 
 class EmailTemplate(db.Model):
@@ -667,10 +645,6 @@ class PaymentOnline(db.Model):
         db.ForeignKey('session_order.id', ondelete='CASCADE', onupdate='CASCADE'),
         nullable=True  # Cho phép NULL
     )
-
-    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
-                        nullable=True)
-
 
     result_payment = db.Column(db.JSON, nullable=True, default=None)
     status_payment = db.Column(db.Boolean, nullable=False, default=False)

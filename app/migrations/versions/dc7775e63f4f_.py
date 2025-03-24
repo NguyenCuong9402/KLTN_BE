@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 9dfbdd441ed9
+Revision ID: dc7775e63f4f
 Revises: 
-Create Date: 2025-02-26 14:25:57.505210
+Create Date: 2025-03-24 10:49:24.810720
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = '9dfbdd441ed9'
+revision = 'dc7775e63f4f'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -64,6 +64,7 @@ def upgrade():
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('key', sa.String(length=100), nullable=True),
     sa.Column('is_staff', sa.Boolean(), nullable=False),
+    sa.Column('is_super_admin', sa.Boolean(), nullable=False),
     sa.Column('name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=False),
     sa.Column('description', sa.String(length=500, collation='utf8mb4_vietnamese_ci'), nullable=True),
     sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=False),
@@ -81,16 +82,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_mail_created_date'), 'mail', ['created_date'], unique=False)
-    op.create_table('payment_online',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('order_payment_id', sa.String(length=100), nullable=False),
-    sa.Column('request_payment_id', sa.String(length=50), nullable=False),
-    sa.Column('result_payment', sa.JSON(), nullable=True),
-    sa.Column('status_payment', sa.Boolean(), nullable=False),
-    sa.Column('type', sa.String(length=20), nullable=True),
-    sa.Column('created_date', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('permission',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('key', sa.String(length=100), nullable=False),
@@ -177,9 +168,12 @@ def upgrade():
     sa.Column('group_id', sa.String(length=50), nullable=True),
     sa.Column('identification_card', sa.String(length=100), nullable=True),
     sa.Column('tax_code', sa.String(length=100), nullable=True),
-    sa.Column('join_date', sa.sa.DATE(), nullable=True),
-    sa.Column('finish_date', sa.sa.DATE(), nullable=True),
+    sa.Column('social_insurance_number', sa.String(length=100), nullable=True),
+    sa.Column('join_date', sa.DATE(), nullable=True),
+    sa.Column('finish_date', sa.DATE(), nullable=True),
     sa.Column('number_dependent', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.Column('ethnicity', sa.String(length=100), nullable=True),
+    sa.Column('nationality', sa.String(length=100), nullable=True),
     sa.ForeignKeyConstraint(['address_id'], ['address.id'], onupdate='CASCADE', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['avatar_id'], ['files.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['group_id'], ['group.id'], onupdate='CASCADE', ondelete='SET NULL'),
@@ -243,29 +237,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_document_storage_created_date'), 'document_storage', ['created_date'], unique=False)
-    op.create_table('orders',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('user_id', sa.String(length=50), nullable=True),
-    sa.Column('full_name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
-    sa.Column('phone_number', sa.String(length=100), nullable=True),
-    sa.Column('address_id', sa.String(length=50), nullable=True),
-    sa.Column('detail_address', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
-    sa.Column('count', sa.BigInteger(), nullable=True),
-    sa.Column('created_date', sa.Integer(), nullable=True),
-    sa.Column('modified_date', sa.Integer(), nullable=True),
-    sa.Column('message', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
-    sa.Column('ship_id', sa.String(length=50), nullable=True),
-    sa.Column('price_ship', sa.Integer(), nullable=True),
-    sa.Column('status', sa.String(length=20), nullable=True),
-    sa.Column('payment_status', sa.Boolean(), nullable=False),
-    sa.Column('payment_online_id', sa.String(length=50), nullable=True),
-    sa.ForeignKeyConstraint(['address_id'], ['address.id'], onupdate='CASCADE', ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['payment_online_id'], ['payment_online.id'], onupdate='SET NULL', ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['ship_id'], ['shipper.id'], onupdate='SET NULL', ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_orders_address_id'), 'orders', ['address_id'], unique=False)
     op.create_table('reaction',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('user_id', sa.String(length=50), nullable=True),
@@ -309,6 +280,7 @@ def upgrade():
     sa.Column('created_date', sa.Integer(), nullable=True),
     sa.Column('user_id', sa.String(length=50), nullable=True),
     sa.Column('duration', sa.Integer(), nullable=True),
+    sa.Column('is_delete', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -381,34 +353,16 @@ def upgrade():
     )
     op.create_index(op.f('ix_group_role_group_id'), 'group_role', ['group_id'], unique=False)
     op.create_index(op.f('ix_group_role_role_id'), 'group_role', ['role_id'], unique=False)
-    op.create_table('order_items',
+    op.create_table('payment_online',
     sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('product_id', sa.String(length=50), nullable=True),
-    sa.Column('order_id', sa.String(length=50), nullable=False),
-    sa.Column('quantity', sa.Integer(), nullable=True),
-    sa.Column('count', sa.BigInteger(), nullable=True),
-    sa.Column('size_id', sa.String(length=50), nullable=True),
-    sa.Column('color_id', sa.String(length=50), nullable=True),
+    sa.Column('order_payment_id', sa.String(length=100), nullable=False),
+    sa.Column('request_payment_id', sa.String(length=50), nullable=False),
+    sa.Column('session_order_id', sa.String(length=50), nullable=True),
+    sa.Column('result_payment', sa.JSON(), nullable=True),
+    sa.Column('status_payment', sa.Boolean(), nullable=False),
+    sa.Column('type', sa.String(length=20), nullable=True),
     sa.Column('created_date', sa.Integer(), nullable=True),
-    sa.Column('modified_date', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['color_id'], ['color.id'], onupdate='CASCADE', ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['order_id'], ['orders.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['product_id'], ['product.id'], onupdate='SET NULL', ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['size_id'], ['size.id'], onupdate='CASCADE', ondelete='SET NULL'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('order_report',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('user_id', sa.String(length=50), nullable=True),
-    sa.Column('reason', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
-    sa.Column('order_id', sa.String(length=50), nullable=True),
-    sa.Column('message', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
-    sa.Column('status', sa.String(length=20), nullable=True),
-    sa.Column('result', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
-    sa.Column('created_date', sa.Integer(), nullable=True),
-    sa.Column('result_date', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['order_id'], ['orders.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['session_order_id'], ['session_order.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('role_permission',
@@ -440,6 +394,29 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_salary_report_created_date'), 'salary_report', ['created_date'], unique=False)
+    op.create_table('orders',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('user_id', sa.String(length=50), nullable=True),
+    sa.Column('full_name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
+    sa.Column('phone_number', sa.String(length=100), nullable=True),
+    sa.Column('address_id', sa.String(length=50), nullable=True),
+    sa.Column('detail_address', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
+    sa.Column('count', sa.BigInteger(), nullable=True),
+    sa.Column('created_date', sa.Integer(), nullable=True),
+    sa.Column('modified_date', sa.Integer(), nullable=True),
+    sa.Column('message', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
+    sa.Column('ship_id', sa.String(length=50), nullable=True),
+    sa.Column('price_ship', sa.Integer(), nullable=True),
+    sa.Column('status', sa.String(length=20), nullable=True),
+    sa.Column('payment_status', sa.Boolean(), nullable=False),
+    sa.Column('payment_online_id', sa.String(length=50), nullable=True),
+    sa.ForeignKeyConstraint(['address_id'], ['address.id'], onupdate='CASCADE', ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['payment_online_id'], ['payment_online.id'], onupdate='SET NULL', ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['ship_id'], ['shipper.id'], onupdate='SET NULL', ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_orders_address_id'), 'orders', ['address_id'], unique=False)
     op.create_table('session_order_cart_items',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('index', sa.Integer(), nullable=False),
@@ -449,19 +426,52 @@ def upgrade():
     sa.ForeignKeyConstraint(['session_order_id'], ['session_order.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('order_items',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('product_id', sa.String(length=50), nullable=True),
+    sa.Column('order_id', sa.String(length=50), nullable=False),
+    sa.Column('quantity', sa.Integer(), nullable=True),
+    sa.Column('count', sa.BigInteger(), nullable=True),
+    sa.Column('size_id', sa.String(length=50), nullable=True),
+    sa.Column('color_id', sa.String(length=50), nullable=True),
+    sa.Column('created_date', sa.Integer(), nullable=True),
+    sa.Column('modified_date', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['color_id'], ['color.id'], onupdate='CASCADE', ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['order_id'], ['orders.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['product_id'], ['product.id'], onupdate='SET NULL', ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['size_id'], ['size.id'], onupdate='CASCADE', ondelete='SET NULL'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('order_report',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('user_id', sa.String(length=50), nullable=True),
+    sa.Column('reason', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
+    sa.Column('order_id', sa.String(length=50), nullable=True),
+    sa.Column('message', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
+    sa.Column('status', sa.String(length=20), nullable=True),
+    sa.Column('result', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
+    sa.Column('created_date', sa.Integer(), nullable=True),
+    sa.Column('result_date', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['order_id'], ['orders.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_table('order_report')
+    op.drop_table('order_items')
     op.drop_table('session_order_cart_items')
+    op.drop_index(op.f('ix_orders_address_id'), table_name='orders')
+    op.drop_table('orders')
     op.drop_index(op.f('ix_salary_report_created_date'), table_name='salary_report')
     op.drop_table('salary_report')
     op.drop_index(op.f('ix_role_permission_role_id'), table_name='role_permission')
     op.drop_index(op.f('ix_role_permission_permission_id'), table_name='role_permission')
     op.drop_table('role_permission')
-    op.drop_table('order_report')
-    op.drop_table('order_items')
+    op.drop_table('payment_online')
     op.drop_index(op.f('ix_group_role_role_id'), table_name='group_role')
     op.drop_index(op.f('ix_group_role_group_id'), table_name='group_role')
     op.drop_table('group_role')
@@ -478,8 +488,6 @@ def downgrade():
     op.drop_table('role')
     op.drop_index(op.f('ix_reaction_created_date'), table_name='reaction')
     op.drop_table('reaction')
-    op.drop_index(op.f('ix_orders_address_id'), table_name='orders')
-    op.drop_table('orders')
     op.drop_index(op.f('ix_document_storage_created_date'), table_name='document_storage')
     op.drop_table('document_storage')
     op.drop_index(op.f('ix_color_created_date'), table_name='color')
@@ -499,7 +507,6 @@ def downgrade():
     op.drop_table('shipper')
     op.drop_table('region')
     op.drop_table('permission')
-    op.drop_table('payment_online')
     op.drop_index(op.f('ix_mail_created_date'), table_name='mail')
     op.drop_table('mail')
     op.drop_index(op.f('ix_group_created_date'), table_name='group')

@@ -148,8 +148,7 @@ def check_payment_session(session_id):
         user = User.query.filter_by(id=user_id).first()
         if user is None:
             return send_error(message='Người dùng không hợp lệ.')
-        session_order = SessionOrder.query.filter(SessionOrder.user_id == user_id,
-                                                  SessionOrder.id == session_id).first()
+        session_order = SessionOrder.query.filter(SessionOrder.id == session_id).first()
         if session_order is None:
             return send_error(message='Phiên thanh toán không tồn tại')
 
@@ -170,7 +169,7 @@ def create_payment(session_id):
         user = User.query.filter_by(id=user_id).first()
         if user is None:
             return send_error(message='Người dùng không hợp lệ.')
-        session_order = SessionOrder.query.filter(SessionOrder.user_id == user_id, SessionOrder.id == session_id,
+        session_order = SessionOrder.query.filter( SessionOrder.id == session_id,
                                                         SessionOrder.duration > get_timestamp_now(),
                                                         SessionOrder.is_delete == False).first()
         if session_order is None:
@@ -296,7 +295,7 @@ def create_payment(session_id):
                 data_result['pay_url'] = result.get("order_url")
 
         payment_online = PaymentOnline(id=payment_online_id, session_order_id=session_id,
-                                       type=payment_type, user_id=user_id,
+                                       type=payment_type,
                                        order_payment_id=order_payment_id, request_payment_id=request_id)
         db.session.add(payment_online)
         db.session.flush()
