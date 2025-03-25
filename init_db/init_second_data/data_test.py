@@ -1,5 +1,7 @@
 import json
 import os
+import shutil
+
 from shortuuid import uuid
 import random
 import pandas as pd
@@ -7,7 +9,7 @@ from flask import Flask
 from sqlalchemy.sql.expression import func
 
 from app.enums import TYPE_FILE_LINK
-from app.models import Product, Size, Color, FileLink, TypeProduct
+from app.models import Product, Size, Color, FileLink, TypeProduct, Files
 from app.extensions import db
 from app.settings import DevConfig
 from app.utils import get_timestamp_now
@@ -24,14 +26,57 @@ class Worker:
         app_context = app.app_context()
         app_context.push()
 
+    def init_file_product(self):
+        Files.query.filter().delete()
+        Product.query.filter().delete()
+        db.session.commit()
+
     def add_db_product(self):
         ### Hướng dâẫn tạo data test. Upload file từ màn create,
         # xong thay data file đc trả ra từ api vô. Xong chạy file này là oke
+
+        FOLDER_SRC = r"E:/KTLN/BE/app/files/anh_mau/"  # Thư mục nguồn
+        FOLDER_DEST = r"E:/KTLN/BE/app/files/image"  # Thư mục đích
+
+
+        FOLDER_DEST_SAVE_DB = "/files/image/"
+
+        if not os.path.exists(FOLDER_DEST):
+            os.makedirs(FOLDER_DEST)
+
+        if not os.path.exists(FOLDER_SRC):
+            print('Thư mục không tồn tại')
+            return "Thư mục không tồn tại"
+
+        result = []
+
+        for file_name in os.listdir(FOLDER_SRC):
+            file_id, file_extension = os.path.splitext(file_name)  # Lấy tên file & đuôi file
+
+            # Kiểm tra file đã tồn tại trong DB chưa
+            existing_file = Files.query.filter_by(id=file_id).first()
+            if not existing_file:
+                # Tạo UUID mới làm tên file an toàn
+                new_file_path = os.path.join(FOLDER_DEST, file_name)
+
+                # Copy file từ `anh_mau` sang `app/files/`
+                shutil.copy(os.path.join(FOLDER_SRC, file_name), new_file_path)
+
+                # Lưu vào DB
+                new_file = Files(
+                    id=file_id,
+                    file_path=FOLDER_DEST_SAVE_DB + file_name,
+                    created_date=get_timestamp_now()
+                )
+                db.session.add(new_file)
+
+                # Thêm vào danh sách kết quả
+                result.append({"id": file_id, "file_path": new_file_path})
+
+        db.session.commit()
+
         data = {
-            "name": "Áo phông",
             "describe": "Áo đẹp giá tốt",
-            "discount_from_date": 1735365861,
-            "discount_to_date": 1735521538,
             "sizes": [
                 "S",
                 "M",
@@ -40,22 +85,10 @@ class Worker:
             ],
             "colors": [
                 "Xanh",
+                "Đen"
                 "Trắng"
             ],
-            "files": [
-                {
-                    "file_path": "/files/mRwRbsfXbnNmBXkhHTKgwJ.png",
-                    "id": "mRwRbsfXbnNmBXkhHTKgwJ"
-                },
-                {
-                    "file_path": "/files/PJdeXmpD8958ZdoxUjsRED.png",
-                    "id": "PJdeXmpD8958ZdoxUjsRED"
-                },
-                {
-                    "file_path": "/files/24jRs3n4FPHxK7qLjtiSbA.jpg",
-                    "id": "24jRs3n4FPHxK7qLjtiSbA"
-                }
-            ]
+            "files": result
         }
 
         values = [200000, 250000, 300000, 350000, 400000, 100000, 150000]
@@ -63,14 +96,13 @@ class Worker:
         files = data.pop('files')
         sizes = data.pop('sizes')
         colors = data.pop('colors')
-        name = data.pop('name')
 
 
         for i in range(1, 40):
             random_type = TypeProduct.query.filter(TypeProduct.type_id.isnot(None)).order_by(func.random()).first()
 
             product = Product(**data, type_product_id=random_type.id, id=str(uuid()), original_price=random.choice(values),
-                              name=f'Sản phẩm {name} {i}', discount=random.randint(1, 20),
+                              name=f'Sản phẩm {random_type.name} {i}', discount=random.randint(1, 20),
                               created_date=get_timestamp_now() + i)
             db.session.add(product)
             db.session.flush()
@@ -94,5 +126,6 @@ class Worker:
 if __name__ == '__main__':
     print("=" * 10, f"Starting init Address to the database on the uri: {CONFIG.SQLALCHEMY_DATABASE_URI}", "=" * 10)
     worker = Worker()
+    worker.init_file_product()
     worker.add_db_product()
     print("=" * 50, "Add address Success", "=" * 50)

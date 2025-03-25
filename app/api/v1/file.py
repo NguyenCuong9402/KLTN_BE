@@ -17,7 +17,7 @@ api = Blueprint('file', __name__)
 
 FILE_ORIGIN = "app"
 
-FOLDER = "/files/"
+FOLDER = "/files/image_project/"
 
 @api.route('upload_file', methods=['POST'])
 def upload_one_file():
