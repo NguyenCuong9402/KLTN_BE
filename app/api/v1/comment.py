@@ -66,7 +66,7 @@ def remove_comment(comment_id):
         comment.delete()
         db.session.flush()
         db.session.commit()
-        return send_result(message="Xóa bài viết thành công")
+        return send_result(message="Xóa bình luận thành công")
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))
