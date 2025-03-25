@@ -27,7 +27,7 @@ class User(db.Model):
     email = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"))
     phone = db.Column(db.String(50))
     password = db.Column(db.String(255))
-    gender = db.Column(db.Boolean, default=0)
+    gender = db.Column(db.Boolean, default=0) #0: Nữ, # 1: Nam
     full_name = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"))
     avatar_id = db.Column(db.String(50), db.ForeignKey('files.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
     avatar = db.relationship("Files", viewonly=True)

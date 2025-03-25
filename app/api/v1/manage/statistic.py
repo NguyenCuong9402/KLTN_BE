@@ -10,7 +10,7 @@ from sqlalchemy_pagination import paginate
 from app.api.helper import send_result, send_error
 from app.enums import KEY_GROUP_NOT_STAFF
 from app.extensions import logger
-from app.models import Group, TypeProduct, Product, Shipper, Orders
+from app.models import Group, TypeProduct, Product, Shipper, Orders, User
 from app.utils import trim_dict, escape_wildcard
 from app.validator import GroupSchema, QueryParamsAllSchema
 
@@ -32,7 +32,7 @@ def get_number_product_by_type():
             for p in TypeProduct.query.filter(TypeProduct.type_id.is_(None)).all()
         ]
 
-        return send_result(data=data, message="Cập nhật thành công")
+        return send_result(data=data, message="Thành công")
     except Exception as ex:
         return send_error(message=str(ex), code=442)
 
@@ -50,8 +50,27 @@ def statistic_ship():
             for shipper in Shipper.query.all()
         ]
 
-        return send_result(data=data, message="Cập nhật thành công")
+        return send_result(data=data, message="Thành công")
     except Exception as ex:
         return send_error(message=str(ex), code=442)
+
+
+@api.route('/statistic_user', methods=['GET'])
+@jwt_required
+def statistic_user():
+    try:
+
+        users = User.query.filter(User.group.has(Group.key == "user"))
+
+        data = {
+            'Nữ': users.filter(User.gender is False).count(),
+            'Nam': users.filter(User.gender is True).count(),
+            'Tổng': users.count()
+        }
+
+        return send_result(data=data, message="Thành công")
+    except Exception as ex:
+        return send_error(message=str(ex), code=442)
+
 
 
