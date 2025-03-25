@@ -66,11 +66,19 @@ class Worker:
                 db.session.flush()
 
                 products = Product.query.order_by(func.random()).limit(3).all()
+
+                count_order = 0
                 for product in products:
                     order_item = OrderItems(id=str(uuid()), order_id=order.id, product_id=product.id, size_id=product.sizes[0].id,
                                             color_id=product.colors[0].id, count=product.detail.get('price'))
                     db.session.add(order_item)
                     db.session.flush()
+
+                    count_order += product.detail.get('price')
+
+                order.count = count_order + price_ship
+                db.session.flush()
+
             # Lưu vào database
 
             db.session.commit()
