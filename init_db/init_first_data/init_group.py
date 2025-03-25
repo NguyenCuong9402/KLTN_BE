@@ -4,8 +4,9 @@ import shortuuid
 
 import pandas as pd
 from flask import Flask
+from sqlalchemy import func
 
-from app.models import Group, User
+from app.models import Group, User, Address
 from app.extensions import db
 from app.settings import DevConfig
 import datetime
@@ -95,6 +96,7 @@ class Worker:
                 'phone': '0327241194',
                 'full_name': 'Nguyễn Ngọc Cương',
                 'group_key': 'admin',
+
             },
             {
                 'email': 'locadmin@gmail.com',
@@ -151,9 +153,12 @@ class Worker:
         db.session.bulk_save_objects(list_add_group)
 
         for item in list_user:
+            random_address = Address.query.filter().order_by(func.random()).first()
+
             group_key = item.pop('group_key')
             group = Group.query.filter_by(key=group_key).first()
-            user = User(id=str(shortuuid.uuid()), **item, group_id=group.id, is_active=True)
+            user = User(id=str(shortuuid.uuid()), **item, group_id=group.id, is_active=True, address_id= random_address.id
+)
             db.session.add(user)
             db.session.flush()
 

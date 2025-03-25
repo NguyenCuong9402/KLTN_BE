@@ -1,0 +1,88 @@
+import json
+import os
+import random
+
+from shortuuid import uuid
+import pandas as pd
+from flask import Flask
+from datetime import datetime, date, timedelta, time
+from dateutil.relativedelta import relativedelta
+from sqlalchemy import func
+
+from app.api.helper import send_result
+from app.enums import regions
+from app.models import Group, Community, Attendance, User, Orders, Shipper, PriceShip, Product, OrderItems
+from app.extensions import db
+from app.settings import DevConfig
+
+CONFIG = DevConfig
+
+
+class Worker:
+    def __init__(self):
+        app = Flask(__name__)
+        app.config.from_object(CONFIG)
+        db.app = app
+        db.init_app(app)
+        app_context = app.app_context()
+        app_context.push()
+
+    def get_timestamp_x_months_ago(self, i):
+        target_date = datetime.now() - relativedelta(months=i)
+        target_date = target_date.replace(day=15, hour=0, minute=0, second=0, microsecond=0)
+        return int(target_date.timestamp())
+
+
+    def init_orders(self):
+
+        users = User.query.filter(User.group.has(is_staff=False, is_super_admin=False)).all()
+
+        ship_ids =  [ ship.id  for ship in  Shipper.query.filter().all()]
+
+
+        for user in users:
+
+            start = 0
+            end = 20
+
+            for i in range(start, end ):
+                time_stamp = self.get_timestamp_x_months_ago(i)
+
+                ship_id = random.choice(ship_ids)
+                region_id = ''
+                for key, value in regions.items():
+                    if user.address.get('province') in value:
+                        region_id = key
+                        break
+
+                find_price = PriceShip.query.filter_by(region_id=region_id, shipper_id=ship_id).first()
+                price_ship = find_price.price
+
+                order = Orders(id=str(uuid()), user_id=user.id, full_name=user.full_name, phone_number=user.phone,
+                               address_id=user.address_id, created_date=time_stamp, modified_date=time_stamp,
+                               ship_id=ship_id, price_ship=price_ship)
+
+                db.session.add(order)
+                db.session.flush()
+
+                products = Product.query.order_by(func.random()).limit(3).all()
+                for product in products:
+                    order_item = OrderItems(id=str(uuid()), order_id=order.id, product_id=product.id, size_id=product.sizes[0].id,
+                                            color_id=product.colors[0].id, count=product.detail.get('price'))
+                    db.session.add(order_item)
+                    db.session.flush()
+            # Lưu vào database
+
+            db.session.commit()
+
+    def delete_orders(self):
+        Orders.query.filter().delete()
+        db.session.commit()
+
+
+if __name__ == '__main__':
+    print("=" * 10, f"Starting init attendance to the database on the uri: {CONFIG.SQLALCHEMY_DATABASE_URI}", "=" * 10)
+    worker = Worker()
+    worker.delete_orders()
+    worker.init_orders()
+    print("=" * 50, "Add address Success", "=" * 50)
