@@ -44,16 +44,16 @@ class Worker:
             ],
             "files": [
                 {
-                    "file_path": "/files/8TYji9JMv6vNJ9zaBEE5WN.jpg",
-                    "id": "8TYji9JMv6vNJ9zaBEE5WN"
+                    "file_path": "/files/mRwRbsfXbnNmBXkhHTKgwJ.png",
+                    "id": "mRwRbsfXbnNmBXkhHTKgwJ"
                 },
                 {
-                    "file_path": "/files/huoZpcBBJsVUEmRG5Nq86g.jpg",
-                    "id": "huoZpcBBJsVUEmRG5Nq86g"
+                    "file_path": "/files/PJdeXmpD8958ZdoxUjsRED.png",
+                    "id": "PJdeXmpD8958ZdoxUjsRED"
                 },
                 {
-                    "file_path": "/files/89sqWWsKgwpTmW5Eyb2hwk.jpg",
-                    "id": "89sqWWsKgwpTmW5Eyb2hwk"
+                    "file_path": "/files/24jRs3n4FPHxK7qLjtiSbA.jpg",
+                    "id": "24jRs3n4FPHxK7qLjtiSbA"
                 }
             ]
         }
@@ -65,30 +65,30 @@ class Worker:
         colors = data.pop('colors')
         name = data.pop('name')
 
-        random_type = TypeProduct.query.filter(TypeProduct.type_id.isnot(None)).order_by(func.random()).first()
 
-        if random_type:
-            for i in range(1, 40):
-                product = Product(**data, type_product_id=random_type.id, id=str(uuid()), original_price=random.choice(values),
-                                  name=f'Sản phẩm {name} {i}', discount=random.randint(1, 20),
-                                  created_date=get_timestamp_now() + i)
-                db.session.add(product)
-                db.session.flush()
+        for i in range(1, 40):
+            random_type = TypeProduct.query.filter(TypeProduct.type_id.isnot(None)).order_by(func.random()).first()
 
-                size_objects = [Size(id=str(uuid()), name=size, product_id=product.id, index=index,
-                                     created_date=get_timestamp_now() + index) for index, size in enumerate(sizes)]
-                color_objects = [Color(id=str(uuid()), name=color, product_id=product.id, index=index,
-                                       created_date=get_timestamp_now() + index) for index, color in enumerate(colors)]
-                db.session.bulk_save_objects(size_objects)
-                db.session.bulk_save_objects(color_objects)
-                db.session.flush()
+            product = Product(**data, type_product_id=random_type.id, id=str(uuid()), original_price=random.choice(values),
+                              name=f'Sản phẩm {name} {i}', discount=random.randint(1, 20),
+                              created_date=get_timestamp_now() + i)
+            db.session.add(product)
+            db.session.flush()
 
-                file_objects = [FileLink(id=str(uuid()), table_id=product.id, file_id=file["id"], table_type = TYPE_FILE_LINK.get('PRODUCT', 'product'),
-                                                index=index, created_date=get_timestamp_now() + index)
-                                for index, file in enumerate(files)]
-                db.session.bulk_save_objects(file_objects)
-                db.session.flush()
-                db.session.commit()
+            size_objects = [Size(id=str(uuid()), name=size, product_id=product.id, index=index,
+                                 created_date=get_timestamp_now() + index) for index, size in enumerate(sizes)]
+            color_objects = [Color(id=str(uuid()), name=color, product_id=product.id, index=index,
+                                   created_date=get_timestamp_now() + index) for index, color in enumerate(colors)]
+            db.session.bulk_save_objects(size_objects)
+            db.session.bulk_save_objects(color_objects)
+            db.session.flush()
+
+            file_objects = [FileLink(id=str(uuid()), table_id=product.id, file_id=file["id"], table_type = TYPE_FILE_LINK.get('PRODUCT', 'product'),
+                                            index=index, created_date=get_timestamp_now() + index)
+                            for index, file in enumerate(files)]
+            db.session.bulk_save_objects(file_objects)
+            db.session.flush()
+            db.session.commit()
 
 
 if __name__ == '__main__':

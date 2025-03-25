@@ -25,14 +25,32 @@ def get_number_product_by_type():
         data = [
             {
                 "name": p.name,
-                # "list_id": [p.id] + [child.id for child in p.type_child],
                 "total": Product.query.filter(
-                    Product.type_product_id.in_([p.id] + [child.id for child in p.type_child])).count()
+                    Product.type_product_id.in_([p.id] + [child.id for child in p.type_child])
+                ).count()
             }
-            for p in TypeProduct.query.filter(TypeProduct.type_id.is_(None)).all()
+            for p in TypeProduct.query.filter(TypeProduct.type_id.is_(None)).order_by(asc(TypeProduct.key)).all()
         ]
 
-        return send_result(data=data, message="Thành công")
+        total_all = sum(item["total"] for item in data)
+
+        data_statistic = {}
+
+        total_percent = 0  # Tổng phần trăm đã tính trước mục cuối
+
+        for index, item in enumerate(data):
+            if total_all == 0:
+                phan_tram = 0  # Tránh chia cho 0
+            else:
+                phan_tram = (item['total'] / total_all) * 100
+
+            if index == len(data) - 1 and phan_tram > 0:
+                data_statistic[item['name']] = 100 - total_percent  # Điều chỉnh mục cuối cùng
+            else:
+                data_statistic[item['name']] = round(phan_tram, 2)
+                total_percent += data_statistic[item['name']]
+
+        return send_result(data={'result': data_statistic, 'data_count': data }, message="Thành công")
     except Exception as ex:
         return send_error(message=str(ex), code=442)
 
