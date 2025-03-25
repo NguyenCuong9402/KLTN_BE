@@ -2,6 +2,7 @@ import json
 import os
 import random
 
+from alembic.util import status
 from shortuuid import uuid
 import pandas as pd
 from flask import Flask
@@ -10,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 from sqlalchemy import func
 
 from app.api.helper import send_result
-from app.enums import regions
+from app.enums import regions, STATUS_ORDER
 from app.models import Group, Community, Attendance, User, Orders, Shipper, PriceShip, Product, OrderItems
 from app.extensions import db
 from app.settings import DevConfig
@@ -60,7 +61,7 @@ class Worker:
 
                 order = Orders(id=str(uuid()), user_id=user.id, full_name=user.full_name, phone_number=user.phone,
                                address_id=user.address_id, created_date=time_stamp, modified_date=time_stamp,
-                               ship_id=ship_id, price_ship=price_ship)
+                               ship_id=ship_id, price_ship=price_ship, status=STATUS_ORDER.get('RESOLVED'))
 
                 db.session.add(order)
                 db.session.flush()
