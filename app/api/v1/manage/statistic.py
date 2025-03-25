@@ -10,7 +10,7 @@ from sqlalchemy_pagination import paginate
 from app.api.helper import send_result, send_error
 from app.enums import KEY_GROUP_NOT_STAFF
 from app.extensions import logger
-from app.models import Group, TypeProduct, Product
+from app.models import Group, TypeProduct, Product, Shipper, Orders
 from app.utils import trim_dict, escape_wildcard
 from app.validator import GroupSchema, QueryParamsAllSchema
 
@@ -22,7 +22,7 @@ api = Blueprint('statistic', __name__)
 def get_number_product_by_type():
     try:
 
-        type_products = [
+        data = [
             {
                 "name": p.name,
                 # "list_id": [p.id] + [child.id for child in p.type_child],
@@ -32,7 +32,26 @@ def get_number_product_by_type():
             for p in TypeProduct.query.filter(TypeProduct.type_id.is_(None)).all()
         ]
 
-        return send_result(data=type_products, message="Cập nhật thành công")
+        return send_result(data=data, message="Cập nhật thành công")
     except Exception as ex:
         return send_error(message=str(ex), code=442)
+
+
+@api.route('/statistic_ship', methods=['GET'])
+@jwt_required
+def statistic_ship():
+    try:
+
+        data = [
+            {
+                "name": shipper.name,
+                "total": Orders.query.filter(Orders.ship_id == shipper.id).count()
+            }
+            for shipper in Shipper.query.all()
+        ]
+
+        return send_result(data=data, message="Cập nhật thành công")
+    except Exception as ex:
+        return send_error(message=str(ex), code=442)
+
 
