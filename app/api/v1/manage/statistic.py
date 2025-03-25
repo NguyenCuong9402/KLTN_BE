@@ -10,14 +10,14 @@ from sqlalchemy_pagination import paginate
 from app.api.helper import send_result, send_error
 from app.enums import KEY_GROUP_NOT_STAFF
 from app.extensions import logger
-from app.models import Group, TypeProduct, Product, Shipper, Orders, User
+from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article
 from app.utils import trim_dict, escape_wildcard
 from app.validator import GroupSchema, QueryParamsAllSchema
 
 api = Blueprint('statistic', __name__)
 
 
-@api.route('/statistic_product_by_type', methods=['GET'])
+@api.route('/product_by_type', methods=['GET'])
 @jwt_required
 def get_number_product_by_type():
     try:
@@ -37,35 +37,17 @@ def get_number_product_by_type():
         return send_error(message=str(ex), code=442)
 
 
-@api.route('/statistic_ship', methods=['GET'])
+@api.route('', methods=['GET'])
 @jwt_required
-def statistic_ship():
+def statistic_all():
     try:
-
-        data = [
-            {
-                "name": shipper.name,
-                "total": Orders.query.filter(Orders.ship_id == shipper.id).count()
-            }
-            for shipper in Shipper.query.all()
-        ]
-
-        return send_result(data=data, message="Thành công")
-    except Exception as ex:
-        return send_error(message=str(ex), code=442)
-
-
-@api.route('/statistic_user', methods=['GET'])
-@jwt_required
-def statistic_user():
-    try:
-
-        users = User.query.filter(User.group.has(Group.key == "user"))
-
         data = {
-            'Nữ': users.filter(User.gender is False).count(),
-            'Nam': users.filter(User.gender is True).count(),
-            'Tổng': users.count()
+            'user': User.query.filter(User.group.has(Group.key == "user")).count(),
+            'shipper': Shipper.query.filter().count(),
+            'product': Product.query.filter().count(),
+            'orders': Orders.query.filter().count(),
+            'article': Article.query.filter().count(),
+            'staff': User.query.filter(User.group.has(Group.is_staff == True)).count(),
         }
 
         return send_result(data=data, message="Thành công")
