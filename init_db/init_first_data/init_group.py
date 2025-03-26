@@ -1,6 +1,11 @@
 import json
 import os
 import shortuuid
+from faker import Faker
+import random
+import json
+
+fake = Faker("vi_VN")
 
 import pandas as pd
 from flask import Flask
@@ -45,124 +50,68 @@ class Worker:
         app_context.push()
 
     def init_group(self):
-        list_group = [
-            {
-                'key': 'admin',
-                'name': 'admin',
-                'description': 'admin',
-                'is_super_admin': True,
+        from faker import Faker
+        import random
+        import datetime
+        import shortuuid
+        from sqlalchemy.sql.expression import func
 
-            },
-            {
-                'key': 'user',
-                'name': 'khách hàng',
-                'description': 'khách hàng',
-            },
-            {
-                'key': 'director',
-                'name': 'giám đốc',
-                'description': 'giám đốc',
-                'is_staff': True,
+        fake = Faker("vi_VN")
 
-            },
-            {
-                'key': 'accountant',
-                'name': 'kế toán',
-                'description': 'kế toán',
-                'is_staff': True,
+        try:
+            list_group = [
+                {'key': 'admin', 'name': 'Quản trị viên', 'description': 'admin', 'is_super_admin': True},
+                {'key': 'user', 'name': 'Khách hàng', 'description': 'khách hàng'},
+                {'key': 'director', 'name': 'Giám đốc', 'description': 'giám đốc', 'is_staff': True},
+                {'key': 'accountant', 'name': 'Kế toán', 'description': 'kế toán', 'is_staff': True},
+                {'key': 'hr_manager', 'name': 'Quản lý nhân sự', 'description': 'quản lý nhân sự', 'is_staff': True},
+                {'key': 'employee', 'name': 'Nhân viên', 'description': 'nhân viên', 'is_staff': True}
+            ]
 
-            },
-            {
-                'key': 'hr_manager',
-                'name': 'quản lý nhân sự',
-                'description': 'quản lý nhân sự',
-                'is_staff': True,
+            list_user = [
+                {'email': f'{user}{role}@gmail.com', 'password': '123456789', 'full_name': f'{user.title()} {role}',
+                 'group_key': role, 'phone': f"0{random.randint(3200000000, 3999999999)}", 'identification_card': generate_vietnam_id(),
+                 'tax_code': generate_vietnam_tax_code(), 'join_date': datetime.datetime(2024, 1, 1),
+                 'finish_date': datetime.datetime(2027, 1, 1), 'number_dependent': 0, 'gender': random.choice([0, 1]),
+                 'birthday': fake.date_of_birth(minimum_age=14, maximum_age=60)
+                 }
+                for role in ['admin', 'user', 'director', 'employee', 'hr_manager', 'accountant']
+                for user in ['cuong', 'loc']
+            ]
 
-            },
-            {
-                'key': 'employee',
-                'name': 'nhân viên',
-                'description': 'nhân viên',
-                'is_staff': True,
+            # Tạo thêm 100,000 user giả
+            list_user.extend([
+                {'email': f"{fake.user_name()}{random.randint(1000, 9999)}@gmail.com",
+                 "phone": f"0{random.randint(3200000000, 3999999999)}",
+                 "password": "123456789", "full_name": fake.name(), "group_key": "user"}
+                for _ in range(10000)
+            ])
 
-            }
-        ]
+            print("Thêm nhóm")
+            db.session.bulk_insert_mappings(Group, [{**g, 'id': str(shortuuid.uuid())} for g in list_group])
+            db.session.commit()
 
-        list_user = [
-            # Admin
-            {
-                'email': 'cuongadmin@gmail.com',
-                'password': '123456789',
-                'phone': '0327241194',
-                'full_name': 'Nguyễn Ngọc Cương',
-                'group_key': 'admin',
+            group_dict = {g.key: g.id for g in Group.query.all()}
 
-            },
-            {
-                'email': 'locadmin@gmail.com',
-                'phone': '0327241194',
-                'password': '123456789',
-                'full_name': 'Tô Thành Lộc',
-                'group_key': 'admin',
-            },
-            # User (Khách hàng)
-            {
-                'email': 'cuonguser@gmail.com',
-                'phone': '0327241194',
-                'password': '123456789',
-                'full_name': 'Nguyễn Ngọc Cương',
-                'group_key': 'user',
-            },
-            {
-                'email': 'locuser@gmail.com',
-                'phone': '0327241194',
-                'password': '123456789',
-                'full_name': 'Tô Thành Lộc',
-                'group_key': 'user',
-            },
-        ]
+            address_ids = [a.id for a in Address.query.with_entities(Address.id).all()]
 
-        # Các tài khoản nhân sự, kế toán, giám đốc, nhân viên
-        roles = ['director', 'employee', 'hr_manager', 'accountant']
-        users = ['cuong', 'loc']
+            print("Thêm người dùng")
 
-        for role in roles:
-            for user in users:
-                join_date = datetime.datetime(2024, 1, 1)
-                finish_date = join_date + datetime.timedelta(days=3 * 365)  # +3 năm
+            users_to_insert = []
+            for item in list_user:
+                item["group_id"] = group_dict.get(item.pop("group_key"))
+                item["id"] = str(shortuuid.uuid())
+                item["is_active"] = True
+                item["address_id"] = random.choice(address_ids)
+                users_to_insert.append(item)
 
-                list_user.append({
-                    'email': f'{user}{role}@gmail.com',
-                    'password': '123456789',
-                    'full_name': f'Cương {role}' if user == 'cuong' else f'Lộc {role}',
-                    'group_key': role,
-                    'phone': '0327241194',
-                    'identification_card': generate_vietnam_id(),
-                    'tax_code': generate_vietnam_tax_code(),
-                    'join_date': join_date,
-                    'finish_date': finish_date,
-                    'number_dependent': 0,
-                })
+            db.session.bulk_insert_mappings(User, users_to_insert)
+            db.session.commit()
 
-        list_add_group= []
-        for item in list_group:
-            group = Group(
-                id=str(shortuuid.uuid()), **item
-            )
-            list_add_group.append(group)
-        db.session.bulk_save_objects(list_add_group)
+            print("Xonggg")
 
-        for item in list_user:
-            random_address = Address.query.filter().order_by(func.random()).first()
-
-            group_key = item.pop('group_key')
-            group = Group.query.filter_by(key=group_key).first()
-            user = User(id=str(shortuuid.uuid()), **item, group_id=group.id, is_active=True, address_id= random_address.id
-)
-            db.session.add(user)
-            db.session.flush()
-
-        db.session.commit()
+        except Exception as ex:
+            print(f"Lỗi: {ex}")
 
     def delete_group(self):
         User.query.filter().delete()
