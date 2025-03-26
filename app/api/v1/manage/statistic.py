@@ -12,7 +12,7 @@ from sqlalchemy import asc, desc, func
 from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
-from app.enums import KEY_GROUP_NOT_STAFF
+from app.enums import KEY_GROUP_NOT_STAFF, STATUS_ORDER
 from app.extensions import logger, db
 from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems
 from app.utils import trim_dict, escape_wildcard
@@ -102,6 +102,11 @@ def get_number_product_sold_by_type_10_month_ago():
 
             )
             .join(Product, OrderItems.product_id == Product.id)
+            .join(Orders, OrderItems.order_id == Orders.id)
+            .filter(
+                (Orders.payment_status == True) & (Orders.payment_online_id.isnot(None)) |
+                (Orders.status == STATUS_ORDER.get("RESOLVED"))
+            )
             .filter(OrderItems.created_date >= int((now_dt - relativedelta(months=9)).timestamp()))
             .group_by("month", Product.type_product_id)
             .order_by("month")
