@@ -1,16 +1,20 @@
 import json
+from collections import defaultdict
+from datetime import datetime, timezone
+from sqlalchemy import cast, Integer, BigInteger
 
+from dateutil.relativedelta import relativedelta
 from flask import Blueprint, request, make_response, send_file, Response
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from marshmallow import ValidationError
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, func
 
 from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
 from app.enums import KEY_GROUP_NOT_STAFF
-from app.extensions import logger
-from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article
+from app.extensions import logger, db
+from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems
 from app.utils import trim_dict, escape_wildcard
 from app.validator import GroupSchema, QueryParamsAllSchema
 
@@ -71,6 +75,89 @@ def statistic_all():
         return send_result(data=data, message="Thành công")
     except Exception as ex:
         return send_error(message=str(ex), code=442)
+
+
+@api.route('/sold_product_by_type', methods=['GET'])
+@jwt_required
+def get_number_product_sold_by_type_10_month_ago():
+    try:
+        now_dt = datetime.now(timezone.utc).replace(day=1)
+
+        # Tạo danh sách 10 tháng gần nhất
+        months = [(now_dt - relativedelta(months=i)).strftime("%m-%Y") for i in range(10)][::-1]
+
+        # Lấy danh sách các loại sản phẩm
+        type_products = TypeProduct.query.filter(TypeProduct.type_id.is_(None)).order_by(asc(TypeProduct.key)).all()
+        type_product_dict = {
+            p.id: {"name": p.name, "list_id": [p.id] + [child.id for child in p.type_child]} for p in type_products
+        }
+
+        # Truy vấn dữ liệu từ OrderItems
+        query = (
+            db.session.query(
+                func.date_format(func.from_unixtime(OrderItems.created_date), "%m-%Y").label("month"),
+                Product.type_product_id,
+                cast(func.sum(OrderItems.quantity), Integer).label("total_quantity"),
+                cast(func.sum(OrderItems.count), BigInteger).label("total_count")
+
+            )
+            .join(Product, OrderItems.product_id == Product.id)
+            .filter(OrderItems.created_date >= int((now_dt - relativedelta(months=9)).timestamp()))
+            .group_by("month", Product.type_product_id)
+            .order_by("month")
+        )
+
+        # Xử lý dữ liệu
+        sales_data = defaultdict(lambda: defaultdict(lambda: {"quantity": 0, "count": 0}))
+
+        for row in query:
+            month = row.month
+            type_id = row.type_product_id
+            quantity = row.total_quantity
+            count = row.total_count
+
+            # Gán dữ liệu vào danh sách tương ứng
+            for type_key, type_value in type_product_dict.items():
+                if type_id in type_value["list_id"]:
+                    sales_data[type_value["name"]][month]["quantity"] += quantity
+                    sales_data[type_value["name"]][month]["count"] += count
+
+        # Chuyển đổi thành format JSON
+        series_sold = [
+            {
+                "name": type_name,
+                "data": [sales_data[type_name][month]["quantity"] for month in months],  # Lấy số lượng
+            }
+            for type_name in sales_data
+        ]
+
+        series_revue = [
+            {
+                "name": type_name,
+                "data": [sales_data[type_name][month]["count"] for month in months],  # Lấy số lần bán (revue)
+            }
+            for type_name in sales_data
+        ]
+
+
+        # Kết quả JSON
+        chart_data_sold = {
+            "categories": months,
+            "series": series_sold
+        }
+
+        chart_data_revenue = {
+            "categories": months,
+            "series": series_revue
+        }
+
+        return send_result(data={
+            'chart_data_sold': chart_data_sold,
+            'chart_data_revenue': chart_data_revenue
+        }, message="Thành công")
+    except Exception as ex:
+        return send_error(message=str(ex), code=442)
+
 
 
 

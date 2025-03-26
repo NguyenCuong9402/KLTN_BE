@@ -37,15 +37,14 @@ class Worker:
     def init_orders(self):
 
         try:
-            users = User.query.filter(User.group.has(is_staff=False, is_super_admin=False)).limit(100).all()
+            users = User.query.filter(User.group.has(is_staff=False, is_super_admin=False)).limit(2).all()
             ship_ids = [ship.id for ship in Shipper.query.all()]
 
             all_prices = {(p.region_id, p.shipper_id): p.price for p in PriceShip.query.all()}
-
             for user in users:
-                all_products = Product.query.order_by(func.random()).limit(3).all()
-
                 for i in range(20):
+                    all_products = Product.query.order_by(func.random()).limit(random.choice([2,3,4,5,6])).all()
+
                     time_stamp = self.get_timestamp_x_months_ago(i)
                     ship_id = random.choice(ship_ids)
 
@@ -63,13 +62,15 @@ class Worker:
 
                     total_price = price_ship
                     for product in all_products:
+                        quantity = random.choice([1,2,3,4])
                         order_item = OrderItems(
-                            id=str(uuid()), order_id=order.id, product_id=product.id,
+                            id=str(uuid()), order_id=order.id, product_id=product.id, quantity= quantity,
                             size_id=product.sizes[0].id, color_id=product.colors[0].id,
-                            count=product.detail.get('price', 1)  # Default tránh lỗi None
+                            count=product.detail.get('price', 1)*quantity, created_date=time_stamp, modified_date=time_stamp
                         )
                         db.session.add(order_item)
-                        total_price += product.detail.get('price', 1)
+                        db.session.flush()
+                        total_price += order_item.count
 
                     order.count = total_price
                     db.session.flush()

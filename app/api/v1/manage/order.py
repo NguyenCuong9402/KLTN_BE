@@ -1,5 +1,7 @@
 import json
+from datetime import timedelta, datetime
 
+from dateutil.relativedelta import relativedelta
 from marshmallow import ValidationError
 from shortuuid import uuid
 from flask import Blueprint, request
@@ -11,7 +13,7 @@ from app.extensions import db, logger
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helper import send_result, send_error
 from app.models import Orders, User
-from app.utils import escape_wildcard
+from app.utils import escape_wildcard, get_timestamp_now, get_datetime_now
 from app.validator import OrderSchema, QueryParamsOrderSchema, QueryParamsManageOrderSchema
 
 api = Blueprint('manage/order', __name__)
@@ -78,9 +80,27 @@ def get_items():
         status = params.get('status', None)
         text_search = params.get('text_search', None)
 
+        time = params.get('time', None)
+
         query = Orders.query.filter()
         if status:
             query = query.filter(Orders.status==status)
+
+        # Tính toán timestamp cho khoảng thời gian lọc
+        if time:
+            datetime_now = get_datetime_now()
+            if time == 'week':
+                time_filter = int((datetime_now - timedelta(weeks=1)).timestamp())
+            elif time == 'month':
+                time_filter = int((datetime_now - relativedelta(months=1)).timestamp())
+            elif time == 'year':
+                time_filter = int((datetime_now - relativedelta(years=1)).timestamp())
+            else:
+                time_filter = None
+
+            # Lọc theo created_date nếu có thời gian hợp lệ
+            if time_filter:
+                query = query.filter(Orders.created_date >= time_filter)
 
         if text_search:
             text_search = text_search.strip()
