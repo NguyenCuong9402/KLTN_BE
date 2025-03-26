@@ -36,53 +36,48 @@ class Worker:
 
     def init_orders(self):
 
-        users = User.query.filter(User.group.has(is_staff=False, is_super_admin=False)).all()
+        try:
+            users = User.query.filter(User.group.has(is_staff=False, is_super_admin=False)).limit(100).all()
+            ship_ids = [ship.id for ship in Shipper.query.all()]
 
-        ship_ids =  [ ship.id  for ship in  Shipper.query.filter().all()]
+            all_prices = {(p.region_id, p.shipper_id): p.price for p in PriceShip.query.all()}
 
+            for user in users:
+                all_products = Product.query.order_by(func.random()).limit(3).all()
 
-        for user in users:
+                for i in range(20):
+                    time_stamp = self.get_timestamp_x_months_ago(i)
+                    ship_id = random.choice(ship_ids)
 
-            start = 0
-            end = 20
+                    region_id = next((key for key, value in regions.items() if user.address.get('province') in value),
+                                     '')
+                    price_ship = all_prices.get((region_id, ship_id), 0)
 
-            for i in range(start, end ):
-                time_stamp = self.get_timestamp_x_months_ago(i)
+                    order = Orders(
+                        id=str(uuid()), user_id=user.id, full_name=user.full_name, phone_number=user.phone,
+                        address_id=user.address_id, created_date=time_stamp, modified_date=time_stamp,
+                        ship_id=ship_id, price_ship=price_ship, status=STATUS_ORDER.get('RESOLVED')
+                    )
+                    db.session.add(order)
+                    db.session.flush()  # Để có `order.id` cho OrderItems
 
-                ship_id = random.choice(ship_ids)
-                region_id = ''
-                for key, value in regions.items():
-                    if user.address.get('province') in value:
-                        region_id = key
-                        break
+                    total_price = price_ship
+                    for product in all_products:
+                        order_item = OrderItems(
+                            id=str(uuid()), order_id=order.id, product_id=product.id,
+                            size_id=product.sizes[0].id, color_id=product.colors[0].id,
+                            count=product.detail.get('price', 1)  # Default tránh lỗi None
+                        )
+                        db.session.add(order_item)
+                        total_price += product.detail.get('price', 1)
 
-                find_price = PriceShip.query.filter_by(region_id=region_id, shipper_id=ship_id).first()
-                price_ship = find_price.price
-
-                order = Orders(id=str(uuid()), user_id=user.id, full_name=user.full_name, phone_number=user.phone,
-                               address_id=user.address_id, created_date=time_stamp, modified_date=time_stamp,
-                               ship_id=ship_id, price_ship=price_ship, status=STATUS_ORDER.get('RESOLVED'))
-
-                db.session.add(order)
-                db.session.flush()
-
-                products = Product.query.order_by(func.random()).limit(3).all()
-
-                count_order = 0
-                for product in products:
-                    order_item = OrderItems(id=str(uuid()), order_id=order.id, product_id=product.id, size_id=product.sizes[0].id,
-                                            color_id=product.colors[0].id, count=product.detail.get('price'))
-                    db.session.add(order_item)
+                    order.count = total_price
                     db.session.flush()
 
-                    count_order += product.detail.get('price')
-
-                order.count = count_order + price_ship
-                db.session.flush()
-
-            # Lưu vào database
-
             db.session.commit()
+
+        except Exception as ex:
+            print("Lỗi:", str(ex))
 
     def delete_orders(self):
         Orders.query.filter().delete()
