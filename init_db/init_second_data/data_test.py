@@ -35,10 +35,10 @@ class Worker:
         ### Hướng dâẫn tạo data test. Upload file từ màn create,
         # xong thay data file đc trả ra từ api vô. Xong chạy file này là oke
 
-        FOLDER_SRC = r"E:/KTLN/BE/app/files/anh_mau/"  # Thư mục nguồn
+        FOLDER_SRC = r"/app/file_mau/"  # Thư mục nguồn
         FOLDER_DEST = r"E:/KTLN/BE/app/files/image"  # Thư mục đích
 
-        # FOLDER_SRC = r"C:\Users\Administrator\Documents\KhoaLuanTotNghiep\kltn-be\app\files\anh_mau/"
+        # FOLDER_SRC = r"C:\Users\Administrator\Documents\KhoaLuanTotNghiep\kltn-be\app\files\file_mau/"
         # FOLDER_DEST = r"C:\Users\Administrator\Documents\KhoaLuanTotNghiep\kltn-be\app\files\image/"
 
         FOLDER_DEST_SAVE_DB = "/files/image/"
@@ -61,7 +61,7 @@ class Worker:
                 # Tạo UUID mới làm tên file an toàn
                 new_file_path = os.path.join(FOLDER_DEST, file_name)
 
-                # Copy file từ `anh_mau` sang `app/files/`
+                # Copy file từ `file_mau` sang `app/files/`
                 shutil.copy(os.path.join(FOLDER_SRC, file_name), new_file_path)
 
                 # Lưu vào DB
