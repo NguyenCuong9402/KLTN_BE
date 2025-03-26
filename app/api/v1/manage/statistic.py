@@ -21,7 +21,7 @@ from app.validator import GroupSchema, QueryParamsAllSchema
 api = Blueprint('statistic', __name__)
 
 
-@api.route('/product_by_type', methods=['GET'])
+@api.route('/number_product_by_type', methods=['GET'])
 @jwt_required
 def get_number_product_by_type():
     try:
@@ -54,7 +54,7 @@ def get_number_product_by_type():
                 data_statistic[item['name']] = round(phan_tram, 2)
                 total_percent += data_statistic[item['name']]
 
-        return send_result(data={'result': data_statistic, 'data_count': data }, message="Thành công")
+        return send_result(data={'result': data_statistic, 'data_count': data}, message="Thành công")
     except Exception as ex:
         return send_error(message=str(ex), code=442)
 
@@ -77,14 +77,16 @@ def statistic_all():
         return send_error(message=str(ex), code=442)
 
 
-@api.route('/sold_product_by_type', methods=['GET'])
+@api.route('/revenue_and_sold_product_by_type', methods=['GET'])
 @jwt_required
-def get_number_product_sold_by_type_10_month_ago():
+def get_number_by_type_product_6_month_ago():
     try:
+        month = request.args.get('month', 12, type=int)
+
         now_dt = datetime.now(timezone.utc).replace(day=1)
 
         # Tạo danh sách 10 tháng gần nhất
-        months = [(now_dt - relativedelta(months=i)).strftime("%m-%Y") for i in range(10)][::-1]
+        months = [(now_dt - relativedelta(months=i)).strftime("%m-%Y") for i in range(month)][::-1]
 
         # Lấy danh sách các loại sản phẩm
         type_products = TypeProduct.query.filter(TypeProduct.type_id.is_(None)).order_by(asc(TypeProduct.key)).all()
@@ -107,7 +109,7 @@ def get_number_product_sold_by_type_10_month_ago():
                 (Orders.payment_status == True) & (Orders.payment_online_id.isnot(None)) |
                 (Orders.status == STATUS_ORDER.get("RESOLVED"))
             )
-            .filter(OrderItems.created_date >= int((now_dt - relativedelta(months=9)).timestamp()))
+            .filter(OrderItems.created_date >= int((now_dt - relativedelta(months=month-1)).timestamp()))
             .group_by("month", Product.type_product_id)
             .order_by("month")
         )
@@ -144,7 +146,6 @@ def get_number_product_sold_by_type_10_month_ago():
             for type_name in sales_data
         ]
 
-
         # Kết quả JSON
         chart_data_sold = {
             "categories": months,
@@ -158,11 +159,9 @@ def get_number_product_sold_by_type_10_month_ago():
 
         return send_result(data={
             'chart_data_sold': chart_data_sold,
-            'chart_data_revenue': chart_data_revenue
+            'chart_data_revenue': chart_data_revenue,
+            'month': month
         }, message="Thành công")
+
     except Exception as ex:
         return send_error(message=str(ex), code=442)
-
-
-
-
