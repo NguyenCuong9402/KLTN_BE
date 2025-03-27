@@ -37,7 +37,7 @@ class Worker:
     def init_orders(self):
 
         try:
-            users = User.query.filter(User.group.has(is_staff=False, is_super_admin=False)).limit(2).all()
+            users = User.query.filter(User.group.has(is_staff=False, is_super_admin=False)).limit(100).all()
             ship_ids = [ship.id for ship in Shipper.query.all()]
 
             all_prices = {(p.region_id, p.shipper_id): p.price for p in PriceShip.query.all()}

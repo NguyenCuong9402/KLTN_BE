@@ -1,22 +1,17 @@
 import json
 from collections import defaultdict
-from datetime import datetime, timezone
-from sqlalchemy import cast, Integer, BigInteger
-import random
+from datetime import datetime, timezone, date
+from sqlalchemy import cast, Integer, BigInteger, case, text
 from dateutil.relativedelta import relativedelta
-from flask import Blueprint, request, make_response, send_file, Response
+from flask import Blueprint, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from marshmallow import ValidationError
 from sqlalchemy import asc, desc, func
-
-from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
 from app.enums import KEY_GROUP_NOT_STAFF, STATUS_ORDER
-from app.extensions import logger, db
+from app.extensions import db
 from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems, Files
-from app.utils import trim_dict, escape_wildcard
-from app.validator import GroupSchema, QueryParamsAllSchema, UserSchema, StatisticTop10CustomerSchema
+from app.validator import StatisticTop10CustomerSchema
 
 api = Blueprint('statistic', __name__)
 
@@ -56,7 +51,7 @@ def get_number_product_by_type():
 
         return send_result(data={'result': data_statistic, 'data_count': data}, message="Thành công")
     except Exception as ex:
-        return send_error(message=str(ex), code=442)
+        return send_error(message=str(ex))
 
 
 @api.route('', methods=['GET'])
@@ -74,7 +69,7 @@ def statistic_all():
 
         return send_result(data=data, message="Thành công")
     except Exception as ex:
-        return send_error(message=str(ex), code=442)
+        return send_error(message=str(ex))
 
 
 @api.route('/top_customer', methods=['GET'])
@@ -107,7 +102,7 @@ def top_customer():
 
         return send_result(data=data, message="Thành công")
     except Exception as ex:
-        return send_error(message=str(ex), code=442)
+        return send_error(message=str(ex))
 
 
 @api.route('/process_orders', methods=['GET'])
@@ -156,7 +151,7 @@ def process_orders():
         return send_result(data=data)
 
     except Exception as ex:
-        return send_error(message=str(ex), code=442)
+        return send_error(message=str(ex))
 
 
 
@@ -245,6 +240,50 @@ def get_number_by_type_product_6_month_ago():
             'chart_data_revenue': chart_data_revenue,
             'month': month
         }, message="Thành công")
+
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+
+@api.route('/number_user_by_age_and_gender', methods=['GET'])
+@jwt_required
+def number_user_by_age_and_gender():
+    try:
+        today = func.curdate()  # Sử dụng CURDATE() thay vì date.today()
+
+        age_expr = func.timestampdiff(text("YEAR"), User.birthday, today)
+
+        stats = (
+            db.session.query(
+                case(
+                    (age_expr < 20, "< 20"),
+                    (age_expr.between(20, 39), "20-40"),
+                    (age_expr.between(40, 59), "40-60"),
+                    (age_expr >= 60, "> 60"),
+                    else_="Unknown"
+                ).label("age_group"),
+                User.gender,
+                func.count().label("count")
+            )
+            .group_by("age_group", User.gender)
+            .all()
+        )
+
+        age_groups = ["< 20", "20-40", "40-60", "> 60"]
+        data = {age: {0: 0, 1: 0} for age in age_groups}
+
+        for age_group, gender, count in stats:
+            data[age_group][gender] = count
+
+        series_data = [
+            {"name": age, "data": [data[age][1], data[age][0]]} for age in age_groups
+        ]
+
+        categories = ["Nam", "Nữ"]
+
+        result = {"series": series_data, "categories": categories}
+
+        return send_result(data=result, message="Thành công")
 
     except Exception as ex:
         return send_error(message=str(ex))

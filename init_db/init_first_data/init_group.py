@@ -83,6 +83,7 @@ class Worker:
             list_user.extend([
                 {'email': f"{fake.user_name()}{random.randint(1000, 9999)}@gmail.com",
                  "phone": f"0{random.randint(3200000000, 3999999999)}",
+                 'birthday': fake.date_of_birth(minimum_age=14, maximum_age=60),
                  "password": "123456789", "full_name": fake.name(), "group_key": "user"}
                 for _ in range(10000)
             ])

@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: ec4c164db6bd
+Revision ID: 3a5a6b38c2b0
 Revises: 
-Create Date: 2025-03-24 11:16:54.498995
+Create Date: 2025-03-27 22:32:16.733424
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'ec4c164db6bd'
+revision = '3a5a6b38c2b0'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -179,13 +179,13 @@ def upgrade():
     op.create_index(op.f('ix_role_permission_role_id'), 'role_permission', ['role_id'], unique=False)
     op.create_table('user',
     sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('email', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
+    sa.Column('email', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=False),
     sa.Column('phone', sa.String(length=50), nullable=True),
-    sa.Column('password', sa.String(length=255), nullable=True),
-    sa.Column('gender', sa.Boolean(), nullable=True),
-    sa.Column('full_name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
+    sa.Column('password', sa.String(length=255), nullable=False),
+    sa.Column('gender', sa.Boolean(), nullable=False),
+    sa.Column('full_name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=False),
     sa.Column('avatar_id', sa.String(length=50), nullable=True),
-    sa.Column('birthday', sa.DATE(), nullable=True),
+    sa.Column('birthday', sa.DATE(), nullable=False),
     sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
     sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=True),

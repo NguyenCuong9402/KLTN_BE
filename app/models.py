@@ -3,13 +3,13 @@ from datetime import time, timedelta, datetime
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
-from sqlalchemy import ForeignKey, TEXT, asc, desc
+from sqlalchemy import ForeignKey, TEXT, asc, desc, func
 from sqlalchemy.orm import validates
 
 from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION, STATUS_ORDER, ATTENDANCE, \
     ATTENDANCE_STATUS, WORK_UNIT_TYPE
 from app.extensions import db
-from app.utils import get_timestamp_now
+from app.utils import get_timestamp_now, default_birthday
 
 
 class Address(db.Model):
@@ -24,15 +24,15 @@ class User(db.Model):
     __tablename__ = 'user'
 
     id = db.Column(db.String(50), primary_key=True)
-    email = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"))
+    email = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=False)
     phone = db.Column(db.String(50))
-    password = db.Column(db.String(255))
-    gender = db.Column(db.Boolean, default=0) #0: Nữ, # 1: Nam
-    full_name = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"))
+    password = db.Column(db.String(255), nullable=False)
+    gender = db.Column(db.Boolean, default=0, nullable=False) #0: Nữ, # 1: Nam
+    full_name = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=False)
     avatar_id = db.Column(db.String(50), db.ForeignKey('files.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
     avatar = db.relationship("Files", viewonly=True)
 
-    birthday = db.Column(db.DATE, nullable=True)
+    birthday = db.Column(db.DATE, nullable=False, default=default_birthday)
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
     modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
     is_deleted = db.Column(db.Boolean, default=0)
