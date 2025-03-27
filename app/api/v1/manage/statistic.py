@@ -114,25 +114,47 @@ def top_customer():
 @jwt_required
 def process_orders():
     try:
-        data = [{
-            'resolved': 0,
-            'delivering': 40,
-            'pending': 60,
-            'chartData': [0, 40, 60]
-        },{
-            'resolved': 50,
-            'delivering': 0,
-            'pending': 50,
-            'chartData': [50, 0, 50]
-        },
-        {
-            'resolved': 70,
-            'delivering': 30,
-            'pending': 0,
-            'chartData': [70, 30, 0]
-        }]
+        # Lấy timestamp của 1 tháng trước chính xác
+        one_month_ago = int((datetime.now(timezone.utc) - relativedelta(months=1)).timestamp())
 
-        return send_result(data=random.choice(data), message="Thành công")
+        # Truy vấn số lượng đơn theo trạng thái trong 1 tháng gần nhất
+        order_counts = (
+            db.session.query(
+                Orders.status,
+                func.count(Orders.id).label('count')
+            )
+            .filter(Orders.created_date >= one_month_ago)
+            .filter(Orders.status.in_(list(STATUS_ORDER.values())))
+            .group_by(Orders.status)
+            .all()
+        )
+
+        # Khởi tạo giá trị mặc định
+        result = {'pending': 0, 'delivering': 0, 'resolved': 0}
+
+        # Cập nhật số lượng từ query vào result
+        for status, count in order_counts:
+            result[status] = count
+
+        # Tổng số đơn hàng (để tính phần trăm)
+        total_orders = sum(result.values())
+
+        # Tính phần trăm cho chartData (nếu total_orders = 0 thì giữ nguyên 0 tránh lỗi chia 0)
+        chart_data = [
+            round((result['resolved'] / total_orders) * 100, 2) if total_orders else 0,
+            round((result['delivering'] / total_orders) * 100, 2) if total_orders else 0,
+            round((result['pending'] / total_orders) * 100, 2) if total_orders else 0
+        ]
+
+        data = {
+            'resolved': result['resolved'],
+            'delivering': result['delivering'],
+            'pending': result['pending'],
+            'chartData': chart_data
+        }
+
+        return send_result(data=data)
+
     except Exception as ex:
         return send_error(message=str(ex), code=442)
 
