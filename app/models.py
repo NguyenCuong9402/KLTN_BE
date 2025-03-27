@@ -32,7 +32,7 @@ class User(db.Model):
     avatar_id = db.Column(db.String(50), db.ForeignKey('files.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
     avatar = db.relationship("Files", viewonly=True)
 
-    birthday = db.Column(db.DATE, nullable=False, default=default_birthday)
+    birthday = db.Column(db.DATE, nullable=False)
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
     modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
     is_deleted = db.Column(db.Boolean, default=0)
