@@ -140,6 +140,7 @@ class RegisterValidation(BaseValidation):
     phone = fields.String(required=True,
                                  validate=[validate.Length(min=10, max=20), validate.Regexp(REGEX_PHONE_NUMBER)])
 
+    birthday = fields.String(required=True)
 
 class UserValidation(BaseValidation):
     email = fields.String(allow_none=True)
