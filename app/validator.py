@@ -50,10 +50,23 @@ def default_schema_get_search(sort_type):
 
 
 class ChangePasswordValidation(BaseValidation):
-    current_password = fields.String(required=True,
-                                     validate=[validate.Length(min=1, max=16), validate.Regexp(REGEX_VALID_PASSWORD)])
-    new_password = fields.String(required=True,
-                                 validate=[validate.Length(min=1, max=16), validate.Regexp(REGEX_VALID_PASSWORD)])
+    current_password = fields.String(
+        required=True,
+        validate=[
+            validate.Length(min=1, max=16, error="Mật khẩu hiện tại phải từ 1 đến 16 ký tự."),
+            validate.Regexp(REGEX_VALID_PASSWORD, error="Mật khẩu hiện tại không hợp lệ.")
+        ],
+        error_messages={"required": "Mật khẩu hiện tại không được để trống."}
+    )
+
+    new_password = fields.String(
+        required=True,
+        validate=[
+            validate.Length(min=1, max=16, error="Mật khẩu mới phải từ 1 đến 16 ký tự."),
+            validate.Regexp(REGEX_VALID_PASSWORD, error="Mật khẩu mới không hợp lệ.")
+        ],
+        error_messages={"required": "Mật khẩu mới không được để trống."}
+    )
 
 class AddressSchema(Schema):
     id = fields.String()
@@ -117,30 +130,78 @@ class StatisticTop5ProductSchema(Schema):
 
 
 class AuthValidation(BaseValidation):
-    password = fields.String(required=True,
-                             validate=[validate.Length(min=8, max=16)])
-    email = fields.String(required=True,
-                          validate=[validate.Length(min=8, max=100), validate.Regexp(REGEX_EMAIL)])
+    password = fields.String(
+        required=True,
+        validate=[
+            validate.Length(min=8, max=16, error="Mật khẩu phải từ 8 đến 16 ký tự.")
+        ],
+        error_messages={"required": "Mật khẩu không được để trống."}
+    )
+
+    email = fields.String(
+        required=True,
+        validate=[
+            validate.Length(min=8, max=100, error="Email phải từ 8 đến 100 ký tự."),
+            validate.Regexp(REGEX_EMAIL, error="Email không hợp lệ.")
+        ],
+        error_messages={"required": "Email không được để trống."})
 
 
 class PasswordValidation(BaseValidation):
-    current_password = fields.String(required=True)
-    new_password = fields.String(required=True)
-    confirm_password = fields.String(required=True)
+    current_password = fields.String(
+        required=True,
+        error_messages={"required": "Mật khẩu hiện tại không được để trống."}
+    )
+
+    new_password = fields.String(
+        required=True,
+        validate=[validate.Length(min=8, max=16, error="Mật khẩu mới phải từ 8 đến 16 ký tự.")],
+        error_messages={"required": "Mật khẩu mới không được để trống."}
+    )
+
+    confirm_password = fields.String(
+        required=True,
+        validate=[validate.Length(min=8, max=16, error="Xác nhận mật khẩu phải từ 8 đến 16 ký tự.")],
+        error_messages={"required": "Xác nhận mật khẩu không được để trống."}
+    )
 
 class RegisterValidation(BaseValidation):
-    full_name = fields.String(required=True)
-    password = fields.String(required=True,
-                                     validate=[validate.Length(min=8, max=16)])
-    confirm_password = fields.String(required=True,
-                                 validate=[validate.Length(min=8, max=16)])
-    email = fields.String(required=True,
-                          validate=[validate.Length(min=8, max=100), validate.Regexp(REGEX_EMAIL)])
+    full_name = fields.String(required=True, error_messages={"required": "Họ và tên không được để trống."})
 
-    phone = fields.String(required=True,
-                                 validate=[validate.Length(min=10, max=20), validate.Regexp(REGEX_PHONE_NUMBER)])
+    password = fields.String(
+        required=True,
+        validate=[validate.Length(min=8, max=16, error="Mật khẩu phải có độ dài từ 8 đến 16 ký tự.")],
+        error_messages={"required": "Mật khẩu không được để trống."}
+    )
 
-    birthday = fields.String(required=True)
+    confirm_password = fields.String(
+        required=True,
+        validate=[validate.Length(min=8, max=16, error="Xác nhận mật khẩu phải có độ dài từ 8 đến 16 ký tự.")],
+        error_messages={"required": "Xác nhận mật khẩu không được để trống."}
+    )
+
+    email = fields.String(
+        required=True,
+        validate=[
+            validate.Length(min=8, max=100, error="Email phải có từ 8 đến 100 ký tự."),
+            validate.Regexp(REGEX_EMAIL, error="Email không hợp lệ.")
+        ],
+        error_messages={"required": "Email không được để trống."}
+    )
+
+    phone = fields.String(
+        required=True,
+        validate=[
+            validate.Length(min=10, max=20, error="Số điện thoại phải có từ 10 đến 20 số."),
+            validate.Regexp(REGEX_PHONE_NUMBER, error="Số điện thoại không hợp lệ.")
+        ],
+        error_messages={"required": "Số điện thoại không được để trống."}
+    )
+
+    birthday = fields.String(
+        required=True,
+        error_messages={"required": "Ngày sinh không được để trống."}
+    )
 
 class UserValidation(BaseValidation):
     email = fields.String(allow_none=True)
@@ -153,75 +214,227 @@ class UserValidation(BaseValidation):
     address = fields.Dict(allow_none=True)
 
 class CartValidation(BaseValidation):
-    quantity = fields.Integer(required=True)
-    color_id = fields.String(required=True)
-    size_id = fields.String(required=True)
-    product_id = fields.String(required=True)
+    quantity = fields.Integer(
+        required=True,
+        error_messages={"required": "Số lượng không được để trống."}
+    )
+
+    color_id = fields.String(
+        required=True,
+        error_messages={"required": "Màu sắc không được để trống."}
+    )
+
+    size_id = fields.String(
+        required=True,
+        error_messages={"required": "Kích thước không được để trống."}
+    )
+
+    product_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã sản phẩm không được để trống."}
+    )
 
 class CartUpdateValidation(BaseValidation):
-    quantity = fields.Integer(required=True)
-    color_id = fields.String(required=True)
-    size_id = fields.String(required=True)
-    product_id = fields.String(required=True)
+    quantity = fields.Integer(
+        required=True,
+        error_messages={"required": "Số lượng không được để trống."}
+    )
+
+    color_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã màu không được để trống."}
+    )
+
+    size_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã kích thước không được để trống."}
+    )
+
+    product_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã sản phẩm không được để trống."}
+    )
+
 
 class ReactionValidation(BaseValidation):
-    category = fields.String(required=True, validate=validate.OneOf([TYPE_REACTION.get('ARTICLE', "article"),
-                                                                      TYPE_REACTION.get('COMMENT', "comment")]))
-    reactable_id = fields.String(required=True)
+    category = fields.String(
+        required=True,
+        validate=validate.OneOf(
+            [TYPE_REACTION.get('ARTICLE', "article"), TYPE_REACTION.get('COMMENT', "comment")],
+            error="Danh mục phải là 'article' hoặc 'comment'."
+        ),
+        error_messages={"required": "Danh mục phản ứng không được để trống."}
+    )
+
+    reactable_id = fields.String(
+        required=True,
+        error_messages={"required": "ID phản ứng không được để trống."}
+    )
 
 
 class TypeProductValidation(BaseValidation):
-    key = fields.String(required=True)
-    name = fields.String(required=True)
-    type_id = fields.String(allow_none=True)
+    key = fields.String(
+        required=True,
+        error_messages={"required": "Mã sản phẩm không được để trống."}
+    )
+
+    name = fields.String(
+        required=True,
+        error_messages={"required": "Tên sản phẩm không được để trống."}
+    )
+
+    type_id = fields.String(
+        allow_none=True
+    )
 
 class ProductValidation(BaseValidation):
     files = fields.List(
         fields.Dict(
-            keys=fields.Str(),  # Các key phải là string
-            values=fields.Raw(),  # Giá trị có thể là bất kỳ loại nào
-            validate=validate.Length(min=1)  # Dictionary không rỗng
+            keys=fields.Str(),
+            values=fields.Raw(),
+            validate=validate.Length(min=1, error="Dữ liệu tệp tin không được rỗng.")
         ),
-        required=True,  # Bắt buộc phải có
-        validate=validate.Length(min=1, error="The files list must contain at least one item.")  # Danh sách không rỗng
+        required=True,
+        validate=validate.Length(min=1, error="Danh sách tệp tin phải chứa ít nhất một mục."),
+        error_messages={"required": "Danh sách tệp tin không được để trống."}
     )
+
     sizes = fields.List(
-        fields.String(validate=validate.Length(min=1)),
+        fields.String(validate=validate.Length(min=1, error="Kích thước không được rỗng.")),
         required=True,
-        validate=validate.Length(min=1)
+        validate=validate.Length(min=1, error="Phải chọn ít nhất một kích thước."),
+        error_messages={"required": "Danh sách kích thước không được để trống."}
     )
+
     colors = fields.List(
-        fields.String(validate=validate.Length(min=1)),
+        fields.String(validate=validate.Length(min=1, error="Màu sắc không được rỗng.")),
         required=True,
-        validate=validate.Length(min=1)
+        validate=validate.Length(min=1, error="Phải chọn ít nhất một màu sắc."),
+        error_messages={"required": "Danh sách màu sắc không được để trống."}
     )
-    original_price = fields.Float(required=True)
-    discount = fields.Integer(allow_none=True, default=0, validate=validate.Range(min=0, max=100))
-    discount_from_date = fields.Integer(allow_none=True)
-    discount_to_date = fields.Integer(allow_none=True)
-    name = fields.String(required=True)
-    describe = fields.String(allow_none=True)
-    type_product_id = fields.String(required=True)
+
+    original_price = fields.Float(
+        required=True,
+        error_messages={"required": "Giá gốc không được để trống."}
+    )
+
+    discount = fields.Integer(
+        allow_none=True,
+        default=0,
+        validate=validate.Range(min=0, max=100, error="Giảm giá phải từ 0 đến 100%."),
+        error_messages={"invalid": "Giảm giá phải là một số nguyên."}
+    )
+
+    discount_from_date = fields.Integer(
+        allow_none=True
+    )
+
+    discount_to_date = fields.Integer(
+        allow_none=True
+    )
+
+    name = fields.String(
+        required=True,
+        error_messages={"required": "Tên sản phẩm không được để trống."}
+    )
+
+    describe = fields.String(
+        allow_none=True
+    )
+
+    type_product_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã loại sản phẩm không được để trống."}
+    )
 
 class StaffValidation(BaseValidation):
-    email = fields.String(required=True, validate=validate.Regexp(REGEX_EMAIL))
-    phone = fields.String(required=True,
-                          validate=[validate.Length(min=10, max=20), validate.Regexp(REGEX_PHONE_NUMBER)])
-    full_name = fields.String(required=True)
-    gender = fields.Boolean(required=True)
-    birthday = fields.String(required=True)
-    detail_address = fields.String(required=True)
-    address = fields.Dict(required=True)
-    join_date = fields.String(required=True)
-    finish_date = fields.String(allow_none=True)
-    tax_code = fields.String(required=True)
-    identification_card = fields.String(required=True)
-    number_dependent = fields.Integer(required=True)
-    nationality = fields.String(required=True)
-    ethnicity = fields.String(required=True)
-    social_insurance_number = fields.Integer(required=True)
-    group_id = fields.String(required=True)
-    avatar_id = fields.String(allow_none=True)
+    email = fields.String(
+        required=True,
+        validate=validate.Regexp(REGEX_EMAIL, error="Email không hợp lệ."),
+        error_messages={"required": "Email không được để trống."}
+    )
+
+    phone = fields.String(
+        required=True,
+        validate=[
+            validate.Length(min=10, max=20, error="Số điện thoại phải có độ dài từ 10 đến 20 ký tự."),
+            validate.Regexp(REGEX_PHONE_NUMBER, error="Số điện thoại không hợp lệ.")
+        ],
+        error_messages={"required": "Số điện thoại không được để trống."}
+    )
+
+    full_name = fields.String(
+        required=True,
+        error_messages={"required": "Họ và tên không được để trống."}
+    )
+
+    gender = fields.Boolean(
+        required=True,
+        error_messages={"required": "Giới tính không được để trống."}
+    )
+
+    birthday = fields.String(
+        required=True,
+        error_messages={"required": "Ngày sinh không được để trống."}
+    )
+
+    detail_address = fields.String(
+        required=True,
+        error_messages={"required": "Địa chỉ chi tiết không được để trống."}
+    )
+
+    address = fields.Dict(
+        required=True,
+        error_messages={"required": "Địa chỉ không được để trống."}
+    )
+
+    join_date = fields.String(
+        required=True,
+        error_messages={"required": "Ngày vào công ty không được để trống."}
+    )
+
+    finish_date = fields.String(
+        allow_none=True
+    )
+
+    tax_code = fields.String(
+        required=True,
+        error_messages={"required": "Mã số thuế không được để trống."}
+    )
+
+    identification_card = fields.String(
+        required=True,
+        error_messages={"required": "CMND/CCCD không được để trống."}
+    )
+
+    number_dependent = fields.Integer(
+        required=True,
+        error_messages={"required": "Số người phụ thuộc không được để trống."}
+    )
+
+    nationality = fields.String(
+        required=True,
+        error_messages={"required": "Quốc tịch không được để trống."}
+    )
+
+    ethnicity = fields.String(
+        required=True,
+        error_messages={"required": "Dân tộc không được để trống."}
+    )
+
+    social_insurance_number = fields.Integer(
+        required=True,
+        error_messages={"required": "Số bảo hiểm xã hội không được để trống."}
+    )
+
+    group_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã nhóm không được để trống."}
+    )
+
+    avatar_id = fields.String(
+        allow_none=True
+    )
 
 
 class AttendanceSchema(Schema):
@@ -236,28 +449,58 @@ class AttendanceSchema(Schema):
 
 class PaymentValidation(BaseValidation):
     message = fields.String(allow_none=True)
-    ship_id = fields.String(required=True)
-    address_order_id = fields.String(required=True)
+
+    ship_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã đơn vị vận chuyển không được để trống."}
+    )
+
+    address_order_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã địa chỉ đặt hàng không được để trống."}
+    )
+
     payment_type = fields.String(
         required=True,
-        validate=validate.OneOf(choices=TYPE_PAYMENT_ONLINE.values(), error="Payment type must be 'momo' or 'zalo'")
+        validate=validate.OneOf(
+            choices=TYPE_PAYMENT_ONLINE.values(),
+            error="Loại thanh toán chỉ được là 'momo' hoặc 'zalo'."
+        ),
+        error_messages={"required": "Loại thanh toán không được để trống."}
     )
 
 class SessionOrderValidate(BaseValidation):
-    message = fields.String(allow_none=True)
-    ship_id = fields.String(required=True)
-    address_order_id = fields.String(required=True)
-    payment_type = fields.String(
-        required=True,
-        validate=validate.OneOf(choices=TYPE_PAYMENT.values(), error="Payment type must be 'cod' or 'momo' or 'zalo'")
+    message = fields.String(
+        allow_none=True
     )
 
-    payment_online_id = fields.String(allow_none=True)
+    ship_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã đơn vị vận chuyển không được để trống."}
+    )
+
+    address_order_id = fields.String(
+        required=True,
+        error_messages={"required": "Địa chỉ nhận hàng không được để trống."}
+    )
+
+    payment_type = fields.String(
+        required=True,
+        validate=validate.OneOf(
+            choices=TYPE_PAYMENT.values(),
+            error="Hình thức thanh toán phải là 'cod', 'momo' hoặc 'zalo'."
+        ),
+        error_messages={"required": "Hình thức thanh toán không được để trống."}
+    )
+
+    payment_online_id = fields.String(
+        allow_none=True
+    )
 
     @validates_schema
     def validate_payment_online_id(self, data, **kwargs):
         if data.get('payment_type') in TYPE_PAYMENT_ONLINE.values() and not data.get('payment_online_id'):
-            raise ValidationError("payment_online_id is required when payment_type is 'momo' or 'zalo'",
+            raise ValidationError("Mã giao dịch thanh toán online bắt buộc khi phương thức thanh toán là 'momo' hoặc 'zalo'.",
                                   field_name='payment_online_id')
 
 
@@ -266,15 +509,41 @@ class ArticleValidate(BaseValidation):
         fields.String(),
     )
 
-    title = fields.String(required=True)
-    community_id = fields.String(required=True)
-    body = fields.String(required=True)
+    title = fields.String(
+        required=True,
+        error_messages={"required": "Tiêu đề không được để trống."}
+    )
+
+    community_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã cộng đồng không được để trống."}
+    )
+
+    body = fields.String(
+        required=True,
+        error_messages={"required": "Nội dung bài viết không được để trống."}
+    )
+
 
 class CommentValidation(BaseValidation):
-    body = fields.String(required=True)
-    article_id = fields.String(required=True)
-    ancestry_id = fields.String(allow_none=True)
-    mention_usernames = fields.List(fields.String, allow_none=True)
+    body = fields.String(
+        required=True,
+        error_messages={"required": "Nội dung bình luận không được để trống."}
+    )
+
+    article_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã bài viết không được để trống."}
+    )
+
+    ancestry_id = fields.String(
+        allow_none=True
+    )
+
+    mention_usernames = fields.List(
+        fields.String,
+        allow_none=True
+    )
 
 
 class ReportValidation(BaseValidation):
@@ -283,11 +552,23 @@ class ReportValidation(BaseValidation):
             keys=fields.Str(),
             values=fields.Raw(),
         ),
-        allow_none=True,
+        allow_none=True
     )
-    order_id = fields.String(required=True)
-    reason = fields.String(required=True)
-    message = fields.String(required=True)
+
+    order_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã đơn hàng không được để trống."}
+    )
+
+    reason = fields.String(
+        required=True,
+        error_messages={"required": "Lý do báo cáo không được để trống."}
+    )
+
+    message = fields.String(
+        required=True,
+        error_messages={"required": "Nội dung báo cáo không được để trống."}
+    )
 
 class TypeProductSchema(Schema):
     id = fields.String()
@@ -327,13 +608,6 @@ class ProductSchema(Schema):
 
     class Meta:
         ordered = True
-
-class EmailValidation(BaseValidation):
-    pass
-
-
-class VerifyPasswordValidation(BaseValidation):
-    pass
 
 class QueryParamsSchema(BaseValidation):
     from_money = fields.Integer(allow_none=True, validate=validate.Range(min=0))  # Có thể None, không nhỏ hơn 0

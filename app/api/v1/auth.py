@@ -17,8 +17,7 @@ from app.utils import trim_dict, get_timestamp_now, logged_input, data_preproces
     body_mail
 from app.extensions import mail
 
-from app.validator import UserSchema, AuthValidation, PasswordValidation, EmailValidation, VerifyPasswordValidation, \
-    RegisterValidation, ProductValidation, UserValidation
+from app.validator import UserSchema, AuthValidation, PasswordValidation, RegisterValidation
 from flask_mail import Message as MessageMail
 
 ACCESS_EXPIRES = timedelta(days=7)
