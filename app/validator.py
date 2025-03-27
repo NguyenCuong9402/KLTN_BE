@@ -108,6 +108,13 @@ class StatisticTop10CustomerSchema(Schema):
     total_count = fields.Int()
 
 
+class StatisticTop5ProductSchema(Schema):
+    id = fields.Str()
+    name = fields.Str()
+    file_path = fields.Str()  # Đường dẫn avatar đã lấy từ Files.file_path
+    total_quantity = fields.Int()
+
+
 
 class AuthValidation(BaseValidation):
     password = fields.String(required=True,

@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict
 from datetime import datetime, timezone, date
-from sqlalchemy import cast, Integer, BigInteger, case, text
+from sqlalchemy import cast, Integer, BigInteger, case, text, and_
 from dateutil.relativedelta import relativedelta
 from flask import Blueprint, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -10,8 +10,8 @@ from sqlalchemy import asc, desc, func
 from app.api.helper import send_result, send_error
 from app.enums import KEY_GROUP_NOT_STAFF, STATUS_ORDER
 from app.extensions import db
-from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems, Files
-from app.validator import StatisticTop10CustomerSchema
+from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems, Files, FileLink
+from app.validator import StatisticTop10CustomerSchema, StatisticTop5ProductSchema
 
 api = Blueprint('statistic', __name__)
 
@@ -295,3 +295,38 @@ def number_user_by_age_and_gender():
     except Exception as ex:
         return send_error(message=str(ex))
 
+@api.route('/top_product', methods=['GET'])
+@jwt_required
+def top_product():
+    try:
+        now_dt = datetime.now(timezone.utc)
+        start_timestamp = int((now_dt - relativedelta(months=12)).timestamp())
+
+        # Truy vấn top 5 product có lượt bán hot nhất trong 1 năm
+        # Truy vấn top 5 sản phẩm bán chạy nhất trong 1 năm
+        top_products = (
+            db.session.query(
+                Product.id,
+                Product.name,
+                func.coalesce(Files.file_path, "").label("file_path"),  # Lấy file đầu tiên
+                func.sum(OrderItems.quantity).label("total_quantity")
+            )
+            .join(OrderItems, OrderItems.product_id == Product.id)
+            .outerjoin(
+                FileLink,
+                and_(FileLink.table_id == Product.id, FileLink.table_type == "product", FileLink.index == 0)
+                # Chỉ lấy index = 0
+            )
+            .outerjoin(Files, Files.id == FileLink.file_id)
+            .filter(OrderItems.created_date >= start_timestamp)
+            .group_by(Product.id, Product.name, Files.file_path)  # Nhóm theo sản phẩm
+            .order_by(desc("total_quantity"))
+            .limit(5)
+            .all()
+        )
+
+        data = StatisticTop5ProductSchema(many=True).dump(top_products)
+
+        return send_result(data=data, message="Thành công")
+    except Exception as ex:
+        return send_error(message=str(ex))
