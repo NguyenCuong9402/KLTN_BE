@@ -111,7 +111,7 @@ regions = {
         "Tỉnh Hà Giang",
         "Tỉnh Hà Nam",
         "Tỉnh Hải Dương",
-        "Tỉnh Hòa Bình",
+        "Tỉnh Hoà Bình",
         "Tỉnh Hưng Yên",
         "Tỉnh Lai Châu",
         "Tỉnh Lào Cai",

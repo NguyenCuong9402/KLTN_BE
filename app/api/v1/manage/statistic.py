@@ -249,7 +249,7 @@ def get_number_by_type_product_6_month_ago():
 @jwt_required
 def number_user_by_age_and_gender():
     try:
-        today = func.curdate()  # Sử dụng CURDATE() thay vì date.today()
+        today = func.curdate()  # Lấy ngày hiện tại từ MySQL
 
         age_expr = func.timestampdiff(text("YEAR"), User.birthday, today)
 
@@ -269,21 +269,29 @@ def number_user_by_age_and_gender():
             .all()
         )
 
-        age_groups = ["< 20", "20-40", "40-60", "> 60"]
-        data = {age: {0: 0, 1: 0} for age in age_groups}
+        # Định nghĩa các danh mục tuổi
+        categories = ["< 20", "20-40", "40-60", "> 60"]
 
+        # Tạo dictionary để chứa dữ liệu
+        age_gender_data = {
+            "Nam": {cat: 0 for cat in categories},
+            "Nữ": {cat: 0 for cat in categories}
+        }
+
+        # Duyệt qua kết quả thống kê và sắp xếp vào đúng nhóm
         for age_group, gender, count in stats:
-            data[age_group][gender] = count
+            gender_key = "Nam" if gender == 1 else "Nữ"
+            if age_group in age_gender_data[gender_key]:
+                age_gender_data[gender_key][age_group] = count
 
+        # Định dạng dữ liệu cho biểu đồ
         series_data = [
-            {"name": age, "data": [data[age][1], data[age][0]]} for age in age_groups
+            {"name": "Nam", "data": [age_gender_data["Nam"][cat] for cat in categories]},
+            {"name": "Nữ", "data": [age_gender_data["Nữ"][cat] for cat in categories]}
         ]
 
-        categories = ["Nam", "Nữ"]
-
-        result = {"series": series_data, "categories": categories}
-
-        return send_result(data=result, message="Thành công")
+        return send_result(data={"series": series_data, "categories": categories}, message="Thành công")
 
     except Exception as ex:
         return send_error(message=str(ex))
+

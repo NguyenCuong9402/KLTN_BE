@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import asc
 
 from app.api.helper import send_error, send_result, Token
+from app.enums import regions
 from app.models import Address, User, AddressOrder
 from shortuuid import uuid
 from app.extensions import jwt, db
@@ -175,6 +176,40 @@ def choose_default(address_order_id):
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))
+
+
+@api.route("/check", methods=["GET"])
+def check():
+    try:
+        # Gộp danh sách các tỉnh từ regions vào một list duy nhất
+        all_regions_provinces = []
+        for provinces in regions.values():
+            all_regions_provinces.extend(provinces)
+
+        # Lấy danh sách province từ database
+        db_provinces = [addr.province for addr in Address.query.with_entities(Address.province).distinct()]
+
+        # Kiểm tra danh sách thiếu
+        missing_in_db = [province for province in all_regions_provinces if province not in db_provinces]
+        missing_in_regions = [province for province in db_provinces if province not in all_regions_provinces]
+
+        # Group missing provinces theo từng region
+        missing_by_region = {
+            region: [province for province in provinces if province in missing_in_db]
+            for region, provinces in regions.items()
+        }
+
+        result = {
+            "region": {k: v for k, v in missing_by_region.items() if v},  # Lọc bỏ region không thiếu tỉnh nào
+            "province": missing_in_regions
+        }
+
+        return send_result(message="Done", data=result)
+
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex))
+
 
 
 
