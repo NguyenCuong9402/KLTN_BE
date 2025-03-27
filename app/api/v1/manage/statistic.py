@@ -14,9 +14,9 @@ from sqlalchemy_pagination import paginate
 from app.api.helper import send_result, send_error
 from app.enums import KEY_GROUP_NOT_STAFF, STATUS_ORDER
 from app.extensions import logger, db
-from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems
+from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems, Files
 from app.utils import trim_dict, escape_wildcard
-from app.validator import GroupSchema, QueryParamsAllSchema
+from app.validator import GroupSchema, QueryParamsAllSchema, UserSchema, StatisticTop10CustomerSchema
 
 api = Blueprint('statistic', __name__)
 
@@ -75,6 +75,40 @@ def statistic_all():
         return send_result(data=data, message="Thành công")
     except Exception as ex:
         return send_error(message=str(ex), code=442)
+
+
+@api.route('/top_customer', methods=['GET'])
+@jwt_required
+def top_customer():
+    try:
+        now_dt = datetime.now(timezone.utc)
+        start_timestamp = int((now_dt - relativedelta(months=12)).timestamp())
+
+        # Truy vấn top 10 user có tổng tiền orders lớn nhất trong 12 tháng gần nhất
+        top_users = (
+            db.session.query(
+                User.id,
+                User.full_name,
+                User.email,
+                Files.file_path,
+                func.sum(OrderItems.count).label("total_count")
+            )
+            .join(Orders, Orders.user_id == User.id)
+            .join(OrderItems, OrderItems.order_id == Orders.id)
+            .outerjoin(Files, Files.id == User.avatar_id)  # Outer join để tránh lỗi nếu không có avatar
+            .filter(OrderItems.created_date >= start_timestamp)
+            .group_by(User.id, Files.file_path)  # Cần group cả file_path nếu có outer join
+            .order_by(desc("total_count"))
+            .limit(10)
+            .all()
+        )
+
+        data = StatisticTop10CustomerSchema(many=True).dump(top_users)
+
+        return send_result(data=data, message="Thành công")
+    except Exception as ex:
+        return send_error(message=str(ex), code=442)
+
 
 
 @api.route('/revenue_and_sold_product_by_type', methods=['GET'])
@@ -164,4 +198,4 @@ def get_number_by_type_product_6_month_ago():
         }, message="Thành công")
 
     except Exception as ex:
-        return send_error(message=str(ex), code=442)
+        return send_error(message=str(ex))

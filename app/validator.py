@@ -100,6 +100,15 @@ class UserSchema(Schema):
 
 
 
+class StatisticTop10CustomerSchema(Schema):
+    id = fields.Str()
+    full_name = fields.Str()
+    email = fields.Str()
+    avatar = fields.Str()  # Đường dẫn avatar đã lấy từ Files.file_path
+    total_count = fields.Int()
+
+
+
 class AuthValidation(BaseValidation):
     password = fields.String(required=True,
                              validate=[validate.Length(min=8, max=16)])
