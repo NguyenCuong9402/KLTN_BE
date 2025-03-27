@@ -2,7 +2,7 @@ import json
 from collections import defaultdict
 from datetime import datetime, timezone
 from sqlalchemy import cast, Integer, BigInteger
-
+import random
 from dateutil.relativedelta import relativedelta
 from flask import Blueprint, request, make_response, send_file, Response
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -106,6 +106,33 @@ def top_customer():
         data = StatisticTop10CustomerSchema(many=True).dump(top_users)
 
         return send_result(data=data, message="Thành công")
+    except Exception as ex:
+        return send_error(message=str(ex), code=442)
+
+
+@api.route('/process_orders', methods=['GET'])
+@jwt_required
+def process_orders():
+    try:
+        data = [{
+            'resolved': 0,
+            'delivering': 40,
+            'pending': 60,
+            'chartData': [0, 40, 60]
+        },{
+            'resolved': 50,
+            'delivering': 0,
+            'pending': 50,
+            'chartData': [50, 0, 50]
+        },
+        {
+            'resolved': 70,
+            'delivering': 30,
+            'pending': 0,
+            'chartData': [70, 30, 0]
+        }]
+
+        return send_result(data=random.choice(data), message="Thành công")
     except Exception as ex:
         return send_error(message=str(ex), code=442)
 
