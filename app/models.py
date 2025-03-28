@@ -641,12 +641,15 @@ class Orders(db.Model):
 
 class Notify(db.Model):
     __tablename__ = 'notify'
+
     id = db.Column(db.String(50), primary_key=True)
     created_date = db.Column(db.Integer, default=get_timestamp_now())
+    modified_date = db.Column(db.Integer, default=get_timestamp_now())
+
     user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
                         nullable=True)
     user = db.relationship('User', viewonly=True)
-    notice_type = db.Column(db.String(50), nullable=False)
+    notify_type = db.Column(db.String(50), nullable=False)
 
     # type là loại model, id là id ban đó
     action_type = db.Column(db.String(50), nullable=True)

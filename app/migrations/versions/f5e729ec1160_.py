@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 5ebdc876623c
+Revision ID: f5e729ec1160
 Revises: 
-Create Date: 2025-03-28 11:03:08.043273
+Create Date: 2025-03-28 15:30:02.943389
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = '5ebdc876623c'
+revision = 'f5e729ec1160'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -269,8 +269,9 @@ def upgrade():
     op.create_table('notify',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('created_date', sa.Integer(), nullable=True),
+    sa.Column('modified_date', sa.Integer(), nullable=True),
     sa.Column('user_id', sa.String(length=50), nullable=True),
-    sa.Column('notice_type', sa.String(length=50), nullable=False),
+    sa.Column('notify_type', sa.String(length=50), nullable=False),
     sa.Column('action_type', sa.String(length=50), nullable=True),
     sa.Column('action_id', sa.String(length=50), nullable=True),
     sa.Column('unread', sa.Boolean(), nullable=False),

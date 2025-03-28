@@ -22,6 +22,14 @@ STATUS_ORDER = {
     'RESOLVED': 'resolved',
 }
 
+NOTIFY_TYPE = {
+    "ARTICLE": 'article',
+    "COMMENT": 'comment',
+    "REACTION": 'reaction',
+    "ORDER": 'order',
+    "PRODUCT": 'product',
+}
+
 ATTENDANCE_STATUS = {
     'PRESENT': 'present',   # Đầy đủ
     'MISSING': 'missing',   # Thiếu
