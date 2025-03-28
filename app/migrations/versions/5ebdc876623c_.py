@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 3a5a6b38c2b0
+Revision ID: 5ebdc876623c
 Revises: 
-Create Date: 2025-03-27 22:32:16.733424
+Create Date: 2025-03-28 11:03:08.043273
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = '3a5a6b38c2b0'
+revision = '5ebdc876623c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -266,6 +266,17 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_document_storage_created_date'), 'document_storage', ['created_date'], unique=False)
+    op.create_table('notify',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('created_date', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.String(length=50), nullable=True),
+    sa.Column('notice_type', sa.String(length=50), nullable=False),
+    sa.Column('action_type', sa.String(length=50), nullable=True),
+    sa.Column('action_id', sa.String(length=50), nullable=True),
+    sa.Column('unread', sa.Boolean(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('reaction',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('user_id', sa.String(length=50), nullable=True),
@@ -357,6 +368,17 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_comment_created_date'), 'comment', ['created_date'], unique=False)
+    op.create_table('notify_detail',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('created_date', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.String(length=50), nullable=True),
+    sa.Column('action_type', sa.String(length=50), nullable=True),
+    sa.Column('action_id', sa.String(length=50), nullable=True),
+    sa.Column('notify_id', sa.String(length=50), nullable=True),
+    sa.ForeignKeyConstraint(['notify_id'], ['notify.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('payment_online',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('order_payment_id', sa.String(length=100), nullable=False),
@@ -372,17 +394,14 @@ def upgrade():
     op.create_table('salary_report',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('user_id', sa.String(length=50), nullable=False),
-    sa.Column('group_id', sa.String(length=50), nullable=True),
     sa.Column('salary_id', sa.String(length=50), nullable=True),
-    sa.Column('month', sa.Integer(), nullable=False),
-    sa.Column('year', sa.Integer(), nullable=False),
+    sa.Column('payment_date', sa.Date(), nullable=False),
     sa.Column('kpi_score', mysql.INTEGER(unsigned=True), nullable=False),
     sa.Column('number_dependent', mysql.INTEGER(unsigned=True), nullable=True),
     sa.Column('reward', mysql.INTEGER(unsigned=True), nullable=False),
     sa.Column('total_salary', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
     sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.ForeignKeyConstraint(['group_id'], ['group.id'], onupdate='CASCADE', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['salary_id'], ['salary.id'], onupdate='CASCADE', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -463,6 +482,7 @@ def downgrade():
     op.drop_index(op.f('ix_salary_report_created_date'), table_name='salary_report')
     op.drop_table('salary_report')
     op.drop_table('payment_online')
+    op.drop_table('notify_detail')
     op.drop_index(op.f('ix_comment_created_date'), table_name='comment')
     op.drop_table('comment')
     op.drop_table('cart_items')
@@ -475,6 +495,7 @@ def downgrade():
     op.drop_table('salary')
     op.drop_index(op.f('ix_reaction_created_date'), table_name='reaction')
     op.drop_table('reaction')
+    op.drop_table('notify')
     op.drop_index(op.f('ix_document_storage_created_date'), table_name='document_storage')
     op.drop_table('document_storage')
     op.drop_index(op.f('ix_color_created_date'), table_name='color')
