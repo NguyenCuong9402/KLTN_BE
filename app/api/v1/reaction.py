@@ -42,7 +42,6 @@ def toggle_reaction():
 
         if reaction:
             reaction.vote = not reaction.vote
-            print(not reaction.vote)
             reaction.modified_date = get_timestamp_now()
         else:
             reaction = Reaction(id=str(uuid()), user_id=user_id,**json_body)

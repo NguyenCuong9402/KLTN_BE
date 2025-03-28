@@ -49,7 +49,6 @@ def notify_handler(mapper, connection, target):
 def delete_notify_handler(mapper, connection, target):
     delete_notification_map = {
         Article: handle_article_delete,
-        Comment: handle_comment_delete,
         Reaction: handle_reaction_delete,
         Product: handle_product_delete
     }
@@ -64,6 +63,6 @@ for model in models_to_connect:
 
 
 # Đăng ký signal cho tất cả models
-models_to_connect = [Article, Comment, Reaction, Product]
+models_to_connect = [Article, Comment, Product]
 for model in models_to_connect:
     listens_for(model, "before_delete")(delete_notify_handler)
