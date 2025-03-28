@@ -26,7 +26,15 @@ NOTIFY_TYPE = {
     "ARTICLE": 'article',
     "COMMENT": 'comment',
     "REACTION": 'reaction',
-    "ORDER": 'order',
+    "ORDERS": 'ORDERS',
+    "PRODUCT": 'product',
+}
+
+CONTENT_TYPE = {
+    "ARTICLE": 'article',
+    "COMMENT": 'comment',
+    "REACTION": 'reaction',
+    "ORDERS": 'orders',
     "PRODUCT": 'product',
 }
 

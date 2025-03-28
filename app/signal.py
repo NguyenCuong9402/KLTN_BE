@@ -2,9 +2,9 @@ from shortuuid import uuid
 from sqlalchemy import desc
 from sqlalchemy.event import listens_for
 
-from app.enums import NOTIFY_TYPE
+from app.enums import NOTIFY_TYPE, CONTENT_TYPE
 from app.extensions import db
-from app.models import Article, Comment, Reaction, Orders, Product, Notify, NotifyDetail
+from app.models import Article, Comment, Reaction, Orders, Product, Notify, NotifyDetail, User
 from app.utils import get_timestamp_now
 
 
@@ -43,22 +43,23 @@ def create_notify(user_id, notify_type, action_type=None, action_id=None):
 
     return notify
 
-def handle_notify(instance, user_id, notify_type, notify_detail_type,  action_type=None, action_id=None):
-    notify = get_notify(user_id, notify_type, action_type, action_id, )
+def handle_notify(instance, action_detail_type, user_id, notify_type, action_type=None,  action_id=None):
+    notify = get_notify(user_id, notify_type, action_type, action_id)
     if notify is None:
         notify = create_notify(user_id, notify_type, action_type, action_id)
     else:
         notify.modified_date = get_timestamp_now()
 
-    notify_detail = NotifyDetail(id=str(uuid()), user_id=user_id, action_type=notify_detail_type,
+    notify_detail = NotifyDetail(id=str(uuid()), user_id=user_id, action_type=action_detail_type,
                                  action_id=instance.id, notify_id=notify.id)
     db.session.add(notify_detail)
     db.session.commit()
 
 
 def handle_article_notification(instance):
-    print(f"Bài viết '{instance.id}' đã được tạo!")
-
+    users = User.query.filter(User.group.has(is_staff=True)).all()
+    for user in users:
+        handle_notify(instance, CONTENT_TYPE["ARTICLE"], user.id, NOTIFY_TYPE["ARTICLE"])
 
 
 def handle_comment_notification(instance):
@@ -70,10 +71,14 @@ def handle_reaction_notification(instance):
 
 
 def handle_orders_notification(instance):
-    print(f"Đơn hàng mới: {instance.id}")
+    users = User.query.filter(User.group.has(is_staff=True)).all()
+    for user in users:
+        handle_notify(instance, CONTENT_TYPE["ORDERS"] , user.id, NOTIFY_TYPE["ORDERS"])
 
 def handle_add_product_notification(instance):
-    print(f"Sản phẩm mới: {instance.id}")
+    users = User.query.filter(User.group.has(is_staff=True)).all()
+    for user in users:
+        handle_notify(instance, CONTENT_TYPE["PRODUCT"] ,user.id, NOTIFY_TYPE["PRODUCT"])
 
 
 def handle_article_delete(instance):
