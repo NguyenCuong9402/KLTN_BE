@@ -38,7 +38,7 @@ class Worker:
         FOLDER_SRC = r"E:/KTLN/BE/app/file_mau/"  # Thư mục nguồn
         FOLDER_DEST = r"E:/KTLN/BE/app/files/image"  # Thư mục đích
 
-        # FOLDER_SRC = r"C:\Users\Administrator\Documents\KhoaLuanTotNghiep\kltn-be\app\files\file_mau/"
+        # FOLDER_SRC = r"C:\Users\Administrator\Documents\KhoaLuanTotNghiep\kltn-be\app\file_mau"
         # FOLDER_DEST = r"C:\Users\Administrator\Documents\KhoaLuanTotNghiep\kltn-be\app\files\image/"
 
         FOLDER_DEST_SAVE_DB = "/files/image/"
