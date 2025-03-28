@@ -24,7 +24,7 @@ def create_app(config_object=CONFIG):
     register_blueprints(app)
     register_monitor(app)
     CORS(app, expose_headers=["Content-Disposition"])
-
+    from app import signal
     if config_object.ENABLE_RABBITMQ_CONSUMER:
         run_consumers_in_thread()
 
