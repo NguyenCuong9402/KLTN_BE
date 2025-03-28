@@ -634,6 +634,38 @@ class Orders(db.Model):
         return data
 
 
+class Notify(db.Model):
+    __tablename__ = 'notify'
+    id = db.Column(db.String(50), primary_key=True)
+    created_date = db.Column(db.Integer, default=get_timestamp_now())
+    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
+                        nullable=True)
+    user = db.relationship('User', viewonly=True)
+    notice_type = db.Column(db.String(50), nullable=False)
+
+    # type là loại model, id là id ban đó
+    action_type = db.Column(db.String(50), nullable=True)
+    action_id = db.Column(db.String(50), nullable=True)
+    unread = db.Column(db.Boolean, default=True, nullable=False)
+
+
+class NotifyDetail(db.Model):
+    __tablename__ = 'notify_detail'
+    id = db.Column(db.String(50), primary_key=True)
+    created_date = db.Column(db.Integer, default=get_timestamp_now())
+    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
+                        nullable=True)
+    user = db.relationship('User', viewonly=True)
+
+    # type là loại model, id là id ban đó
+    action_type = db.Column(db.String(50), nullable=True)
+    action_id = db.Column(db.String(50), nullable=True)
+
+    notify_id = db.Column(db.String(50), db.ForeignKey('notify.id', ondelete='CASCADE', onupdate='CASCADE'),
+                        nullable=True)
+
+
+
 class PaymentOnline(db.Model):
     __tablename__ = 'payment_online'
     id = db.Column(db.String(50), primary_key=True)
