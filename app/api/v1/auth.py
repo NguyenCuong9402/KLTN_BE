@@ -192,17 +192,19 @@ def register():
         db.session.add(code)
         db.session.flush()
 
+        title_mail = 'MÃ XÁC THỰC ĐĂNG KÝ TÀI KHOẢN C&M'
         # gửi mail neu co queue
         if DevConfig.ENABLE_RABBITMQ_CONSUMER:
             body = {
                 'type_action': TYPE_ACTION_SEND_MAIL['REGISTER'],
                 'body_mail': body,
-                'email': [email]
+                'email': [email],
+                'title': title_mail
             }
             queue_mail = RabbitMQProducerSendMail()
             queue_mail.call(body)
         else:
-            msg = MessageMail('Mã xác thực:', recipients=[email])
+            msg = MessageMail(title_mail, recipients=[email])
             msg.body = mail_send.body
             mail.send(msg)
 

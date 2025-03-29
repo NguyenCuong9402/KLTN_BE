@@ -53,7 +53,7 @@ class RabbitMQConsumerSendMailConsumer(BaseRabbitMQConsumer):
             email =  message.get('email')
 
             with current_app.app_context():  # Thêm application context
-                msg = MessageMail('Mã xác thực:', recipients=email)
+                msg = MessageMail(message.get('title_mail'), recipients=email)
                 msg.body = message.get('body_mail')
                 mail.send(msg)
 
