@@ -100,7 +100,8 @@ class UserSchema(Schema):
     group = fields.Nested(GroupSchema())
     avatar = fields.Nested(FileSchema())
     created_date = fields.Integer()
-
+    is_active = fields.Boolean()
+    status = fields.Boolean()
 
     join_date = fields.Date()
     finish_date = fields.Date()

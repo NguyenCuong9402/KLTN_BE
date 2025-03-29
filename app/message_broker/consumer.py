@@ -48,12 +48,12 @@ class RabbitMQConsumerSendMailConsumer(BaseRabbitMQConsumer):
     def process_message(self, message):
         type_action = message.get('type_action', None)
         email = message.get('email')
+        if type_action in[TYPE_ACTION_SEND_MAIL['REGISTER'], TYPE_ACTION_SEND_MAIL['OPEN_ACCOUNT'],
+                          TYPE_ACTION_SEND_MAIL['UPDATE_ACCOUNT']] and email:
 
-        if type_action == TYPE_ACTION_SEND_MAIL['REGISTER'] and email:
             email =  message.get('email')
-
             with current_app.app_context():  # Thêm application context
-                msg = MessageMail(message.get('title_mail'), recipients=email)
+                msg = MessageMail(message.get('title', 'MÃ XÁC THỰC ĐĂNG KÝ TÀI KHOẢN C&M'), recipients=email)
                 msg.body = message.get('body_mail')
                 mail.send(msg)
 
@@ -61,7 +61,6 @@ class RabbitMQConsumerSendMailConsumer(BaseRabbitMQConsumer):
             pass
         elif type_action == TYPE_ACTION_SEND_MAIL['FORGET_PASS']:
             pass
-
 
 class RabbitMQConsumerGenerateReportConsumer(BaseRabbitMQConsumer):
     def __init__(self):

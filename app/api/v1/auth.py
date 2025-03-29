@@ -173,7 +173,7 @@ def register():
         if User.query.filter(User.email == json_body.get('email'), User.phone == json_body.get('phone')).first():
             return send_error(message='Gmail/ Phone đã được đăng ký.')
         group = Group.query.filter(Group.key == GROUP_USER_KEY).first()
-        user = User(id=str(uuid()), **json_body, group_id=group.id, status=False)
+        user = User(id=str(uuid()), **json_body, group_id=group.id, status=False, is_active=True)
         db.session.add(user)
         db.session.flush()
 
@@ -188,7 +188,7 @@ def register():
         db.session.flush()
 
         # Tạo verity code
-        code = VerityCode(id=str(uuid()), user_id=user.id, mail_id=mail_send.id, code=code, type=1)
+        code = VerityCode(id=str(uuid()), user_id=user.id, mail_id=mail_send.id, code=code)
         db.session.add(code)
         db.session.flush()
 
@@ -220,6 +220,10 @@ def register():
 @jwt_required
 def send_code():
     try:
+        json_req = request.get_json()
+
+        type_input_code = json_req.get('type_input_code', None)
+
         user_id = get_jwt_identity()
         user = User.query.filter_by(id=user_id).first()
         if user is None:
@@ -235,15 +239,39 @@ def send_code():
         db.session.flush()
 
         # Tạo verity code
-        code = VerityCode(id=str(uuid()), user_id=user.id, mail_id=mail_send.id, code=code, type=1)
+        code = VerityCode(id=str(uuid()), user_id=user.id, mail_id=mail_send.id, code=code)
         db.session.add(code)
 
         db.session.flush()
         db.session.commit()
 
-        msg = MessageMail('Mã xác thực là:', recipients=[user.email])
-        msg.body = mail_send.body
-        mail.send(msg)
+        # msg = MessageMail('Mã xác thực là:', recipients=[user.email])
+        # msg.body = mail_send.body
+        # mail.send(msg)
+        email = user.email
+
+        title_mail = 'MÃ XÁC THỰC'
+
+        if type_input_code == TYPE_ACTION_SEND_MAIL['OPEN_ACCOUNT']:
+            title_mail = 'MÃ XÁC THỰC MỞ KHÓA TÀI KHOẢN C&M'
+
+        elif type_input_code == TYPE_ACTION_SEND_MAIL['UPDATE_ACCOUNT']:
+            title_mail = 'MÃ XÁC THAY ĐỔI MẬT KHẨU TÀI KHOẢN C&M'
+
+
+        if DevConfig.ENABLE_RABBITMQ_CONSUMER:
+            body = {
+                'type_action': type_input_code,
+                'body_mail': body,
+                'email': [email],
+                'title': title_mail
+            }
+            queue_mail = RabbitMQProducerSendMail()
+            queue_mail.call(body)
+        else:
+            msg = MessageMail(title_mail, recipients=[email])
+            msg.body = mail_send.body
+            mail.send(msg)
 
         return send_result(message='Gửi Code thành công.', data={'verity_code_id': code.id})
     except Exception as ex:
@@ -296,12 +324,12 @@ def verity_code():
         # user_id = get_jwt_identity()
         code = json_req.get('code', '')
         verity_code_id = json_req.get('verity_code_id', '')
-        type_code = json_req.get('type_code', None)
+        type_input_code = json_req.get('type_input_code', None)
         verity = VerityCode.query.filter(VerityCode.id == verity_code_id).first()
         if verity.code != code:
             return send_error(message='Mã Code không hợp lệ.')
 
-        if type_code == TYPE_ACTION_SEND_MAIL['REGISTER']:
+        if type_input_code == TYPE_ACTION_SEND_MAIL['REGISTER']:
             user = User.query.filter(User.id == verity.user_id).first()
             user.status = 1
             db.session.flush()

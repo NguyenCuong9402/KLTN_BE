@@ -71,6 +71,8 @@ LAYER_COMMENT = 2
 
 TYPE_ACTION_SEND_MAIL = {
     'REGISTER': 'register',
+    'OPEN_ACCOUNT': 'open_account',
+    'UPDATE_ACCOUNT': 'update_account',
     'CHANGE_PASS': 'change_pass',
     'FORGET_PASS': 'forget_pass'
 }
