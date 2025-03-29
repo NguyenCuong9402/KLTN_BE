@@ -28,9 +28,9 @@ def create_app(config_object=CONFIG):
     if config_object.ENABLE_RABBITMQ_CONSUMER:
         run_consumers_in_thread(app)
 
-    if config_object.ENV == 'prd':
-        # Task Scheduler backup data runs every 2 week at 03:00:00pm
-        scheduler.add_job(backup_data, trigger='cron', hour='15', minute='00', second='00')
+    # if config_object.ENV == 'prd':
+    #     # Task Scheduler backup data runs every 2 week at 03:00:00pm
+    #     scheduler.add_job(backup_data, trigger='cron', hour='15', minute='00', second='00')
 
     return app
 
