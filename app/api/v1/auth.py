@@ -7,12 +7,15 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, get_raw_jwt, jwt_refresh_token_required, jwt_required)
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.enums import ADMIN_EMAIL, MAIL_VERITY_CODE, GROUP_KEY_PARAM, GROUP_ADMIN_KEY, GROUP_USER_KEY
+from app.enums import ADMIN_EMAIL, MAIL_VERITY_CODE, GROUP_KEY_PARAM, GROUP_ADMIN_KEY, GROUP_USER_KEY, \
+    TYPE_ACTION_SEND_MAIL
 from app.api.helper import get_permissions, CONFIG, send_email_template, get_roles_key, Token, convert_to_datetime
 from app.api.helper import send_error, send_result, Token
 from app.extensions import jwt, db
 from app.gateway import authorization_require
+from app.message_broker import RabbitMQProducerSendMail
 from app.models import User, EmailTemplate, VerityCode, Mail, GroupRole, Group, Address
+from app.settings import DevConfig
 from app.utils import trim_dict, get_timestamp_now, logged_input, data_preprocessing, generate_random_number_string, \
     body_mail
 from app.extensions import mail
@@ -170,15 +173,16 @@ def register():
         if User.query.filter(User.email == json_body.get('email'), User.phone == json_body.get('phone')).first():
             return send_error(message='Gmail/ Phone đã được đăng ký.')
         group = Group.query.filter(Group.key == GROUP_USER_KEY).first()
-        user = User(id=str(uuid()), **json_body, group_id=group.id)
+        user = User(id=str(uuid()), **json_body, group_id=group.id, status=False)
         db.session.add(user)
         db.session.flush()
 
+        email = json_body.get('email')
         code = generate_random_number_string()
         # body = body_mail(MAIL_VERITY_CODE, {'code': code})
         body = f"Mã Code của bạn là : {code} "
         # Mail
-        mail_send = Mail(id=str(uuid()), body=body, email=json_body.get('email'))
+        mail_send = Mail(id=str(uuid()), body=body, email=email)
 
         db.session.add(mail_send)
         db.session.flush()
@@ -188,10 +192,19 @@ def register():
         db.session.add(code)
         db.session.flush()
 
-        # gửi mail
-        msg = MessageMail('Mã xác thực:', recipients=[json_body.get('email')])
-        msg.body = mail_send.body
-        mail.send(msg)
+        # gửi mail neu co queue
+        if DevConfig.ENABLE_RABBITMQ_CONSUMER:
+            body = {
+                'type_action': TYPE_ACTION_SEND_MAIL['REGISTER'],
+                'body_mail': body,
+                'email': [email]
+            }
+            queue_mail = RabbitMQProducerSendMail()
+            queue_mail.call(body)
+        else:
+            msg = MessageMail('Mã xác thực:', recipients=[email])
+            msg.body = mail_send.body
+            mail.send(msg)
 
         db.session.commit()
         return send_result(data={'verity_code_id': code.id}, message='Đăng kí thành công')

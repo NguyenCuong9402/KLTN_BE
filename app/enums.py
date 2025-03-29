@@ -69,6 +69,12 @@ TYPE_PAYMENT = {
 
 LAYER_COMMENT = 2
 
+TYPE_ACTION_SEND_MAIL = {
+    'REGISTER': 'register',
+    'CHANGE_PASS': 'change_pass',
+    'FORGET_PASS': 'forget_pass'
+}
+
 TYPE_FILE_LINK = {
     'USER': 'user',
     'PRODUCT': 'product',

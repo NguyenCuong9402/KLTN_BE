@@ -1,7 +1,13 @@
 import pika
 import json
-from app.settings import  DevConfig
+
+from flask import current_app
+
+from app.enums import TYPE_ACTION_SEND_MAIL
+from app.settings import DevConfig
 import os
+from flask_mail import Message as MessageMail
+from app.extensions import mail
 
 CONFIG = DevConfig
 
@@ -20,7 +26,6 @@ class BaseRabbitMQConsumer:
 
         self.channel.queue_declare(queue=self.queue_name, durable=True)
         self.channel.queue_bind(exchange=CONFIG.EXCHANGE_NAME, queue=self.queue_name, routing_key=self.routing_key)
-
 
     def callback(self, ch, method, properties, body):
         print(f"[{self.__class__.__name__}] Received message: {body.decode()}")
@@ -41,7 +46,21 @@ class RabbitMQConsumerSendMailConsumer(BaseRabbitMQConsumer):
         super().__init__(CONFIG.SEND_MAIL_QUEUE, CONFIG.SEND_MAIL_ROUTING_KEY)
 
     def process_message(self, message):
-        print(f"[SendMail] Processing email data: {message}")
+        type_action = message.get('type_action', None)
+        email = message.get('email')
+
+        if type_action == TYPE_ACTION_SEND_MAIL['REGISTER'] and email:
+            email =  message.get('email')
+
+            with current_app.app_context():  # Thêm application context
+                msg = MessageMail('Mã xác thực:', recipients=email)
+                msg.body = message.get('body_mail')
+                mail.send(msg)
+
+        elif type_action == TYPE_ACTION_SEND_MAIL['CHANGE_PASS']:
+            pass
+        elif type_action == TYPE_ACTION_SEND_MAIL['FORGET_PASS']:
+            pass
 
 
 class RabbitMQConsumerGenerateReportConsumer(BaseRabbitMQConsumer):

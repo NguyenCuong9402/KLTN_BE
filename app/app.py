@@ -26,7 +26,7 @@ def create_app(config_object=CONFIG):
     CORS(app, expose_headers=["Content-Disposition"])
     from app import signal
     if config_object.ENABLE_RABBITMQ_CONSUMER:
-        run_consumers_in_thread()
+        run_consumers_in_thread(app)
 
     if config_object.ENV == 'prd':
         # Task Scheduler backup data runs every 2 week at 03:00:00pm

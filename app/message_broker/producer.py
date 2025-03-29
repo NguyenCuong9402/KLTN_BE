@@ -27,13 +27,18 @@ class BaseRabbitMQProducer(abc.ABC):
         """Subclasses must define a routing key."""
         pass
 
+    @abc.abstractmethod
+    def expiration(self):
+        """Subclasses must define a routing key."""
+        pass
+
     def call(self, message):
         print(f"[{self.__class__.__name__}] Sending message: {message}")
         self.channel.basic_publish(
             exchange=self.exchange_name,
             routing_key=self.routing_key,
             body=json.dumps(message),
-            properties=pika.BasicProperties(delivery_mode=2),  # Ensure message durability
+            properties=pika.BasicProperties(delivery_mode=2, expiration=self.expiration),  # Ensure message durability
         )
 
 
@@ -41,6 +46,10 @@ class RabbitMQProducerSendMail(BaseRabbitMQProducer):
     @property
     def routing_key(self):
         return CONFIG.SEND_MAIL_ROUTING_KEY
+
+    @property
+    def expiration(self):
+        return tinh_ttl(phut=3)
 
     def __init__(self):
         super().__init__()
@@ -52,6 +61,10 @@ class RabbitMQProducerGenerateReport(BaseRabbitMQProducer):
     def routing_key(self):
         return CONFIG.GENERATE_REPORT_ROUTING_KEY
 
+    @property
+    def expiration(self):
+        return tinh_ttl(phut=6)
+
     def __init__(self):
         super().__init__()
         self.channel.queue_declare(queue=CONFIG.GENERATE_REPORT_QUEUE, durable=True)
@@ -62,6 +75,25 @@ class RabbitMQProducerStatistics(BaseRabbitMQProducer):
     def routing_key(self):
         return CONFIG.STATISTICS_ROUTING_KEY
 
+    @property
+    def expiration(self):
+        return tinh_ttl(phut=6)
+
     def __init__(self):
         super().__init__()
         self.channel.queue_declare(queue=CONFIG.STATISTICS_QUEUE, durable=True)
+
+
+def tinh_ttl(phut=0, giay=0):
+    """
+    Tính TTL (Time-To-Live) cho thông điệp trong RabbitMQ.
+
+    Tham số:
+    - phut: Số phút.
+    - giay: Số giây.
+
+    Trả về:
+    - TTL dưới dạng chuỗi mili giây.
+    """
+    ttl_miligiay = (phut * 60 + giay) * 1000
+    return str(ttl_miligiay)
