@@ -294,13 +294,18 @@ def verity_code():
         # user_id = get_jwt_identity()
         code = json_req.get('code', '')
         verity_code_id = json_req.get('verity_code_id', '')
+        type_code = json_req.get('type_code', None)
         verity = VerityCode.query.filter(VerityCode.id == verity_code_id).first()
         if verity.code != code:
             return send_error(message='Mã Code không hợp lệ.')
-        user = User.query.filter(User.id == verity.user_id).first()
-        user.is_active = 1
-        db.session.flush()
-        db.session.commit()
+
+        if type_code == TYPE_ACTION_SEND_MAIL['REGISTER']:
+            user = User.query.filter(User.id == verity.user_id).first()
+            user.status = 1
+            db.session.flush()
+            db.session.commit()
+
+
         return send_result(message='Xác thực thành công.')
     except Exception as ex:
         db.session.rollback()
