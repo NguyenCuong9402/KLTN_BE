@@ -659,6 +659,7 @@ class ParamTypeProduct(QueryParamsAllSchema):
 class QueryParamsArticleSchema(QueryParamsAllSchema):
     community_id = fields.String(allow_none=True)
     timestamp = fields.Integer(allow_none=True)
+    profile_id = fields.String(allow_none=True)
 
 
 class CommentParamsValidation(BaseValidation):
