@@ -99,18 +99,15 @@ class Attendance(db.Model):
             check_out_dt = datetime.combine(base_date, self.check_out)
             # Chuyển đổi thời gian của ATTENDANCE thành datetime
             check_in_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_IN'])
-            late_check_in_attendance = datetime.combine(base_date, ATTENDANCE['LATE_CHECK_IN'])
             check_out_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_OUT'])
 
             # Điều kiện trả về "full"
-            if check_in_dt <= (check_in_attendance + timedelta(hours=1)) and check_out_dt >= (
-                    check_out_attendance - timedelta(minutes=30)):
+            if check_in_dt <= check_in_attendance and check_out_dt >= check_out_attendance:
                 return WORK_UNIT_TYPE.get('FULL')
-            # Điều kiện trả về "half"
-            elif check_in_dt <= late_check_in_attendance and check_out_dt >= (
-                    check_out_attendance - timedelta(minutes=30)):
-                return WORK_UNIT_TYPE.get('HALF')
 
+            elif check_in_dt <= (check_in_attendance + timedelta(hours=1)) and check_out_dt >= (
+                    check_out_attendance - timedelta(hours=1)):
+                return WORK_UNIT_TYPE.get('HALF')
         return None
 
     @property

@@ -1,16 +1,17 @@
 import json
 from collections import defaultdict
 from datetime import datetime, timezone, date
-from sqlalchemy import cast, Integer, BigInteger, case, text, and_
+from sqlalchemy import cast, Integer, BigInteger, case, text, and_, extract
 from dateutil.relativedelta import relativedelta
 from flask import Blueprint, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy import asc, desc, func
 
 from app.api.helper import send_result, send_error
-from app.enums import KEY_GROUP_NOT_STAFF, STATUS_ORDER
+from app.enums import KEY_GROUP_NOT_STAFF, STATUS_ORDER, ATTENDANCE, WORK_UNIT_TYPE
 from app.extensions import db
-from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems, Files, FileLink
+from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems, Files, FileLink, \
+    Attendance
 from app.validator import StatisticTop10CustomerSchema, StatisticTop5ProductSchema
 
 api = Blueprint('statistic', __name__)
@@ -328,5 +329,79 @@ def top_product():
         data = StatisticTop5ProductSchema(many=True).dump(top_products)
 
         return send_result(data=data, message="Thành công")
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+
+## Thống kê số lần đi muộn, về sớm. Số công/Tháng
+@api.route('/statistic_attendance', methods=['GET'])
+@jwt_required
+def statistic_attendance():
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+
+        if user is None:
+            return send_error(message="Tài khoản không tồn tại")
+
+        if user.group.key in KEY_GROUP_NOT_STAFF:
+            return send_error(message="Tài khoản không có quyền")
+
+        # Lấy tham số thời gian (mm-yyyy)
+        time_str = request.args.get("time_str", type=str)
+        if not time_str:
+            time_obj = datetime.now()
+        else:
+            try:
+                time_obj = datetime.strptime(time_str, "%m-%Y")
+            except ValueError:
+                return send_error(message="Định dạng time không hợp lệ, yêu cầu MM-YYYY")
+
+        # Lấy tháng và năm từ time_obj
+        month = time_obj.month
+        year = time_obj.year
+
+        # Truy vấn danh sách Attendance
+        attendances = Attendance.query.filter(
+            Attendance.user_id == user_id,
+            extract("month", Attendance.work_date) == month,
+            extract("year", Attendance.work_date) == year
+        ).order_by(Attendance.work_date.asc()).all()
+
+        # Serialize dữ liệu
+        # result = AttendanceSchema(many=True).dump(attendances)
+
+        base_date = datetime.today().date()
+        # Chuyển đổi check_in và check_out của nhân viên thành datetime
+        # Chuyển đổi thời gian của ATTENDANCE thành datetime
+        check_in_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_IN'])
+        check_out_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_OUT'])
+
+        data = {
+            'work_later': 0,
+            'leave_early': 0,
+            'forget_checkout': 0,
+            'work_unit': 0
+        }
+
+        for attendance in attendances:
+            if attendance.check_in:
+                check_in_dt = datetime.combine(base_date, attendance.check_in)
+                if check_in_dt > check_in_attendance:
+                    data['work_later'] += 1
+
+                if not attendance.check_out:
+                    data['forget_checkout'] +=1
+                else:
+                    check_out_dt = datetime.combine(base_date, attendance.check_out)
+                    if check_out_dt < check_out_attendance:
+                        data['leave_early'] += 1
+
+            if attendance.work_unit in [WORK_UNIT_TYPE.get('HALF'), attendance.work_unit == WORK_UNIT_TYPE.get('FULL')]:
+                data['work_unit'] += 1
+
+
+        return send_result(data=data, message="Thành công")
+
     except Exception as ex:
         return send_error(message=str(ex))

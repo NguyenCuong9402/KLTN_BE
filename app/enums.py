@@ -52,8 +52,8 @@ ATTENDANCE = {
 }
 
 WORK_UNIT_TYPE = {
-    "HALF": "half",
-    "FULL": "full"
+    "HALF": "half", # Đi làm muộn, về sớm
+    "FULL": "full"  # đi làm đúng giờ
 }
 
 TYPE_PAYMENT_ONLINE = {

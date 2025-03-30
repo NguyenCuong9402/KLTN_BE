@@ -67,8 +67,8 @@ class Worker:
                         id=str(uuid()),  # Tạo UUID ngẫu nhiên
                         user_id=user.id,
                         work_date=start_date,
-                        check_in=self.random_time(time(7, 0), time(13, 30)),
-                        check_out=self.random_time_checkout(time(16, 0), time(19, 0))
+                        check_in=self.random_time(time(7, 0), time(8, 30)),
+                        check_out=self.random_time_checkout(time(16, 30), time(19, 0))
                     )
                     attendances.append(attendance)
 
