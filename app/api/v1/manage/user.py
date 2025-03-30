@@ -20,78 +20,9 @@ from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema, Att
 api = Blueprint('manage/user', __name__)
 
 
-@api.route('', methods=['POST'])
-@jwt_required
-def new():
-    try:
-
-        json_req = request.get_json()
-        json_body = trim_dict(json_req)
-        validator_input = StaffValidation()
-        is_not_validate = validator_input.validate(json_body)
-        if is_not_validate:
-            return send_error(data=is_not_validate, message='Validate Error')
 
 
-        email = json_body.get('email')
-        phone = json_body.get('phone')
-        group_id = json_body.get('group_id')
-        avatar_id = json_body.get('avatar_id', None)
-
-        address = json_body.pop('address')
-        if json_body.get('birthday', None):
-            json_body['birthday'] = convert_to_datetime(json_body.get('birthday'))
-
-        for key, value in address.items():
-            if value is None or value.strip() == '':
-                return send_error(message='Vui lòng chọn địa chỉ')
-
-        address = Address.query.filter_by(province=address.get('province'), district=address.get('district'),
-                                          ward=address.get('ward')).first()
-        if address is None:
-            return send_error(message="Địa chỉ không hợp lệ.")
-
-        json_body['address_id'] = address.id
-
-
-        check_email = User.query.filter_by(email=email).first()
-        if check_email:
-            return send_error(message='Email đã được đăng ký')
-
-        check_phone = User.query.filter_by(phone=phone).first()
-        if check_phone:
-            return send_error(message='SĐT đã được đăng ký')
-
-        check_group = Group.query.filter_by(id=group_id).first()
-        if check_group is None:
-            return send_error(message='Chức vụ không tồn tại')
-
-        if check_group.key in KEY_GROUP_NOT_STAFF:
-            return send_error(message='Chức vụ không phù hợp')
-
-        if avatar_id:
-            check_file = Files.query.filter_by(id=avatar_id).first()
-            if check_file is None:
-                return send_error(message='Vui lòng tải lại ảnh')
-
-        json_body['password'] = generate_password()
-
-        json_body['status'] = 0 # Khi nào User đăng nhập sẽ được kích hoạt
-        user = User(id=str(uuid()),**json_body)
-
-        db.session.add(user)
-        db.session.flush()
-        db.session.commit()
-
-        #send mail
-
-        return send_result(message='Thành công')
-
-    except Exception as ex:
-        db.session.rollback()
-        return send_error(message=str(ex), code=442)
-
-
+# Nhan vien
 @api.route('/check_in', methods=['POST'])
 @jwt_required
 def check_in():
@@ -248,6 +179,78 @@ def time_check():
 
     except Exception as ex:
         return send_error(message=str(ex))
+
+# Quan ly nhan vien
+@api.route('', methods=['POST'])
+@jwt_required
+def new():
+    try:
+
+        json_req = request.get_json()
+        json_body = trim_dict(json_req)
+        validator_input = StaffValidation()
+        is_not_validate = validator_input.validate(json_body)
+        if is_not_validate:
+            return send_error(data=is_not_validate, message='Validate Error')
+
+
+        email = json_body.get('email')
+        phone = json_body.get('phone')
+        group_id = json_body.get('group_id')
+        avatar_id = json_body.get('avatar_id', None)
+
+        address = json_body.pop('address')
+        if json_body.get('birthday', None):
+            json_body['birthday'] = convert_to_datetime(json_body.get('birthday'))
+
+        for key, value in address.items():
+            if value is None or value.strip() == '':
+                return send_error(message='Vui lòng chọn địa chỉ')
+
+        address = Address.query.filter_by(province=address.get('province'), district=address.get('district'),
+                                          ward=address.get('ward')).first()
+        if address is None:
+            return send_error(message="Địa chỉ không hợp lệ.")
+
+        json_body['address_id'] = address.id
+
+
+        check_email = User.query.filter_by(email=email).first()
+        if check_email:
+            return send_error(message='Email đã được đăng ký')
+
+        check_phone = User.query.filter_by(phone=phone).first()
+        if check_phone:
+            return send_error(message='SĐT đã được đăng ký')
+
+        check_group = Group.query.filter_by(id=group_id).first()
+        if check_group is None:
+            return send_error(message='Chức vụ không tồn tại')
+
+        if check_group.key in KEY_GROUP_NOT_STAFF:
+            return send_error(message='Chức vụ không phù hợp')
+
+        if avatar_id:
+            check_file = Files.query.filter_by(id=avatar_id).first()
+            if check_file is None:
+                return send_error(message='Vui lòng tải lại ảnh')
+
+        json_body['password'] = generate_password()
+
+        json_body['status'] = 0 # Khi nào User đăng nhập sẽ được kích hoạt
+        user = User(id=str(uuid()),**json_body)
+
+        db.session.add(user)
+        db.session.flush()
+        db.session.commit()
+
+        #send mail
+
+        return send_result(message='Thành công')
+
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex), code=442)
 
 @api.route("/active/<user_id>", methods=["PUT"])
 @jwt_required
