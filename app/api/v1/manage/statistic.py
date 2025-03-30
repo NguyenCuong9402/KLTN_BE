@@ -378,8 +378,7 @@ def statistic_attendance():
         check_out_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_OUT'])
 
         data = {
-            'work_later': 0,
-            'leave_early': 0,
+            'work_later_and_leave_early': 0,
             'forget_checkout': 0,
             'work_unit': 0,
             'number_work_date': len(attendances)
@@ -389,20 +388,20 @@ def statistic_attendance():
             if attendance.check_in:
                 check_in_dt = datetime.combine(base_date, attendance.check_in)
                 if check_in_dt > check_in_attendance:
-                    data['work_later'] += 1
+                    data['work_later_and_leave_early'] += 1
 
                 if not attendance.check_out:
                     data['forget_checkout'] +=1
                 else:
                     check_out_dt = datetime.combine(base_date, attendance.check_out)
                     if check_out_dt < check_out_attendance:
-                        data['leave_early'] += 1
+                        data['work_later_and_leave_early'] += 1
 
             if attendance.work_unit in [WORK_UNIT_TYPE.get('HALF'), attendance.work_unit == WORK_UNIT_TYPE.get('FULL')]:
                 data['work_unit'] += 1
 
         vi_pham = round(
-            (data['work_later'] + data['forget_checkout'] + data['leave_early']) / (data['number_work_date'] * 2) * 100,
+            (data['work_later_and_leave_early'] + data['forget_checkout']) / (data['number_work_date'] * 2) * 100,
             2)
         tuan_thu = 100 - vi_pham
 
