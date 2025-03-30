@@ -334,7 +334,7 @@ def top_product():
 
 
 ## Thống kê số lần đi muộn, về sớm. Số công/Tháng
-@api.route('/statistic_attendance', methods=['GET'])
+@api.route('/attendance', methods=['GET'])
 @jwt_required
 def statistic_attendance():
     try:
@@ -381,7 +381,8 @@ def statistic_attendance():
             'work_later': 0,
             'leave_early': 0,
             'forget_checkout': 0,
-            'work_unit': 0
+            'work_unit': 0,
+            'number_work_date': len(attendances)
         }
 
         for attendance in attendances:
@@ -399,6 +400,16 @@ def statistic_attendance():
 
             if attendance.work_unit in [WORK_UNIT_TYPE.get('HALF'), attendance.work_unit == WORK_UNIT_TYPE.get('FULL')]:
                 data['work_unit'] += 1
+
+        vi_pham = round(
+            (data['work_later'] + data['forget_checkout'] + data['leave_early']) / (data['number_work_date'] * 2) * 100,
+            2)
+        tuan_thu = 100 - vi_pham
+
+        data['chart'] = {
+            'Vi phạm': vi_pham,
+            'Tuân thủ':  tuan_thu,
+        }
 
 
         return send_result(data=data, message="Thành công")
