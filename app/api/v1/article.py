@@ -42,7 +42,6 @@ def create_article():
             **json_body
         )
         db.session.add(artice)
-        db.session.flush()
         tag_product = [ArticleTagProduct(id=str(uuid()), article_id=artice.id, product_id=product_id, index=index)
                        for  index, product_id in enumerate(tags)]
         db.session.bulk_save_objects(tag_product)

@@ -39,7 +39,6 @@ def create_notify(user_id, notify_type, action_type=None, action_id=None):
 
     notify = Notify(**notify_data)
     db.session.add(notify)
-    db.session.commit()  # Lưu vào database
 
     return notify
 
@@ -53,10 +52,14 @@ def handle_notify(instance, action_detail_type, user_id, notify_type, action_typ
     notify_detail = NotifyDetail(id=str(uuid()), user_id=user_id, action_type=action_detail_type,
                                  action_id=instance.id, notify_id=notify.id)
     db.session.add(notify_detail)
-    db.session.commit()
 
 
 def handle_article_notification(instance):
+    user = User.query.filter_by(id=instance.user_id).first()
+
+    if not user or user.group.is_staff or user.group.is_super_admin:
+        return
+
     users = User.query.filter(User.group.has(is_staff=True)).all()
     for user in users:
         handle_notify(instance, CONTENT_TYPE["ARTICLE"], user.id, NOTIFY_TYPE["ARTICLE"])
@@ -97,10 +100,10 @@ def handle_product_delete(instance):
 def notify_handler(mapper, connection, target):
     notification_map = {
         Article: handle_article_notification,
-        Comment: handle_comment_notification,
-        Reaction: handle_reaction_notification,
-        Orders: handle_orders_notification,
-        Product : handle_add_product_notification
+        # Comment: handle_comment_notification,
+        # Reaction: handle_reaction_notification,
+        # Orders: handle_orders_notification,
+        # Product : handle_add_product_notification
     }
 
     handler = notification_map.get(target.__class__)
@@ -123,7 +126,7 @@ for model in models_to_connect:
     listens_for(model, "after_insert")(notify_handler)
 
 
-# Đăng ký signal cho tất cả models
-models_to_connect = [Article, Comment, Product]
-for model in models_to_connect:
-    listens_for(model, "before_delete")(delete_notify_handler)
+# # Đăng ký signal cho tất cả models
+# models_to_connect = [Article, Comment, Product]
+# for model in models_to_connect:
+#     listens_for(model, "before_delete")(delete_notify_handler)
