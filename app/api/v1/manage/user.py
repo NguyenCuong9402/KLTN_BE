@@ -98,7 +98,7 @@ def check_out():
         db.session.commit()
         data = AttendanceSchema().dump(attendance)
 
-        return send_result(data=data, message='Thành công')
+        return send_result(data=data, message=f'Check out thành công lúc {attendance.check_out}')
 
     except Exception as ex:
         db.session.rollback()
