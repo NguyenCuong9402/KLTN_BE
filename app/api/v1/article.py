@@ -81,10 +81,6 @@ def get_articles():
             params = request.args.to_dict(flat=True)
             params = QueryParamsArticleSchema().load(params) if params else dict()
         except ValidationError as err:
-            logger.error(json.dumps({
-                "message": err.messages,
-                "data": err.valid_data
-            }))
             return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
         page = params.get('page', 1)
         page_size = params.get('page_size', 10)
@@ -158,10 +154,6 @@ def get_comment_article(article_id):
             params = request.args.to_dict(flat=True)
             params = CommentParamsValidation().load(params) if params else dict()
         except ValidationError as err:
-            logger.error(json.dumps({
-                "message": err.messages,
-                "data": err.valid_data
-            }))
             return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
         page = params.get('page', 1)
         page_size = params.get('page_size', 10)

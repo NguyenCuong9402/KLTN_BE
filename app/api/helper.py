@@ -183,30 +183,6 @@ def send_email_template_old(recipient: str, title: str, template: str, data_fill
         print(e.__str__())
 
 
-def convert_birth_to_timestamp(date_of_birth: str):
-    """
-    send email with by template
-    :param date_of_birth:
-    :return: int
-    """
-    try:
-        import time
-        import datetime
-        from pytz import timezone
-        try:
-            date = datetime.datetime.strptime(date_of_birth, "%d/%m/%Y %H:%M:%S")
-        except:
-            date = datetime.datetime.strptime(date_of_birth, "%Y-%m-%d %H:%M:%S")
-        # convert string to timestamp with timezone saigon
-        timezone_sg = timezone(CONFIG.TIME_ZONE)
-        with_timezone = timezone_sg.localize(date)
-        timestamp = int(with_timezone.timestamp())
-
-        return timestamp
-    except Exception as e:
-        logger.error(e.__str__())
-        return 0
-
 def convert_to_datetime(date_str):
     try:
         # Chuyển chuỗi thành datetime với định dạng "dd/MM/yyyy"

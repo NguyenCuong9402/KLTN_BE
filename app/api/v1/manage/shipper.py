@@ -75,10 +75,6 @@ def get_shipper():
             params = request.args.to_dict(flat=True)
             params = QueryParamsAllSchema().load(params) if params else dict()
         except ValidationError as err:
-            logger.error(json.dumps({
-                "message": err.messages,
-                "data": err.valid_data
-            }))
             return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
 
         page = params.get('page', 1)
