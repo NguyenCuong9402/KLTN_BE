@@ -11,7 +11,8 @@ from app.api.helper import send_result, send_error
 from app.enums import STATUS_ORDER
 from app.models import db, Product, User, Orders, Notify, NotifyDetail
 from app.utils import escape_wildcard
-from app.validator import OrderSchema, QueryParamsOrderSchema, NotifySchema, QueryNotifyParamsSchema
+from app.validator import OrderSchema, QueryParamsOrderSchema, NotifySchema, QueryNotifyParamsSchema, \
+    LastSeenNotifyParamsSchema
 
 api = Blueprint('notify', __name__)
 
@@ -23,17 +24,40 @@ def get_item(notify_id):
         user = User.query.filter_by(id=user_id).first()
         if user is None:
             return send_error(message='Người dùng không tồn tại.')
-        item = Notify.query.filter(Notify.id == notify_id, Orders.user_id==user_id).first()
+        item = Notify.query.filter(Notify.id == notify_id, Notify.user_id==user_id).first()
         if item is None:
             return send_error(message="Thông báo không tồn tại, F5 lại web")
-        if Notify.unread:
-            Notify.unread = False
+        if item.unread:
+            item.unread = False
             db.session.flush()
             db.session.commit()
         data = NotifySchema().dump(item)
         return send_result(data=data)
     except Exception as ex:
         db.session.flush()
+        return send_error(message=str(ex))
+
+@api.route("/last_seen", methods=["GET"])
+@jwt_required
+def last_seen():
+    user_id = get_jwt_identity()
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return send_error(message='Người dùng không tồn tại.')
+    try:
+        params = request.args.to_dict(flat=True)
+        params = LastSeenNotifyParamsSchema().load(params) if params else dict()
+    except ValidationError as err:
+        return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
+
+    last_time = params.get('last_time', None)
+
+    try:
+        if last_time:
+            user.last_seen_notify = last_time
+            db.session.commit()
+        return send_result(message='Thành công')
+    except Exception as ex:
         return send_error(message=str(ex))
 
 @api.route("/number_unread", methods=["GET"])
@@ -45,7 +69,7 @@ def number_unread():
         if user is None:
             return send_error(message='Người dùng không tồn tại.')
 
-        query = Notify.query.filter(Notify.user_id == user_id,
+        query = Notify.query.filter(Notify.user_id == user_id, Notify.unread.is_(True),
                                     db.session.query(exists().where(NotifyDetail.notify_id == Notify.id)).scalar_subquery())
 
         if user.last_seen_notify:
