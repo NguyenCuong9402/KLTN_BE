@@ -36,6 +36,26 @@ def get_item(notify_id):
         db.session.flush()
         return send_error(message=str(ex))
 
+@api.route("/number_unread", methods=["GET"])
+@jwt_required
+def number_unread():
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+        if user is None:
+            return send_error(message='Người dùng không tồn tại.')
+
+        query = Notify.query.filter(Notify.user_id == user_id,
+                                    db.session.query(exists().where(NotifyDetail.notify_id == Notify.id)).scalar_subquery())
+
+        if user.last_seen_notify:
+            query = query.filter(Notify.modified_date > user.last_seen_notify)
+
+        return send_result(data={'number_new_notify': query.count()})
+
+    except Exception as ex:
+        return send_error(message=str(ex))
+
 @api.route("", methods=["GET"])
 @jwt_required
 def get_items():
@@ -49,22 +69,19 @@ def get_items():
             params = QueryNotifyParamsSchema().load(params) if params else dict()
         except ValidationError as err:
             return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
-        time_stamp = params.get('time_stamp', None)
         notify_unread = params.get('notify_unread')
+        page = params.get('page', 1)
+        page_size = params.get('page_size', 10)
 
         query = Notify.query.filter(Notify.user_id==user_id,
                                     db.session.query(exists().where(NotifyDetail.notify_id == Notify.id)).scalar_subquery())
 
         if notify_unread:
-            query = query.filter(Notify.unread==True)
-
-        if time_stamp:
-            query = query.filter(Notify.modified_date > time_stamp)
-
+            query = query.filter(Notify.unread.is_(True))
 
         query = query.order_by(desc(Notify.modified_date))
 
-        paginator = paginate(query, 1, 10)
+        paginator = paginate(query, page, page_size)
 
         notify_data = OrderSchema(many=True).dump(paginator.items)
 

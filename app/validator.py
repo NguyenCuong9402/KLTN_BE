@@ -683,9 +683,9 @@ class QueryParamsOrderSchema(BaseValidation):
     text_search = fields.String(allow_none=True)
 
 class QueryNotifyParamsSchema(BaseValidation):
-    time_stamp = fields.Integer(allow_none=True)
     notify_unread = fields.Boolean(allow_none=True, missing=False)
-
+    page = fields.Integer(required=True, validate=validate.Range(min=1))  # Bắt buộc, không nhỏ hơn 1
+    page_size = fields.Integer(missing=10, validate=validate.Range(min=1, max=100))  # Mặc định là 10, giới hạn tối đa 100
 
 class QueryParamsManageOrderSchema(QueryParamsOrderSchema):
     time = fields.String()
