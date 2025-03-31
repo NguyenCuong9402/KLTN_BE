@@ -10,6 +10,7 @@ from flask import request
 from marshmallow import fields, validate as validate_
 from pytz import timezone
 from .enums import TIME_FORMAT_LOG, ALLOWED_EXTENSIONS_IMG
+from .extensions import mongo_db
 
 
 class FieldString(fields.String):
@@ -343,3 +344,20 @@ REGEX_URL = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^
 REGEX_ADDRESS_VIETNAMESE = r"([^`~!@#$%^&*().?'\":;{}+=|<>_\-\\\[\]]+)$"
 REGEX_VALID_PASSWORD = r'^(?=.*[0-9])(?=.*[a-zA-Z])(?!.* ).{8,16}$'
 secret_key_serpapi = "13b70e23408306d0e6f4b1f7e59b6fc3643128c415e9696a6502102d5166cf59"
+
+
+def find_attendance_data(user_id, time_str):
+    try:
+        attendance_collection = mongo_db[f"attendance_statistics_{user_id}"]
+        result = attendance_collection.find_one({"date": time_str})
+        return result if result else None
+    except Exception:
+        return None
+
+
+def save_attendance_data(user_id, data):
+    try:
+        attendance_collection = mongo_db[f"attendance_statistics_{user_id}"]
+        attendance_collection.insert_one(data)
+    except Exception:
+        pass

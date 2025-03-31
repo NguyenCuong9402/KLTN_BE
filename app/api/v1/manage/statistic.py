@@ -12,6 +12,7 @@ from app.enums import KEY_GROUP_NOT_STAFF, STATUS_ORDER, ATTENDANCE, WORK_UNIT_T
 from app.extensions import db
 from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems, Files, FileLink, \
     Attendance
+from app.utils import find_attendance_data, save_attendance_data
 from app.validator import StatisticTop10CustomerSchema, StatisticTop5ProductSchema
 
 api = Blueprint('statistic', __name__)
@@ -361,6 +362,16 @@ def statistic_attendance():
         month = time_obj.month
         year = time_obj.year
 
+
+
+        # Tìm kiếm trong mongo db: mongo_db[f"attendance_statistics_{user_id}"] xem có time-obj nào bằng time-obj không.
+        # Nếu None thì thực thi ở đoạn dưới
+
+        time_str = time_obj.strftime("%m-%Y")
+        existing_data = find_attendance_data(user_id, time_str)
+        if existing_data:
+            return send_result(data=existing_data, message="Thành công (dữ liệu từ MongoDB)")
+
         # Truy vấn danh sách Attendance
         attendances = Attendance.query.filter(
             Attendance.user_id == user_id,
@@ -378,6 +389,7 @@ def statistic_attendance():
         check_out_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_OUT'])
 
         data = {
+            'time_obj': time_obj,
             'work_later_and_leave_early': 0,
             'forget_checkout': 0,
             'work_unit': 0,
@@ -410,6 +422,8 @@ def statistic_attendance():
             'Tuân thủ':  tuan_thu,
         }
 
+        # Thêm dữ liệu data vào colection mongo_db[f"attendance_statistics_{user_id}"]
+        save_attendance_data(user_id, data)
 
         return send_result(data=data, message="Thành công")
 
