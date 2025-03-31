@@ -39,6 +39,7 @@ def create_notify(user_id, notify_type, action_type=None, action_id=None):
 
     notify = Notify(**notify_data)
     db.session.add(notify)
+    db.session.flush()
 
     return notify
 
@@ -52,6 +53,8 @@ def handle_notify(instance, action_detail_type, user_id, notify_type, action_typ
     notify_detail = NotifyDetail(id=str(uuid()), user_id=user_id, action_type=action_detail_type,
                                  action_id=instance.id, notify_id=notify.id)
     db.session.add(notify_detail)
+    db.session.flush()
+    db.session.commit()
 
 
 def handle_article_notification(instance):
@@ -96,37 +99,3 @@ def handle_reaction_delete(instance):
 def handle_product_delete(instance):
     print(f"Sản phẩm '{instance.id}' sắp bị xóa!")
 
-# Hàm xử lý khi model được thêm vào database
-def notify_handler(mapper, connection, target):
-    notification_map = {
-        Article: handle_article_notification,
-        # Comment: handle_comment_notification,
-        # Reaction: handle_reaction_notification,
-        # Orders: handle_orders_notification,
-        # Product : handle_add_product_notification
-    }
-
-    handler = notification_map.get(target.__class__)
-    if handler:
-        handler(target)
-
-def delete_notify_handler(mapper, connection, target):
-    delete_notification_map = {
-        Article: handle_article_delete,
-        Reaction: handle_reaction_delete,
-        Product: handle_product_delete
-    }
-    handler = delete_notification_map.get(target.__class__)
-    if handler:
-        handler(target)
-
-# Đăng ký signal cho tất cả models
-models_to_connect = [Article, Comment, Reaction, Orders, Product]
-for model in models_to_connect:
-    listens_for(model, "after_insert")(notify_handler)
-
-
-# # Đăng ký signal cho tất cả models
-# models_to_connect = [Article, Comment, Product]
-# for model in models_to_connect:
-#     listens_for(model, "before_delete")(delete_notify_handler)
