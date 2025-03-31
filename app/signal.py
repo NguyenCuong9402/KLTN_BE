@@ -109,17 +109,3 @@ def handle_add_product_notification(instance):
     users = User.query.filter(User.group.has(is_staff=True)).all()
     for user in users:
         handle_notify(instance, CONTENT_TYPE["PRODUCT"], user.id, NOTIFY_TYPE["PRODUCT"])
-
-
-def handle_article_delete(instance):
-    print(f"Bài viết '{instance.id}' sắp bị xóa!")
-
-def handle_comment_delete(instance):
-    print(f"Bình luận '{instance.id}' sắp bị xóa!")
-
-def handle_reaction_delete(instance):
-    print(f"Phản ứng '{instance.id}' sắp bị xóa!")
-
-def handle_product_delete(instance):
-    print(f"Sản phẩm '{instance.id}' sắp bị xóa!")
-
