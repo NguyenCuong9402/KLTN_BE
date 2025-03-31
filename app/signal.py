@@ -50,7 +50,7 @@ def handle_notify(instance, action_detail_type, user_id, notify_type, action_typ
     else:
         notify.modified_date = get_timestamp_now()
 
-    notify_detail = NotifyDetail(id=str(uuid()), user_id=user_id, action_type=action_detail_type,
+    notify_detail = NotifyDetail(id=str(uuid()), user_id=instance.user_id, action_type=action_detail_type,
                                  action_id=instance.id, notify_id=notify.id)
     db.session.add(notify_detail)
     db.session.flush()
