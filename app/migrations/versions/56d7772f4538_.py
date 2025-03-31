@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f5e729ec1160
+Revision ID: 56d7772f4538
 Revises: 
-Create Date: 2025-03-28 15:30:02.943389
+Create Date: 2025-03-31 23:06:10.747987
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'f5e729ec1160'
+revision = '56d7772f4538'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -74,14 +74,6 @@ def upgrade():
     sa.UniqueConstraint('name')
     )
     op.create_index(op.f('ix_group_created_date'), 'group', ['created_date'], unique=False)
-    op.create_table('mail',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('body', sa.TEXT(), nullable=True),
-    sa.Column('email', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
-    sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_mail_created_date'), 'mail', ['created_date'], unique=False)
     op.create_table('permission',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('key', sa.String(length=100), nullable=False),
@@ -324,9 +316,6 @@ def upgrade():
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('code', sa.String(length=20), nullable=True),
     sa.Column('user_id', sa.String(length=50), nullable=True),
-    sa.Column('mail_id', sa.String(length=50), nullable=True),
-    sa.Column('type', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['mail_id'], ['mail.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -523,8 +512,6 @@ def downgrade():
     op.drop_table('role')
     op.drop_table('region')
     op.drop_table('permission')
-    op.drop_index(op.f('ix_mail_created_date'), table_name='mail')
-    op.drop_table('mail')
     op.drop_index(op.f('ix_group_created_date'), table_name='group')
     op.drop_table('group')
     op.drop_index(op.f('ix_files_created_date'), table_name='files')
