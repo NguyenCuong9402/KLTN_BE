@@ -655,6 +655,12 @@ class Notify(db.Model):
 
     notify_details = db.relationship('NotifyDetail', backref='notify', lazy='dynamic')
 
+    def get_distinct_user_ids(self):
+        return [
+            detail.user_id
+            for detail in
+            self.notify_details.order_by(NotifyDetail.created_date.asc()).with_entities(NotifyDetail.user_id).distinct()
+        ]
 
     def get_formatted_name(self, name=None):
         if name:
@@ -663,7 +669,7 @@ class Notify(db.Model):
             else:
                 return {"name": None, "other": 0, "avatar": None}
         first_detail = self.notify_details.order_by(asc(NotifyDetail.created_date)).first()
-        total_count = self.notify_details.count()
+        total_count = len(self.get_distinct_user_ids())
 
         if first_detail and first_detail.user:
             return {
