@@ -9,7 +9,7 @@ from time import strftime
 from flask import request
 from marshmallow import fields, validate as validate_
 from pytz import timezone
-from .enums import TIME_FORMAT_LOG, ALLOWED_EXTENSIONS_IMG
+from .enums import TIME_FORMAT_LOG, ALLOWED_EXTENSIONS_IMG, MONGO_COLLECTION_STATISTIC_ATTENDANCE_USER
 from .extensions import mongo_db
 
 
@@ -348,16 +348,34 @@ secret_key_serpapi = "13b70e23408306d0e6f4b1f7e59b6fc3643128c415e9696a6502102d51
 
 def find_attendance_data(user_id, time_str):
     try:
-        attendance_collection = mongo_db[f"attendance_statistics_{user_id}"]
-        result = attendance_collection.find_one({"date": time_str})
-        return result if result else None
+        attendance_collection = mongo_db[f"{MONGO_COLLECTION_STATISTIC_ATTENDANCE_USER}_{user_id}"]
+        result = attendance_collection.find_one({"time_str": time_str})
+        if result:
+            # Chuyển dữ liệu MongoDB về dạng JSON
+            result['_id'] = str(
+                result['_id'])  # Đảm bảo _id là chuỗi (vì ObjectId không thể trực tiếp chuyển sang JSON)
+            return result
+        else:
+            return None
     except Exception:
         return None
 
 
 def save_attendance_data(user_id, data):
     try:
-        attendance_collection = mongo_db[f"attendance_statistics_{user_id}"]
-        attendance_collection.insert_one(data)
+        attendance_collection = mongo_db[f"{MONGO_COLLECTION_STATISTIC_ATTENDANCE_USER}_{user_id}"]
+        # Kiểm tra xem dữ liệu với time_str đã tồn tại trong MongoDB chưa
+        existing_data = find_attendance_data(user_id, data['time_str'])
+
+        if existing_data:
+            # Nếu có dữ liệu, cập nhật nó
+            attendance_collection.update_one(
+                {"time_str": data['time_str']},  # Tìm kiếm theo time_str
+                {"$set": data}  # Cập nhật toàn bộ dữ liệu
+            )
+        else:
+            # Nếu không có dữ liệu, thêm mới
+            attendance_collection.insert_one(data)
+
     except Exception:
         pass

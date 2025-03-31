@@ -347,8 +347,10 @@ def statistic_attendance():
 
         # Lấy tham số thời gian (mm-yyyy)
         time_str = request.args.get("time_str", type=str)
+        current_date = datetime.now()
+
         if not time_str:
-            time_obj = datetime.now()
+            time_obj = current_date
         else:
             try:
                 time_obj = datetime.strptime(time_str, "%m-%Y")
@@ -359,15 +361,16 @@ def statistic_attendance():
         month = time_obj.month
         year = time_obj.year
 
-
+        is_past = time_obj < current_date
 
         # Tìm kiếm trong mongo db: mongo_db[f"attendance_statistics_{user_id}"] xem có time-obj nào bằng time-obj không.
         # Nếu None thì thực thi ở đoạn dưới
 
         time_str = time_obj.strftime("%m-%Y")
-        existing_data = find_attendance_data(user_id, time_str)
-        if existing_data:
-            return send_result(data=existing_data, message="Thành công (dữ liệu từ MongoDB)")
+        if is_past:
+            existing_data = find_attendance_data(user_id, time_str)
+            if existing_data:
+                return send_result(data=existing_data, message="Thành công (dữ liệu từ MongoDB)")
 
         # Truy vấn danh sách Attendance
         attendances = Attendance.query.filter(
@@ -386,7 +389,7 @@ def statistic_attendance():
         check_out_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_OUT'])
 
         data = {
-            'time_obj': time_obj,
+            'time_str': time_str,
             'work_later_and_leave_early': 0,
             'forget_checkout': 0,
             'work_unit': 0,
@@ -409,9 +412,14 @@ def statistic_attendance():
             if attendance.work_unit in [WORK_UNIT_TYPE.get('HALF'), attendance.work_unit == WORK_UNIT_TYPE.get('FULL')]:
                 data['work_unit'] += 1
 
-        vi_pham = round(
-            (data['work_later_and_leave_early'] + data['forget_checkout']) / (data['number_work_date'] * 2) * 100,
-            2)
+        if data['number_work_date'] > 0:
+            vi_pham = round(
+                (data['work_later_and_leave_early'] + data['forget_checkout']) / (data['number_work_date'] * 2) * 100,
+                2
+            )
+        else:
+            vi_pham = 0
+
         tuan_thu = 100 - vi_pham
 
         data['chart'] = {
@@ -420,7 +428,8 @@ def statistic_attendance():
         }
 
         # Thêm dữ liệu data vào colection mongo_db[f"attendance_statistics_{user_id}"]
-        save_attendance_data(user_id, data)
+        if is_past:
+            save_attendance_data(user_id, data.copy())
 
         return send_result(data=data, message="Thành công")
 

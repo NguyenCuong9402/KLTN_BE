@@ -1,6 +1,6 @@
 from app.settings import DevConfig
 from datetime import datetime, date, time
-
+MONGO_COLLECTION_STATISTIC_ATTENDANCE_USER = "attendance_statistics"
 TIME_FORMAT_LOG = "[%Y-%b-%d %H:%M]"
 
 ADMIN_EMAIL = DevConfig.ADMIN_EMAIL
