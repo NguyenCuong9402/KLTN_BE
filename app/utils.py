@@ -80,9 +80,6 @@ def get_datetime_now() -> datetime:
     time_zon_sg = timezone('Asia/Ho_Chi_Minh')
     return datetime.datetime.now(time_zon_sg)
 
-def default_birthday():
-    return date.today().replace(year=date.today().year - 18)
-
 def get_datetime_now_utc() -> datetime:
     return datetime.datetime.now()
 

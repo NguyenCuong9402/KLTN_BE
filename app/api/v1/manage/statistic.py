@@ -1,6 +1,6 @@
 import json
 from collections import defaultdict
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 from sqlalchemy import cast, Integer, BigInteger, case, text, and_, extract
 from dateutil.relativedelta import relativedelta
 from flask import Blueprint, request

@@ -9,7 +9,7 @@ from sqlalchemy.orm import validates
 from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION, STATUS_ORDER, ATTENDANCE, \
     ATTENDANCE_STATUS, WORK_UNIT_TYPE, CONTENT_TYPE, NOTIFY_TYPE
 from app.extensions import db
-from app.utils import get_timestamp_now, default_birthday
+from app.utils import get_timestamp_now
 
 
 class Address(db.Model):
