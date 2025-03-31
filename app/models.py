@@ -7,7 +7,7 @@ from sqlalchemy import ForeignKey, TEXT, asc, desc, func
 from sqlalchemy.orm import validates
 
 from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION, STATUS_ORDER, ATTENDANCE, \
-    ATTENDANCE_STATUS, WORK_UNIT_TYPE
+    ATTENDANCE_STATUS, WORK_UNIT_TYPE, CONTENT_TYPE
 from app.extensions import db
 from app.utils import get_timestamp_now, default_birthday
 
@@ -652,6 +652,99 @@ class Notify(db.Model):
     action_type = db.Column(db.String(50), nullable=True)
     action_id = db.Column(db.String(50), nullable=True)
     unread = db.Column(db.Boolean, default=True, nullable=False)
+
+    notify_details = db.relationship('NotifyDetail', backref='notify', lazy='dynamic')
+
+
+    def get_formatted_name(self, name=None):
+        if name:
+            return {"name": name, "other": 0, "avatar": None}
+        first_detail = self.notify_details.order_by(asc(NotifyDetail.created_date)).first()
+        total_count = self.notify_details.count()
+
+        if first_detail and first_detail.user:
+            return {
+                'name': first_detail.user.full_name,
+                'other': max(0, total_count - 1),
+                'avatar': first_detail.user.avatar,
+            }
+        return {'name': None, 'other': 0, "avatar": None}
+
+    @property
+    def detail(self):
+        result = self.get_formatted_name(name='Admin') if self.notify_type in [] else self.get_formatted_name()
+
+        handlers = {
+            "ARTICLE": self._handle_article,
+            "COMMENT": self._handle_comment_related,
+            "REACTION": self._handle_comment_related,
+            "ORDERS": self._handle_add_order,
+        }
+
+        handler = handlers.get(self.notify_type, self._handle_default)
+        content, router = handler()
+
+        result.update({'content': content, 'router': router})
+        return result
+
+    def _handle_article(self):
+        """Process notifications when there is a new post"""
+        article = Article.query.filter_by(id=self.action_id).first()
+        if not article:
+            return 'bài viết đã bị xóa', {}
+
+        return (
+            f'posted an article {article.title}',
+            {"name": "PostDetail", "params": {
+                "article_id": article.id,
+            }}
+        )
+
+    def _handle_comment_related(self):
+        """Process notifications when there are comments, reactions, or mentions"""
+        if self.action_type == CONTENT_TYPE["ARTICLE"]:
+            article = Article.query.filter_by(id=self.action_id).first()
+            if not article:
+                return '', {}
+
+            messages = {
+                "comment": f"commented on your article {': ' + article.title}",
+                "reaction": f"voted your article {': ' + article.title}",
+            }
+
+            return messages[self.notify_type], {
+                "name": "PostDetail",
+                "params": {
+                    "article_id": article.id,
+                }
+            }
+
+        comment = Comment.query.filter_by(id=self.action_id).first()
+        if not comment:
+            return '', {}
+
+        messages = {
+            "comment": 'replied to a comment',
+            "reaction": 'voted a comment',
+        }
+
+        return messages[self.notify_type], {
+            "name": "CommentDetail",
+            "params": {
+                "article_id": comment.article_id,
+                "comment_id": comment.id,
+            }
+        }
+
+    def _handle_add_order(self):
+
+        messages = "đã đặt đơn hàng"
+
+        return messages, {"name": "ManageOrders"}
+
+    def _handle_default(self):
+        """Default case handling"""
+        return '', {}
 
 
 class NotifyDetail(db.Model):

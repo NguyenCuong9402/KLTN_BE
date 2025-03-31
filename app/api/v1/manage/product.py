@@ -11,7 +11,6 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.api.helper import send_result, send_error
 from app.models import Product, Size, Color, \
     FileLink
-from app.signal import handle_add_product_notification
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now
 from app.validator import ProductValidation
 
@@ -53,11 +52,6 @@ def new():
         db.session.bulk_save_objects(file_objects)
         db.session.flush()
         db.session.commit()
-
-        try:
-            handle_add_product_notification(product)
-        except:
-            pass
 
         return send_result(message='Thành công')
 

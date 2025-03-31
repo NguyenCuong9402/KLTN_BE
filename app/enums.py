@@ -27,7 +27,6 @@ NOTIFY_TYPE = {
     "COMMENT": 'comment',
     "REACTION": 'reaction',
     "ORDERS": 'ORDERS',
-    "PRODUCT": 'product',
 }
 
 CONTENT_TYPE = {
@@ -35,7 +34,6 @@ CONTENT_TYPE = {
     "COMMENT": 'comment',
     "REACTION": 'reaction',
     "ORDERS": 'orders',
-    "PRODUCT": 'product',
 }
 
 ATTENDANCE_STATUS = {
