@@ -1,4 +1,4 @@
-version: "3"
+version: '3.8'
 
 services:
   rabbitmq:
@@ -16,7 +16,7 @@ services:
     networks:
       - dev-csoc-net
   mongodb_container:
-    image: mongo:6.0.6
+    image: mongo:7.0.5
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
