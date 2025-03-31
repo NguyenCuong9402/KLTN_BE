@@ -13,7 +13,7 @@
 * chạy Docker-compose
 ```
 -connect mongo compass
-- mongodb://root:admin@127.0.0.1:27017/dev-shop?authSource=admin
+- mongodb://root:admin-password@127.0.0.1:27017/dev-shop?authSource=admin
 
 ```
 
