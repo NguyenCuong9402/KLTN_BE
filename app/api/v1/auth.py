@@ -14,7 +14,7 @@ from app.api.helper import send_error, send_result, Token
 from app.extensions import jwt, db
 from app.gateway import authorization_require
 from app.message_broker import RabbitMQProducerSendMail
-from app.models import User, EmailTemplate, VerityCode, Mail, GroupRole, Group, Address
+from app.models import User, EmailTemplate, VerityCode, GroupRole, Group, Address
 from app.settings import DevConfig
 from app.utils import trim_dict, get_timestamp_now, data_preprocessing, generate_random_number_string, \
     body_mail
@@ -182,13 +182,9 @@ def register():
         # body = body_mail(MAIL_VERITY_CODE, {'code': code})
         body = f"Mã Code của bạn là : {code} "
         # Mail
-        mail_send = Mail(id=str(uuid()), body=body, email=email)
-
-        db.session.add(mail_send)
-        db.session.flush()
 
         # Tạo verity code
-        code = VerityCode(id=str(uuid()), user_id=user.id, mail_id=mail_send.id, code=code)
+        code = VerityCode(id=str(uuid()), user_id=user.id, code=code)
         db.session.add(code)
         db.session.flush()
 
@@ -232,14 +228,8 @@ def send_code():
         code = generate_random_number_string()
         # body = body_mail(MAIL_VERITY_CODE, {'code': code})
         body = f"Mã Code của bạn là : {code} "
-        # Mail
-        mail_send = Mail(id=str(uuid()), body=body, email=user.email)
-
-        db.session.add(mail_send)
-        db.session.flush()
-
         # Tạo verity code
-        code = VerityCode(id=str(uuid()), user_id=user.id, mail_id=mail_send.id, code=code)
+        code = VerityCode(id=str(uuid()), user_id=user.id, code=code)
         db.session.add(code)
 
         db.session.flush()
@@ -270,7 +260,7 @@ def send_code():
             queue_mail.call(body)
         else:
             msg = MessageMail(title_mail, recipients=[email])
-            msg.body = mail_send.body
+            msg.body = body
             mail.send(msg)
 
         return send_result(message='Gửi Code thành công.', data={'verity_code_id': code.id})

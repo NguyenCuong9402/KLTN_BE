@@ -389,14 +389,6 @@ class EmailTemplate(db.Model):
     object = db.Column(db.JSON)
 
 
-class Mail(db.Model):
-    __tablename__ = 'mail'
-    id = db.Column(db.String(50), primary_key=True)
-    body = db.Column(TEXT())
-    email = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"))
-    created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
-
-
 class VerityCode(db.Model):
     __tablename__ = 'verity_code'
 
@@ -404,10 +396,6 @@ class VerityCode(db.Model):
     code = db.Column(db.String(20))
     user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
                         nullable=True)
-    mail_id = db.Column(db.String(50), db.ForeignKey('mail.id', ondelete='CASCADE', onupdate='CASCADE'),
-                        nullable=True)
-    type = db.Column(db.Integer, default=1)  # 1: đăng ký
-    # thêm thời gian giới hạn
 
 
 class Region(db.Model):
