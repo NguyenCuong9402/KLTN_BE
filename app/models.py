@@ -705,7 +705,7 @@ class Notify(db.Model):
         if self.action_type == CONTENT_TYPE["ARTICLE"]:
             article = Article.query.filter_by(id=self.action_id).first()
             if not article:
-                return '', {}
+                return 'Bài viết đã bị xóa', {}
 
             messages = {
                 "comment": f"commented on your article {': ' + article.title}",
@@ -721,7 +721,7 @@ class Notify(db.Model):
 
         comment = Comment.query.filter_by(id=self.action_id).first()
         if not comment:
-            return '', {}
+            return 'bình luận đã bị xóa', {}
 
         messages = {
             "comment": 'replied to a comment',

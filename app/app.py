@@ -153,20 +153,4 @@ def register_blueprints(app):
     app.register_blueprint(api_v1.comment.api, url_prefix='/api/v1/comment')
     app.register_blueprint(api_v1.type_product.api, url_prefix='/api/v1/type_product')
     app.register_blueprint(api_v1.payment_online.api, url_prefix='/api/v1/payment_online')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    app.register_blueprint(api_v1.notify.api, url_prefix='/api/v1/notify')

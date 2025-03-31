@@ -682,6 +682,11 @@ class QueryParamsOrderSchema(BaseValidation):
     status = fields.String(validate=validate.OneOf(["pending", "processing", "delivering", "resolved"]))
     text_search = fields.String(allow_none=True)
 
+class QueryNotifyParamsSchema(BaseValidation):
+    time_stamp = fields.Integer(allow_none=True)
+    notify_unread = fields.Boolean(allow_none=True, missing=False)
+
+
 class QueryParamsManageOrderSchema(QueryParamsOrderSchema):
     time = fields.String()
 
@@ -753,6 +758,15 @@ class OrderSchema(Schema):
     payment_status = fields.Boolean()
     payment_online = fields.Nested(PaymentOnlineSchema)
     is_paid = fields.Boolean()
+
+
+class NotifySchema(Schema):
+    id = fields.String()
+    created_date = fields.Integer()
+    modified_date = fields.Integer()
+    notify_type = fields.String()
+    unread = fields.Boolean()
+    detail = fields.Dict()
 
 
 
