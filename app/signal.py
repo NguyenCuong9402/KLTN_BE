@@ -2,7 +2,7 @@ from shortuuid import uuid
 from sqlalchemy import desc
 from sqlalchemy.event import listens_for
 
-from app.enums import NOTIFY_TYPE, CONTENT_TYPE
+from app.enums import NOTIFY_TYPE, CONTENT_TYPE, TYPE_REACTION
 from app.extensions import db
 from app.models import Article, Comment, Reaction, Orders, Product, Notify, NotifyDetail, User
 from app.utils import get_timestamp_now
@@ -78,9 +78,16 @@ def handle_comment_notification(instance):
 
 
 def handle_reaction_notification(instance):
-    user_id = instance.ancestry.user_id if instance.ancestry_id else instance.article.user_id
-    action_id = instance.ancestry_id if instance.ancestry_id else instance.article_id
-    action_type = CONTENT_TYPE["COMMENT"] if instance.ancestry_id else CONTENT_TYPE["ARTICLE"]
+    action_id = instance.reactable_id
+    action_type = instance.category
+
+    if action_type == TYPE_REACTION["COMMENT"]:
+        comment = Comment.query.filter_by(id=action_id).first()
+        user_id = comment.user_id
+
+    else:
+        article = Article.query.filter_by(id=instance.article_id).first()
+        user_id = article.user_id
 
     if instance.user_id != user_id:
         handle_notify(instance, action_detail_type=CONTENT_TYPE["REACTION"], user_id=user_id,
