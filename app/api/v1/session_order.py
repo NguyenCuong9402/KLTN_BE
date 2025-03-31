@@ -8,6 +8,7 @@ from app.api.helper import send_result, send_error
 from app.enums import regions, TYPE_PAYMENT_ONLINE
 from app.models import db, User, SessionOrder, SessionOrderCartItems, Orders, OrderItems, CartItems, AddressOrder, \
     PriceShip, Shipper, PaymentOnline
+from app.signal import handle_orders_notification
 from app.utils import get_timestamp_now, trim_dict
 from app.validator import CartSchema, SessionSchema, ShipperSchema, AddressOrderSchema, PaymentValidation, \
     SessionOrderValidate
@@ -245,6 +246,10 @@ def order_session(session_id):
 
         db.session.flush()
         db.session.commit()
+        try:
+            handle_orders_notification(order)
+        except:
+            pass
 
         return send_result(message='Đặt hàng thành công.', data={'count': count, 'price_ship': price_ship})
     except Exception as ex:

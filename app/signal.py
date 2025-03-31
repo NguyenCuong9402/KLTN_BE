@@ -88,14 +88,20 @@ def handle_reaction_notification(instance):
 
 
 def handle_orders_notification(instance):
+    user = User.query.filter_by(id=instance.user_id).first()
+    if not user or user.group.is_staff or user.group.is_super_admin:
+        return
     users = User.query.filter(User.group.has(is_staff=True)).all()
     for user in users:
-        handle_notify(instance, CONTENT_TYPE["ORDERS"] , user.id, NOTIFY_TYPE["ORDERS"])
+        handle_notify(instance, CONTENT_TYPE["ORDERS"], user.id, NOTIFY_TYPE["ORDERS"])
 
 def handle_add_product_notification(instance):
+    user = User.query.filter_by(id=instance.user_id).first()
+    if not user or user.group.is_staff or user.group.is_super_admin:
+        return
     users = User.query.filter(User.group.has(is_staff=True)).all()
     for user in users:
-        handle_notify(instance, CONTENT_TYPE["PRODUCT"] ,user.id, NOTIFY_TYPE["PRODUCT"])
+        handle_notify(instance, CONTENT_TYPE["PRODUCT"], user.id, NOTIFY_TYPE["PRODUCT"])
 
 
 def handle_article_delete(instance):
