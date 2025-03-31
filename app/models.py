@@ -7,7 +7,7 @@ from sqlalchemy import ForeignKey, TEXT, asc, desc, func
 from sqlalchemy.orm import validates
 
 from app.enums import DURATION_SESSION_MINUTES, TYPE_REACTION, STATUS_ORDER, ATTENDANCE, \
-    ATTENDANCE_STATUS, WORK_UNIT_TYPE, CONTENT_TYPE
+    ATTENDANCE_STATUS, WORK_UNIT_TYPE, CONTENT_TYPE, NOTIFY_TYPE
 from app.extensions import db
 from app.utils import get_timestamp_now, default_birthday
 
@@ -658,7 +658,10 @@ class Notify(db.Model):
 
     def get_formatted_name(self, name=None):
         if name:
-            return {"name": name, "other": 0, "avatar": None}
+            if name == "ADMIN":
+                return {"name": name, "other": 0, "avatar": None}
+            else:
+                return {"name": None, "other": 0, "avatar": None}
         first_detail = self.notify_details.order_by(asc(NotifyDetail.created_date)).first()
         total_count = self.notify_details.count()
 
@@ -672,13 +675,19 @@ class Notify(db.Model):
 
     @property
     def detail(self):
-        result = self.get_formatted_name(name='Admin') if self.notify_type in [] else self.get_formatted_name()
+        if self.notify_type in [NOTIFY_TYPE["DELIVERING_ORDERS"]]:
+            result = self.get_formatted_name(name="NONAME")
+        elif self.notify_type in []:
+            result = self.get_formatted_name(name="ADMIN")
+        else:
+            result = self.get_formatted_name()
 
         handlers = {
             "article": self._handle_article,
             "comment": self._handle_comment_related,
             "reaction": self._handle_comment_related,
             "orders": self._handle_add_order,
+            "delivering_orders": self._handle_ship_order
         }
 
         handler = handlers.get(self.notify_type, self._handle_default)
@@ -741,6 +750,12 @@ class Notify(db.Model):
         messages = "đã đặt đơn hàng"
 
         return messages, {"name": "ManageOrders"}
+
+    def _handle_ship_order(self):
+
+        messages = f"Đơn hàng #{self.id} đã được giao cho đơn vận chuyển"
+
+        return messages, {"name": "OrdersDelivering"}
 
     def _handle_default(self):
         """Default case handling"""

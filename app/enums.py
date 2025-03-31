@@ -27,6 +27,8 @@ NOTIFY_TYPE = {
     "COMMENT": 'comment',
     "REACTION": 'reaction',
     "ORDERS": 'orders',
+    "DELIVERING_ORDERS": 'delivering_orders',
+
 }
 
 CONTENT_TYPE = {

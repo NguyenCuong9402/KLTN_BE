@@ -13,6 +13,7 @@ from app.extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helper import send_result, send_error
 from app.models import Orders, User
+from app.signal import handle_ship_orders_notification
 from app.utils import escape_wildcard, get_timestamp_now, get_datetime_now
 from app.validator import OrderSchema, QueryParamsOrderSchema, QueryParamsManageOrderSchema
 
@@ -37,8 +38,12 @@ def change_status(order_id):
         order.status = status
         db.session.flush()
         db.session.commit()
-
         data = OrderSchema().dump(order)
+        if status == STATUS_ORDER['DELIVERING']:
+            try:
+                handle_ship_orders_notification(order)
+            except:
+                pass
         return send_result(data=data, message="Cập nhật thành công")
     except Exception as ex:
         db.session.rollback()

@@ -101,3 +101,10 @@ def handle_orders_notification(instance):
     users = User.query.filter(User.group.has(is_staff=True), User.id != instance.user_id).all()
     for user in users:
         handle_notify(instance, CONTENT_TYPE["ORDERS"], user.id, NOTIFY_TYPE["ORDERS"])
+
+
+def handle_ship_orders_notification(instance):
+    user = User.query.filter_by(id=instance.user_id).first()
+
+    handle_notify(instance, CONTENT_TYPE["ORDERS"], user.id, NOTIFY_TYPE["DELIVERING_ORDERS"],
+                            action_type=CONTENT_TYPE["ORDERS"], action_id=instance.id)
