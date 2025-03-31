@@ -78,7 +78,13 @@ def handle_comment_notification(instance):
 
 
 def handle_reaction_notification(instance):
-    print(f"Phản ứng mới: {instance.id}")
+    user_id = instance.ancestry.user_id if instance.ancestry_id else instance.article.user_id
+    action_id = instance.ancestry_id if instance.ancestry_id else instance.article_id
+    action_type = CONTENT_TYPE["COMMENT"] if instance.ancestry_id else CONTENT_TYPE["ARTICLE"]
+
+    if instance.user_id != user_id:
+        handle_notify(instance, action_detail_type=CONTENT_TYPE["REACTION"], user_id=user_id,
+                      notify_type=NOTIFY_TYPE["REACTION"], action_type=action_type, action_id=action_id)
 
 
 def handle_orders_notification(instance):

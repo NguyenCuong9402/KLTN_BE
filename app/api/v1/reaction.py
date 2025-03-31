@@ -5,6 +5,7 @@ from app.extensions import db
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.api.helper import send_result, send_error
 from app.models import Reaction, Article, Comment
+from app.signal import handle_reaction_notification
 from app.utils import trim_dict, get_timestamp_now
 from app.validator import  ReactionValidation
 
@@ -40,6 +41,8 @@ def toggle_reaction():
             category=category
         ).first()
 
+        handle_notify = False
+
         if reaction:
             reaction.vote = not reaction.vote
             reaction.modified_date = get_timestamp_now()
@@ -47,8 +50,17 @@ def toggle_reaction():
             reaction = Reaction(id=str(uuid()), user_id=user_id,**json_body)
             db.session.add(reaction)
 
+            handle_notify = True
+
         db.session.flush()
         db.session.commit()
+
+        if handle_notify:
+            try:
+                handle_reaction_notification(reaction)
+            except:
+                pass
+
         return send_result(message='Thành công', data= reaction.vote)
 
     except Exception as ex:
