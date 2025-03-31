@@ -10,7 +10,6 @@ from flask import request
 from marshmallow import fields, validate as validate_
 from pytz import timezone
 from .enums import TIME_FORMAT_LOG, ALLOWED_EXTENSIONS_IMG
-from .extensions import logger
 
 
 class FieldString(fields.String):
@@ -59,38 +58,6 @@ class FieldNumber(fields.Number):
         if validate is None:
             validate = validate_.Length(max=self.DEFAULT_MAX_LENGTH)
         super(FieldNumber, self).__init__(validate=validate, **metadata)
-
-
-def logged_input(json_req: str) -> None:
-    """
-    Logged input fields
-    :param json_req:
-    :return:
-    """
-
-    logger.info('%s %s %s %s %s INPUT FIELDS: %s',
-                strftime(TIME_FORMAT_LOG),
-                request.remote_addr,
-                request.method,
-                request.scheme,
-                request.full_path,
-                json_req)
-
-
-def logged_error(error: str) -> None:
-    """
-    Logged input fields
-    :param error:
-    :return:
-    """
-
-    logger.info('%s %s %s %s %s ERROR: %s',
-                strftime(TIME_FORMAT_LOG),
-                request.remote_addr,
-                request.method,
-                request.scheme,
-                request.full_path,
-                error)
 
 def allowed_file(filename: str) -> bool:
     """

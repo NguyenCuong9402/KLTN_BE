@@ -15,8 +15,7 @@ from sqlalchemy_pagination import paginate
 from werkzeug.utils import secure_filename
 
 from app.api.helper import send_result, send_error
-from app.extensions import logger
-from app.models import db, Product, User, Orders, OrderItems, CartItems, Files, TypeProduct
+from app.models import db, Product
 from app.utils import trim_dict, escape_wildcard
 from app.validator import ProductSchema, QueryParamsSchema
 

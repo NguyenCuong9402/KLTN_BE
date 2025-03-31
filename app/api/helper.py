@@ -7,7 +7,7 @@ from flask_jwt_extended import decode_token, get_jwt_identity, verify_jwt_in_req
 from flask_mail import Message as MessageMail
 from jinja2 import Template
 
-from app.extensions import logger, mail, red, db, mongo_db
+from app.extensions import mail, red, db, mongo_db
 from app.models import User, GroupRole, RolePermission, Role
 from app.settings import DevConfig
 from app.utils import get_timestamp_now, no_accent_vietnamese
@@ -159,10 +159,8 @@ def send_email(recipient: str, title: str, body: str) -> None:
     # Try to send the email.
     try:
         mail.send(msg)
-    except Exception as e:
-        logger.error(str(e))
-    else:
-        logger.info('Successful mailing')
+    except Exception as ex:
+        print(ex)
 
 
 # The old function using smtp gmail

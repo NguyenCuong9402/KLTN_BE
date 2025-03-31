@@ -10,7 +10,7 @@ from sqlalchemy import or_
 from sqlalchemy import extract
 
 from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, ATTENDANCE
-from app.extensions import db, logger
+from app.extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helper import send_result, send_error, convert_to_datetime
 from app.models import User, Group, Files, Address, Attendance

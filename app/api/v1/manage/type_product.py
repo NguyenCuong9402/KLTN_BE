@@ -7,7 +7,7 @@ from marshmallow import ValidationError
 from sqlalchemy import desc, asc, or_
 from sqlalchemy_pagination import paginate
 
-from app.extensions import logger, db
+from app.extensions import db
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.api.helper import send_result, send_error
 from app.models import TypeProduct, Product

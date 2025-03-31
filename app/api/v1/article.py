@@ -7,7 +7,7 @@ from sqlalchemy.sql.visitors import replacement_traverse
 from sqlalchemy_pagination import paginate
 
 from app.enums import LAYER_COMMENT
-from app.extensions import logger, db
+from app.extensions import db
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request_optional
 from app.api.helper import send_result, send_error, get_user_id_request
 from app.models import User, Article, Community, Product, ArticleTagProduct, Comment

@@ -9,7 +9,6 @@ from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
 from app.enums import STATUS_ORDER
-from app.extensions import logger
 from app.models import db, Product, User, Orders
 from app.utils import escape_wildcard
 from app.validator import OrderSchema, QueryParamsOrderSchema

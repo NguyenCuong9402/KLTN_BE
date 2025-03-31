@@ -16,7 +16,7 @@ from app.gateway import authorization_require
 from app.message_broker import RabbitMQProducerSendMail
 from app.models import User, EmailTemplate, VerityCode, Mail, GroupRole, Group, Address
 from app.settings import DevConfig
-from app.utils import trim_dict, get_timestamp_now, logged_input, data_preprocessing, generate_random_number_string, \
+from app.utils import trim_dict, get_timestamp_now, data_preprocessing, generate_random_number_string, \
     body_mail
 from app.extensions import mail
 

@@ -9,7 +9,6 @@ from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
 from app.enums import KEY_GROUP_NOT_STAFF
-from app.extensions import logger
 from app.models import Group
 from app.utils import trim_dict, escape_wildcard
 from app.validator import GroupSchema, QueryParamsAllSchema

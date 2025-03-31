@@ -1,13 +1,10 @@
 import json
 
 from flask import Blueprint, request
-from flask_jwt_extended import get_jwt_identity
-from marshmallow import ValidationError
 from sqlalchemy import asc, desc
 from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
-from app.extensions import logger
 from app.models import Community, Article
 from app.utils import escape_wildcard
 from app.validator import CommunitySchema, QueryParamsAllSchema, ArticleSchema

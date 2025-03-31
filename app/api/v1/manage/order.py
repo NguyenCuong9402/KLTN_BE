@@ -9,7 +9,7 @@ from sqlalchemy import desc, asc
 from sqlalchemy_pagination import paginate
 
 from app.enums import STATUS_ORDER
-from app.extensions import db, logger
+from app.extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helper import send_result, send_error
 from app.models import Orders, User

@@ -2,7 +2,7 @@ import os
 import urllib.parse
 import datetime
 
-from app.extensions import db, logger, CONFIG
+from app.extensions import db, CONFIG
 from app.utils import get_datetime_now
 from threading import Thread
 

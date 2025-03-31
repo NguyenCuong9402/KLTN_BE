@@ -5,7 +5,7 @@ from flask import Flask, request
 from flask_cors import CORS
 
 from app.api.helper import CONFIG, send_result
-from app.extensions import logger, jwt, db, red, mail, migrate, scheduler
+from app.extensions import jwt, db, red, mail, migrate, scheduler
 from .api import v1 as api_v1
 from .api.helper import send_error
 from .enums import TIME_FORMAT_LOG
@@ -49,45 +49,45 @@ def register_extensions(app):
     mail.init_app(app)
     migrate.init_app(app, db)
 
-    @app.after_request
-    def after_request(response):
-        """
+    # @app.after_request
+    # def after_request(response):
+    #     """
+    #
+    #     :param response:
+    #     :return:
+    #     """
+    #     # This IF avoids the duplication of registry in the log,
+    #     # status code greater than 400 is already logged in @app.errorhandler.
+    #     if 200 <= response.status_code < 400:
+    #         ts = strftime(TIME_FORMAT_LOG)
+    #         logger.info('%s %s %s %s %s %s',
+    #                     ts,
+    #                     request.remote_addr,
+    #                     request.method,
+    #                     request.scheme,
+    #                     request.full_path,
+    #                     response.status)
+    #     return response
 
-        :param response:
-        :return:
-        """
-        # This IF avoids the duplication of registry in the log,
-        # status code greater than 400 is already logged in @app.errorhandler.
-        if 200 <= response.status_code < 400:
-            ts = strftime(TIME_FORMAT_LOG)
-            logger.info('%s %s %s %s %s %s',
-                        ts,
-                        request.remote_addr,
-                        request.method,
-                        request.scheme,
-                        request.full_path,
-                        response.status)
-        return response
-
-    @app.errorhandler(Exception)
-    def exceptions(e):
-        """
-        Handling exceptions
-        :param e:
-        :return:
-        """
-        ts = strftime(TIME_FORMAT_LOG)
-        error = '{} {} {} {} {} {}'.format(ts, request.remote_addr, request.method, request.scheme, request.full_path,
-                                           str(e))
-        code = 500
-        if hasattr(e, 'code'):
-            code = e.code
-        if code == 500:
-            logger.error(error)
-        else:
-            logger.info(error)
-
-        return send_error(message=str(e), code=code)
+    # @app.errorhandler(Exception)
+    # def exceptions(e):
+    #     """
+    #     Handling exceptions
+    #     :param e:
+    #     :return:
+    #     """
+    #     ts = strftime(TIME_FORMAT_LOG)
+    #     error = '{} {} {} {} {} {}'.format(ts, request.remote_addr, request.method, request.scheme, request.full_path,
+    #                                        str(e))
+    #     code = 500
+    #     if hasattr(e, 'code'):
+    #         code = e.code
+    #     if code == 500:
+    #         logger.error(error)
+    #     else:
+    #         logger.info(error)
+    #
+    #     return send_error(message=str(e), code=code)
 
 
 def register_monitor(app):

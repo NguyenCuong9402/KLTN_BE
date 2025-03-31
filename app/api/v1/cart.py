@@ -8,7 +8,6 @@ from datetime import datetime
 from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
-from app.extensions import logger
 from app.models import CartItems, db, User
 from app.utils import trim_dict, get_timestamp_now
 from app.validator import QueryParamsAllSchema, CartSchema, CartValidation, CartUpdateValidation
