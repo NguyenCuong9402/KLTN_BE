@@ -10,6 +10,13 @@
 - Liên kết ngân hàng bidv ( Nhập bừa theo hướng dẫn, mã 000000)
 - Nạp tiền vào.
 
+* chạy Docker-compose
+```
+-connect mongo compass
+- mongodb://root:admin@127.0.0.1:27017/dev-shop?authSource=admin
+
+```
+
 
 * Cài đặt base và data
 ```
