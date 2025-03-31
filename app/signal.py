@@ -86,7 +86,7 @@ def handle_reaction_notification(instance):
         user_id = comment.user_id
 
     else:
-        article = Article.query.filter_by(id=instance.article_id).first()
+        article = Article.query.filter_by(id=action_id).first()
         user_id = article.user_id
 
     if instance.user_id != user_id:

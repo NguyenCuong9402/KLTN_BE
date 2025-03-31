@@ -83,7 +83,7 @@ def get_items():
 
         paginator = paginate(query, page, page_size)
 
-        notify_data = OrderSchema(many=True).dump(paginator.items)
+        notify_data = NotifySchema(many=True).dump(paginator.items)
 
         response_data = dict(
             items=notify_data,

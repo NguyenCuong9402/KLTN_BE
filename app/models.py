@@ -675,10 +675,10 @@ class Notify(db.Model):
         result = self.get_formatted_name(name='Admin') if self.notify_type in [] else self.get_formatted_name()
 
         handlers = {
-            "ARTICLE": self._handle_article,
-            "COMMENT": self._handle_comment_related,
-            "REACTION": self._handle_comment_related,
-            "ORDERS": self._handle_add_order,
+            "article": self._handle_article,
+            "comment": self._handle_comment_related,
+            "reaction": self._handle_comment_related,
+            "orders": self._handle_add_order,
         }
 
         handler = handlers.get(self.notify_type, self._handle_default)
