@@ -59,12 +59,14 @@ class DevConfig(Config):
     BASE_URL_WEBSITE = os.environ.get('BASE_URL_WEBSITE', "http://localhost:5012" )
 
     # Config Mongodb
-    MONGO_CONN = "mongodb://root:bootai%402022_@192.168.1.223:27017/?authMechanism=DEFAULT"
-    MONGO_DB = "dev-csoc-dev"
-    BK_HOST_MONGODB = '127.0.0.1'
-    BK_PORT_MONGODB = '27017'
-    BK_USERNAME_MONGODB = 'root'
-    BK_PASSWORD_MONGODB = ''
+
+    BK_HOST_MONGODB = os.environ.get("BK_HOST_MONGODB", "127.0.0.1")
+    BK_PORT_MONGODB = os.environ.get("BK_PORT_MONGODB", "27017")
+    BK_USERNAME_MONGODB = os.environ.get("BK_USERNAME_MONGODB", "root")
+    BK_PASSWORD_MONGODB = os.environ.get("BK_PASSWORD_MONGODB", "admin-password")
+    MONGO_DB = os.environ.get("MONGO_DB", "dev-shop")
+
+    MONGO_CONN = f"mongodb://{BK_USERNAME_MONGODB}:{BK_PASSWORD_MONGODB}@{BK_HOST_MONGODB}:{BK_PORT_MONGODB}/{MONGO_DB}?authSource=admin"
 
     # rabbitmq
     ENABLE_RABBITMQ_CONSUMER = os.environ.get("ENABLE_RABBITMQ_CONSUMER", "False").lower() == "true"
