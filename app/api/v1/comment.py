@@ -11,6 +11,7 @@ from app.extensions import db
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request_optional
 from app.api.helper import send_result, send_error, get_user_id_request
 from app.models import User, Article, Comment
+from app.signal import handle_comment_notification
 from app.utils import trim_dict
 from app.validator import  CommentValidation, CommentParamsValidation, CommentSchema
 
@@ -44,6 +45,11 @@ def create_comment():
         db.session.flush()
         db.session.commit()
         data = CommentSchema(context={"user_id": user_id}).dump(comment)
+
+        try:
+            handle_comment_notification(comment)
+        except:
+            pass
 
         return send_result(data=data, message='Thành công')
 
