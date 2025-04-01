@@ -38,12 +38,12 @@ class DevConfig(Config):
     BK_DBNAME_MYSQL = os.environ.get('BK_DBNAME_MYSQL', "dev_kltn")
     SQLALCHEMY_DATABASE_URI = f'mysql://{BK_USERNAME_MYSQL}:{BK_PASSWORD_MYSQL}@{BK_HOST_MYSQL}:{BK_PORT_MYSQL}/{BK_DBNAME_MYSQL}?charset=utf8mb4'
 
-    os.environ.get('REDIS_HOST', "127.0.0.1")
+
     # redis config
-    REDIS_HOST = '127.0.0.1'
-    REDIS_PORT = 6379
+    REDIS_HOST = os.environ.get('REDIS_HOST', "127.0.0.1")
+    REDIS_PORT = os.environ.get('REDIS_PORT', "6379")
     REDIS_DB = 2
-    REDIS_PASSWORD = 'cuong942002'
+    REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', "cuong942002")
 
     # email config
     ADMIN_EMAIL = os.environ.get('MAIL_USERNAME', "cn.company.enterprise@gmail.com" )
