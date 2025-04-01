@@ -42,7 +42,7 @@ class Worker:
 
             all_prices = {(p.region_id, p.shipper_id): p.price for p in PriceShip.query.all()}
             for user in users:
-                for i in range(20):
+                for i in range(1, 20):
                     all_products = Product.query.order_by(func.random()).limit(random.choice([2,3,4,5,6])).all()
 
                     time_stamp = self.get_timestamp_x_months_ago(i)
