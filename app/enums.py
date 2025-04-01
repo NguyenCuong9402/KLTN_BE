@@ -55,6 +55,13 @@ WORK_UNIT_TYPE = {
     "FULL": "full"  # đi làm đúng giờ
 }
 
+# processing, resolved
+
+REPORT_ORDER_TYPE = {
+    'PROCESSING': 'processing',
+    'RESOLVED': 'resolved'
+}
+
 TYPE_PAYMENT_ONLINE = {
     'MOMO': 'momo',
     'ZALO': 'zalo',
