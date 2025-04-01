@@ -395,8 +395,9 @@ def statistic_attendance():
             'work_unit': 0,
             'number_work_date': len(attendances)
         }
-
         for attendance in attendances:
+            if attendance.work_unit in list(WORK_UNIT_TYPE.values()):
+                data['work_unit'] += 1
             if attendance.check_in:
                 check_in_dt = datetime.combine(base_date, attendance.check_in)
                 if check_in_dt > check_in_attendance:
@@ -409,8 +410,7 @@ def statistic_attendance():
                     if check_out_dt < check_out_attendance:
                         data['work_later_and_leave_early'] += 1
 
-            if attendance.work_unit in [WORK_UNIT_TYPE.get('HALF'), attendance.work_unit == WORK_UNIT_TYPE.get('FULL')]:
-                data['work_unit'] += 1
+
 
         if data['number_work_date'] > 0:
             vi_pham = round(
