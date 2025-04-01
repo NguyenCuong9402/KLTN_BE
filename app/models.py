@@ -599,7 +599,7 @@ class Orders(db.Model):
     payment_online_id = db.Column(db.String(50), db.ForeignKey('payment_online.id', ondelete='SET NULL', onupdate='SET NULL'))
 
     payment_online = db.relationship("PaymentOnline", viewonly=True)
-
+    user = db.relationship('User', viewonly=True)
 
     @property
     def is_paid(self):
