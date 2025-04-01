@@ -869,12 +869,12 @@ class OrderReportSchema(Schema):
     reason = fields.String()
     message = fields.String()
     files = fields.List(fields.Nested(FileSchema()))
-    order_id = fields.String()
     created_date = fields.Integer()
     result_date = fields.Integer()
     result = fields.String()
+    status = fields.String()
     user = fields.Nested(UserSchema(only=("id","full_name", "avatar", "email", "phone")))
-
+    order = fields.Nested(OrderSchema())
 class RegionSchema(Schema):
     id = fields.String()
     name = fields.String()

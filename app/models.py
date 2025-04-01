@@ -799,6 +799,8 @@ class OrderReport(db.Model):
     reason = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"))
     order_id = db.Column(db.String(50), db.ForeignKey('orders.id', ondelete='CASCADE', onupdate='CASCADE'),
                          nullable=True)
+    order = db.relationship('Orders', viewonly=True)
+
     message = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
     status = db.Column(db.String(20), default='processing')  # processing, resolved
     result = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)

@@ -43,7 +43,7 @@ class DevConfig(Config):
     REDIS_HOST = os.environ.get('REDIS_HOST', "127.0.0.1")
     REDIS_PORT = os.environ.get('REDIS_PORT', "6379")
     REDIS_DB = 2
-    REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', "cuong942002")
+    REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
 
     # email config
     ADMIN_EMAIL = os.environ.get('MAIL_USERNAME', "cn.company.enterprise@gmail.com" )
