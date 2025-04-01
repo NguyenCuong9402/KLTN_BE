@@ -15,8 +15,9 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - dev-csoc-net
-  mongodb_container:
+  mongodb:
     image: mongo:7.0.5
+    container_name: mongodb_container
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -63,17 +64,17 @@ services:
 #    networks:
 #      - dev-csoc-net
 
-#  redis:
-#    image: redis:6.2-alpine
-#    container_name: redis_fit
-#    restart: always
-#    ports:
-#      - '6379:6379'
-#    command: redis-server --save 20 1 --loglevel warning --requirepass cuong942002
-##    volumes:
-##      - cache:/data
-#    networks:
-#      - dev-csoc-net
+  redis:
+    image: redis:6.2.14-alpine
+    container_name: redis_container
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass cuong942002
+    volumes:
+      - cache:/data
+    networks:
+      - dev-csoc-net
 networks:
   dev-csoc-net:
 
@@ -81,4 +82,4 @@ volumes:
   rabbitmq_data:
   mongodb_data_container:
 #  db_data:
-#  cache:
+  cache:
