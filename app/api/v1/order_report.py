@@ -1,3 +1,6 @@
+from datetime import timedelta
+
+from dateutil.relativedelta import relativedelta
 from shortuuid import uuid
 from flask import Blueprint, request
 from marshmallow import ValidationError
@@ -9,7 +12,7 @@ from app.extensions import db
 
 from app.api.helper import send_result, send_error
 from app.models import FileLink, OrderReport, User
-from app.utils import trim_dict, get_timestamp_now, escape_wildcard
+from app.utils import trim_dict, get_timestamp_now, escape_wildcard, get_datetime_now
 from app.validator import ReportValidation, OrderReportSchema, QueryParamsOrderSchema
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
@@ -83,9 +86,23 @@ def get_items():
         sort = params.get('sort', 'desc')
         status = params.get('status', None)
         text_search = params.get('text_search', None)
+        time = params.get('time', None)
 
         query = OrderReport.query.filter(OrderReport.user_id==user_id)
+        if time:
+            datetime_now = get_datetime_now()
+            if time == 'week':
+                time_filter = int((datetime_now - timedelta(weeks=1)).timestamp())
+            elif time == 'month':
+                time_filter = int((datetime_now - relativedelta(months=1)).timestamp())
+            elif time == 'year':
+                time_filter = int((datetime_now - relativedelta(years=1)).timestamp())
+            else:
+                time_filter = None
 
+            # Lọc theo created_date nếu có thời gian hợp lệ
+            if time_filter:
+                query = query.filter(OrderReport.created_date >= time_filter)
         if status:
             query = query.filter(OrderReport.status==status)
 

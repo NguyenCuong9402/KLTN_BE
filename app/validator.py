@@ -681,6 +681,20 @@ class QueryParamsOrderSchema(BaseValidation):
     )
     status = fields.String(validate=validate.OneOf(["pending", "processing", "delivering", "resolved"]))
     text_search = fields.String(allow_none=True)
+    time = fields.String()
+
+class ParamsReportSchema(BaseValidation):
+    page = fields.Integer(required=True, validate=validate.Range(min=1))  # Bắt buộc, không nhỏ hơn 1
+    page_size = fields.Integer(missing=10,
+                               validate=validate.Range(min=1, max=100))  # Mặc định là 10, giới hạn tối đa 100
+    order_by = fields.String(missing="created_date")  # Mặc định là 'created_date'
+    sort = fields.String(
+        missing="desc", validate=validate.OneOf(["asc", "desc"])  # Chỉ chấp nhận 'asc' hoặc 'desc'
+    )
+    status = fields.String(allow_none=True, validate=validate.OneOf(["pending", "processing", "delivering", "resolved"]))
+    text_search = fields.String(allow_none=True)
+    created_at = fields.String(allow_none=True)
+
 
 class QueryNotifyParamsSchema(BaseValidation):
     notify_unread = fields.Boolean(allow_none=True, missing=False)
