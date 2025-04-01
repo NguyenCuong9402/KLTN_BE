@@ -13,7 +13,7 @@ from app.utils import trim_dict, get_timestamp_now, escape_wildcard
 from app.validator import ReportValidation, OrderReportSchema, QueryParamsOrderSchema
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
-api = Blueprint('order_report', __name__)
+api = Blueprint('report', __name__)
 
 @api.route("/<report_id>", methods=["GET"])
 @jwt_required
