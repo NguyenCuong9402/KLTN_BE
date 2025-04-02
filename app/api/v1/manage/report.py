@@ -4,7 +4,7 @@ from marshmallow import ValidationError
 from sqlalchemy import desc, asc
 from sqlalchemy_pagination import paginate
 
-from app.enums import TYPE_FILE_LINK
+from app.enums import TYPE_FILE_LINK, REPORT_ORDER_TYPE
 from app.extensions import db
 
 from app.api.helper import send_result, send_error
@@ -24,6 +24,29 @@ def get_item(report_id):
             return send_error(message="Đơn khiếu nại không tồn tại, F5 lại web")
         data = OrderReportSchema().dump(item)
         return send_result(data=data)
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+
+@api.route("/<report_id>", methods=["PUT"])
+@jwt_required
+def put_item(report_id):
+    try:
+        item = OrderReport.query.filter(OrderReport.id == report_id).first()
+        if item is None:
+            return send_error(message="Đơn khiếu nại không tồn tại, F5 lại web")
+
+        body_request = request.get_json()
+
+        result = body_request.get("result", "")
+        if not result.strip():
+            return send_error(message='Không để trống phản hồi')
+        item.result = result.strip()
+        item.status = REPORT_ORDER_TYPE['RESOLVED']
+        db.session.flush()
+        db.session.commit()
+        data = OrderReportSchema().dump(item)
+        return send_result(data=data, message="ok")
     except Exception as ex:
         return send_error(message=str(ex))
 
