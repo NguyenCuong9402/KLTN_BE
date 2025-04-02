@@ -257,6 +257,56 @@ def profile_staff(profile_id):
     data = UserSchema().dump(user)
     return send_result(data=data)
 
+@api.route('/<profile_id>', methods=['PUT'])
+@jwt_required
+def update_staff(profile_id):
+
+    body = request.get_json()
+    json_req = request.get_json()
+    json_body = trim_dict(json_req)
+    validator_input = StaffValidation()
+    is_not_validate = validator_input.validate(json_body)
+    if is_not_validate:
+        return send_error(data=is_not_validate, message='Validate Error')
+
+    user = User.query.filter(User.id==profile_id, User.group.has(is_staff=True)).first()
+    if user is None:
+        return send_error(message='Nhân viên không tồn tại')
+    address = json_body.pop('address')
+    address = Address.query.filter_by(province=address.get('province'), district=address.get('district'),
+                                      ward=address.get('ward')).first()
+    if address is None:
+        return send_error(message="Địa chỉ không hợp lệ.")
+
+    json_body['address_id'] = address.id
+
+    check_email = User.query.filter(User.email==json_body['email'], User.id!=user.id).first()
+    if check_email:
+        return send_error(message='Email đã được đăng ký')
+
+    check_phone = User.query.filter(User.phone == json_body['phone'], User.id != user.id).first()
+    if check_phone:
+        return send_error(message='SĐT đã được đăng ký')
+
+    check_group = Group.query.filter_by(id=json_body['group_id']).first()
+    if check_group is None:
+        return send_error(message='Chức vụ không tồn tại')
+
+    if check_group.key in KEY_GROUP_NOT_STAFF:
+        return send_error(message='Chức vụ không phù hợp')
+
+    for key, value in json_body.items():
+        # Kiểm tra nếu trường đó tồn tại trong đối tượng User (tránh trường không hợp lệ)
+        if hasattr(user, key):
+            setattr(user, key, value)
+
+        # Lưu thay đổi vào cơ sở dữ liệu
+    db.session.commit()
+
+
+    return send_result(data=body)
+
+
 @api.route("/active/<user_id>", methods=["PUT"])
 @jwt_required
 def active_user(user_id):
