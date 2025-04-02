@@ -72,8 +72,11 @@ class Worker:
                 {'email': f'{user}{role}@gmail.com', 'password': '123456789', 'full_name': f'{user.title()} {role}',
                  'group_key': role, 'phone': f"0{random.randint(3200000000, 3999999999)}", 'identification_card': generate_vietnam_id(),
                  'tax_code': generate_vietnam_tax_code(), 'join_date': datetime.datetime(2024, 1, 1),
-                 'finish_date': datetime.datetime(2027, 1, 1), 'number_dependent': 0, 'gender': random.choice([0, 1]),
-                 'birthday': fake.date_of_birth(minimum_age=14, maximum_age=60)
+                 'finish_date': datetime.datetime(2027, 1, 1), 'number_dependent': random.choice([0,1]),
+                 'nationality': 'Việt Nam', 'ethnicity': 'Kinh',
+                 'gender': random.choice([0, 1]), 'social_insurance_number':  f"0{random.randint(3200000000, 3999999999)}",
+
+                 'birthday': fake.date_of_birth(minimum_age=14, maximum_age=60, )
                  }
                 for role in ['admin', 'user', 'director', 'employee', 'hr_manager', 'accountant']
                 for user in ['cuong', 'loc']

@@ -249,6 +249,14 @@ def new():
         db.session.rollback()
         return send_error(message=str(ex), code=442)
 
+@api.route('/<profile_id>', methods=['GET'])
+@jwt_required
+def profile_staff(profile_id):
+
+    user = User.query.filter_by(id=profile_id).first()
+    data = UserSchema().dump(user)
+    return send_result(data=data)
+
 @api.route("/active/<user_id>", methods=["PUT"])
 @jwt_required
 def active_user(user_id):

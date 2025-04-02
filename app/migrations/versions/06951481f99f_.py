@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 56d7772f4538
+Revision ID: 06951481f99f
 Revises: 
-Create Date: 2025-03-31 23:06:10.747987
+Create Date: 2025-04-02 15:31:54.818981
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = '56d7772f4538'
+revision = '06951481f99f'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -188,13 +188,13 @@ def upgrade():
     sa.Column('last_seen_notify', mysql.INTEGER(unsigned=True), nullable=True),
     sa.Column('group_id', sa.String(length=50), nullable=True),
     sa.Column('identification_card', sa.String(length=100), nullable=True),
-    sa.Column('tax_code', sa.String(length=100), nullable=True),
-    sa.Column('social_insurance_number', sa.String(length=100), nullable=True),
+    sa.Column('tax_code', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
+    sa.Column('social_insurance_number', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
     sa.Column('join_date', sa.DATE(), nullable=True),
     sa.Column('finish_date', sa.DATE(), nullable=True),
     sa.Column('number_dependent', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.Column('ethnicity', sa.String(length=100), nullable=True),
-    sa.Column('nationality', sa.String(length=100), nullable=True),
+    sa.Column('ethnicity', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
+    sa.Column('nationality', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
     sa.ForeignKeyConstraint(['address_id'], ['address.id'], onupdate='CASCADE', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['avatar_id'], ['files.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['group_id'], ['group.id'], onupdate='CASCADE', ondelete='SET NULL'),

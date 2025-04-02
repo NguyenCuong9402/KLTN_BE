@@ -47,13 +47,13 @@ class User(db.Model):
 
     # nhan vien
     identification_card = db.Column(db.String(100), nullable=True) # can cuoc cong dan
-    tax_code = db.Column(db.String(100), nullable=True) # ma so thue
-    social_insurance_number = db.Column(db.String(100), nullable=True) # Mã BHXH
+    tax_code = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=True) # ma so thue
+    social_insurance_number = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=True) # Mã BHXH
     join_date = db.Column(db.DATE, nullable=True)
     finish_date = db.Column(db.DATE, nullable=True)
     number_dependent = db.Column(INTEGER(unsigned=True), default=0) # người phụ thuộc
-    ethnicity = db.Column(db.String(100), nullable=True) # Dan toc
-    nationality = db.Column(db.String(100), nullable=True) # Quoc Tich
+    ethnicity = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=True) # Dan toc
+    nationality = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=True) # Quoc Tich
 
     attendances = db.relationship('Attendance', back_populates='user', cascade="all, delete-orphan")
     latest_salary = db.relationship(
