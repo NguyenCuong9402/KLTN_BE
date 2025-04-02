@@ -302,9 +302,10 @@ def update_staff(profile_id):
 
         # Lưu thay đổi vào cơ sở dữ liệu
     db.session.commit()
+    
+    data=UserSchema().dump(user)
 
-
-    return send_result(data=body)
+    return send_result(data=data, message='Thay đổi thông tin thành công')
 
 
 @api.route("/active/<user_id>", methods=["PUT"])

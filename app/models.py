@@ -418,6 +418,7 @@ class PriceShip(db.Model):
 class Shipper(db.Model):
     __tablename__ = 'shipper'
     id = db.Column(db.String(50), primary_key=True)
+    is_delete = db.Column(db.Boolean, nullable=False, default=False)
     name = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
     index = db.Column(db.Integer, nullable=True, default=0)
     price_ship = db.relationship(
@@ -470,6 +471,7 @@ class Product(db.Model):
     describe = db.Column(db.Text(collation='utf8mb4_unicode_ci'), nullable=True)
     type_product_id = db.Column(db.String(50), db.ForeignKey('type_product.id', ondelete='SET NULL',
                                                              onupdate='CASCADE'), nullable=True)
+    is_delete = db.Column(db.Boolean, nullable=False, default=False)
     original_price = db.Column(db.BigInteger, nullable=True, default=0)
     discount = db.Column(db.Integer, nullable=True, default=0)
     discount_from_date = db.Column(db.Integer, nullable=True)

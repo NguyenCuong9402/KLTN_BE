@@ -78,7 +78,7 @@ def remove_item():
         list_id = body_request.get('list_id', [])
         if len(list_id) == 0:
             return send_error(message='Chưa chọn item nào.')
-        Product.query.filter(Product.id.in_(list_id)).delete()
+        Product.query.filter(Product.id.in_(list_id)).update({"is_delete": True}, synchronize_session=False)
         db.session.flush()
         db.session.commit()
         return send_result(message="Xóa sản phẩm thành công")
@@ -92,7 +92,7 @@ def remove_item():
 def update_item(product_id):
     try:
 
-        product = Product.query.filter(Product.id == product_id).first()
+        product = Product.query.filter(Product.id == product_id, Product.is_delete.is_(False)).first()
 
         if product is None:
             return send_error(message='Sản phẩm không tồn tại.')

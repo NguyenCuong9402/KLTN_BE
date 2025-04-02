@@ -12,7 +12,7 @@ api = Blueprint('shipper', __name__)
 @api.route("", methods=["GET"])
 def get_shipper():
     try:
-        shipper = Shipper.query.filter().order_by(asc(Shipper.index)).all()
+        shipper = Shipper.query.filter(Shipper.is_delete.is_(False)).order_by(asc(Shipper.index)).all()
 
         if len(shipper) == 0:
             return send_error(message='Không có đơn vị vận chuyển nào.')

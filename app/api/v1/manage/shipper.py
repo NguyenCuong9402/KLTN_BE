@@ -40,7 +40,8 @@ def new():
 @jwt_required
 def remove_item(ship_id):
     try:
-        Shipper.query.filter(Shipper.id == ship_id).delete()
+        Shipper.query.filter(Shipper.id == ship_id).update({"is_delete": True}, synchronize_session=False)
+
         db.session.flush()
         db.session.commit()
         return send_result(message="Xóa sản phẩm thành công")
@@ -82,7 +83,7 @@ def get_shipper():
         sort = params.get('sort', 'desc')
         text_search = params.get('text_search', None)
 
-        query = Shipper.query.filter()
+        query = Shipper.query.filter(Shipper.is_delete.is_(False))
 
         if text_search:
             text_search = text_search.strip()

@@ -24,7 +24,7 @@ api = Blueprint('product', __name__)
 @api.route("/<product_id>", methods=["GET"])
 def get_item(product_id):
     try:
-        item = Product.query.filter(Product.id == product_id).first()
+        item = Product.query.filter(Product.id == product_id, Product.is_delete.is_(False)).first()
         if item is None:
             return send_error(message="Sản phẩm không tồn tại, F5 lại web")
         data = ProductSchema(many=False).dump(item)
@@ -51,7 +51,7 @@ def get_items():
         text_search = params.get('text_search', None)
         select_type = params.get('select_type', [])
 
-        query = Product.query.filter()
+        query = Product.query.filter(Product.is_delete.is_(False))
 
         if select_type:
             query = query.filter(Product.type_product_id.in_(select_type))
