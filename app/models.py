@@ -127,8 +127,6 @@ class Attendance(db.Model):
         return ATTENDANCE_STATUS['ACCEPTABLE_ABSENT']
 
 
-
-
 class Salary(db.Model):
     __tablename__ = 'salary'
 
@@ -166,12 +164,23 @@ class DocumentStorage(db.Model):
     __tablename__ = 'document_storage'
 
     id = db.Column(db.String(50), primary_key=True)
-    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
-                           nullable=False)
-    user = db.relationship('User', viewonly=True)
+    name = db.Column(db.String(255, collation="utf8mb4_vietnamese_ci"), nullable=False)# Tên tài liệu
+    index = db.Column(db.Integer, nullable=True, default=0)
 
-    document_name = db.Column(db.String(255, collation="utf8mb4_vietnamese_ci"), nullable=False)  # Tên tài liệu
-    document_url = db.Column(db.String(500), nullable=False)  # Đường dẫn đến tài liệu
+
+class StaffDocumentFile(db.Model):
+    __tablename__ = 'staff_document_file'
+    id = db.Column(db.String(50), primary_key=True)
+    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
+                        nullable=False)
+    user = db.relationship('User', viewonly=True)
+    document_id = db.Column(db.String(50), db.ForeignKey('document_storage.id', ondelete='CASCADE', onupdate='CASCADE'),
+                        nullable=False)
+    document = db.relationship('DocumentStorage', viewonly=True)
+    file_id = db.Column(db.String(50), db.ForeignKey('files.id', ondelete='CASCADE', onupdate='CASCADE'),
+                        nullable=False)
+    file = db.relationship('Files', viewonly=True)
+    index = db.Column(db.Integer, nullable=True, default=0)
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
     modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
 
@@ -291,6 +300,7 @@ class Files(db.Model):
 
     id = db.Column(db.String(50), primary_key=True)
     file_path = db.Column(db.String(255))
+    file_name = db.Column(db.String(255, collation="utf8mb4_vietnamese_ci"), nullable=True)
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
 
 

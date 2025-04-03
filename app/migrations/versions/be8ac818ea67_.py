@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 06951481f99f
+Revision ID: be8ac818ea67
 Revises: 
-Create Date: 2025-04-02 15:31:54.818981
+Create Date: 2025-04-03 16:56:59.199800
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = '06951481f99f'
+revision = 'be8ac818ea67'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -46,6 +46,12 @@ def upgrade():
     sa.Column('modified_date', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('document_storage',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('name', sa.String(length=255, collation='utf8mb4_vietnamese_ci'), nullable=False),
+    sa.Column('index', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('email_template',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('body', sa.TEXT(), nullable=True),
@@ -56,6 +62,7 @@ def upgrade():
     op.create_table('files',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('file_path', sa.String(length=255), nullable=True),
+    sa.Column('file_name', sa.String(length=255, collation='utf8mb4_vietnamese_ci'), nullable=True),
     sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
@@ -100,6 +107,7 @@ def upgrade():
     )
     op.create_table('shipper',
     sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('is_delete', sa.Boolean(), nullable=False),
     sa.Column('name', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
     sa.Column('index', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
@@ -150,6 +158,7 @@ def upgrade():
     sa.Column('name', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
     sa.Column('describe', sa.Text(collation='utf8mb4_unicode_ci'), nullable=True),
     sa.Column('type_product_id', sa.String(length=50), nullable=True),
+    sa.Column('is_delete', sa.Boolean(), nullable=False),
     sa.Column('original_price', sa.BigInteger(), nullable=True),
     sa.Column('discount', sa.Integer(), nullable=True),
     sa.Column('discount_from_date', sa.Integer(), nullable=True),
@@ -247,17 +256,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_color_created_date'), 'color', ['created_date'], unique=False)
-    op.create_table('document_storage',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('user_id', sa.String(length=50), nullable=False),
-    sa.Column('document_name', sa.String(length=255, collation='utf8mb4_vietnamese_ci'), nullable=False),
-    sa.Column('document_url', sa.String(length=500), nullable=False),
-    sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_document_storage_created_date'), 'document_storage', ['created_date'], unique=False)
     op.create_table('notify',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('created_date', sa.Integer(), nullable=True),
@@ -312,6 +310,20 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_size_created_date'), 'size', ['created_date'], unique=False)
+    op.create_table('staff_document_file',
+    sa.Column('id', sa.String(length=50), nullable=False),
+    sa.Column('user_id', sa.String(length=50), nullable=False),
+    sa.Column('document_id', sa.String(length=50), nullable=False),
+    sa.Column('file_id', sa.String(length=50), nullable=False),
+    sa.Column('index', sa.Integer(), nullable=True),
+    sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
+    sa.ForeignKeyConstraint(['document_id'], ['document_storage.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['file_id'], ['files.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_staff_document_file_created_date'), 'staff_document_file', ['created_date'], unique=False)
     op.create_table('verity_code',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('code', sa.String(length=20), nullable=True),
@@ -478,6 +490,8 @@ def downgrade():
     op.drop_table('cart_items')
     op.drop_table('article_tag_product')
     op.drop_table('verity_code')
+    op.drop_index(op.f('ix_staff_document_file_created_date'), table_name='staff_document_file')
+    op.drop_table('staff_document_file')
     op.drop_index(op.f('ix_size_created_date'), table_name='size')
     op.drop_table('size')
     op.drop_table('session_order')
@@ -486,8 +500,6 @@ def downgrade():
     op.drop_index(op.f('ix_reaction_created_date'), table_name='reaction')
     op.drop_table('reaction')
     op.drop_table('notify')
-    op.drop_index(op.f('ix_document_storage_created_date'), table_name='document_storage')
-    op.drop_table('document_storage')
     op.drop_index(op.f('ix_color_created_date'), table_name='color')
     op.drop_table('color')
     op.drop_table('attendance')
@@ -517,6 +529,7 @@ def downgrade():
     op.drop_index(op.f('ix_files_created_date'), table_name='files')
     op.drop_table('files')
     op.drop_table('email_template')
+    op.drop_table('document_storage')
     op.drop_table('discount_coupon')
     op.drop_index(op.f('ix_community_created_date'), table_name='community')
     op.drop_table('community')
