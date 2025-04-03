@@ -797,6 +797,10 @@ class CommunitySchema(Schema):
     name = fields.String()
     description = fields.String()
 
+class DocumentSchema(Schema):
+    id = fields.String()
+    name = fields.String()
+
 class ArticleSchema(Schema):
     id = fields.String()
     title = fields.String()

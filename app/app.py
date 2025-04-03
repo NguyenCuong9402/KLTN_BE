@@ -135,8 +135,7 @@ def register_blueprints(app):
     app.register_blueprint(api_v1.manage.group.api, url_prefix='/api/v1/manage/group')
     app.register_blueprint(api_v1.manage.statistic.api, url_prefix='/api/v1/manage/statistic')
     app.register_blueprint(api_v1.manage.report.api, url_prefix='/api/v1/manage/report')
-
-
+    app.register_blueprint(api_v1.manage.document.api, url_prefix='/api/v1/manage/document')
 
     # User
     app.register_blueprint(api_v1.auth.api, url_prefix='/api/v1/auth')

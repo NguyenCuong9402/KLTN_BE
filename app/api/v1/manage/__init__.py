@@ -7,5 +7,6 @@ from app.api.v1.manage import region
 from app.api.v1.manage import group
 from app.api.v1.manage import statistic
 from app.api.v1.manage import report
+from app.api.v1.manage import document
 
 
