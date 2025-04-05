@@ -122,7 +122,7 @@ def timekeeping():
             time_obj = datetime.now()
         else:
             try:
-                time_obj = datetime.strptime(time_str, "%m-%Y")
+                time_obj = datetime.strptime(time_str, "%Y-%m")
             except ValueError:
                 return send_error(message="Định dạng time không hợp lệ, yêu cầu MM-YYYY")
 
@@ -202,7 +202,7 @@ def timesheet():
             time_obj = current_date
         else:
             try:
-                time_obj = datetime.strptime(time_str, "%m-%Y")
+                time_obj = datetime.strptime(time_str, "%Y-%m")
             except ValueError:
                 return send_error(message="Định dạng time không hợp lệ, yêu cầu MM-YYYY")
 
@@ -210,7 +210,7 @@ def timesheet():
         month = time_obj.month
         year = time_obj.year
         is_past = time_obj < current_date
-        time_str = time_obj.strftime("%m-%Y")
+        time_str = time_obj.strftime("%Y-%m")
 
         query = User.query.join(Group).filter(
             Group.is_staff == True,
@@ -249,12 +249,12 @@ def timesheet():
                 'number_work_date': 0
             }
             if is_past:
-                existing_data = find_attendance_data(staff.id, time_str)
+                existing_data = find_attendance_data(staff['id'], time_str)
                 if existing_data:
                     data = existing_data
                 else:
                     attendances = Attendance.query.filter(
-                        Attendance.user_id == staff.id,
+                        Attendance.user_id == staff['id'],
                         extract("month", Attendance.work_date) == month,
                         extract("year", Attendance.work_date) == year
                     ).order_by(Attendance.work_date.asc()).all()

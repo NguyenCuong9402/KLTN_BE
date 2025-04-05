@@ -55,7 +55,7 @@ class Worker:
                     extract("month", Attendance.work_date) == month,
                     extract("year", Attendance.work_date) == year
                 ).order_by(Attendance.work_date.asc()).all()
-                time_str = current_month.strftime("%m-%Y")
+                time_str = current_month.strftime("%Y-%m")
 
                 data = {
                     'time_str': time_str,

@@ -353,7 +353,7 @@ def statistic_attendance():
             time_obj = current_date
         else:
             try:
-                time_obj = datetime.strptime(time_str, "%m-%Y")
+                time_obj = datetime.strptime(time_str, "%Y-%m")
             except ValueError:
                 return send_error(message="Định dạng time không hợp lệ, yêu cầu MM-YYYY")
 
