@@ -34,18 +34,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_community_created_date'), 'community', ['created_date'], unique=False)
-    op.create_table('discount_coupon',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('discount_value', sa.Float(), nullable=False),
-    sa.Column('discount_limit', sa.Integer(), nullable=True),
-    sa.Column('expiration_date', sa.Integer(), nullable=True),
-    sa.Column('order_price_from', sa.Integer(), nullable=True),
-    sa.Column('is_active', sa.Boolean(), nullable=True),
-    sa.Column('used_count', sa.Integer(), nullable=True),
-    sa.Column('created_date', sa.Integer(), nullable=True),
-    sa.Column('modified_date', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('document_storage',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('name', sa.String(length=255, collation='utf8mb4_vietnamese_ci'), nullable=False),
@@ -530,7 +518,6 @@ def downgrade():
     op.drop_table('files')
     op.drop_table('email_template')
     op.drop_table('document_storage')
-    op.drop_table('discount_coupon')
     op.drop_index(op.f('ix_community_created_date'), table_name='community')
     op.drop_table('community')
     op.drop_table('address')

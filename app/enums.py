@@ -13,7 +13,7 @@ TYPE_REACTION = {
 }
 
 ADMIN_KEY_GROUP = ['admin']
-
+USER_KEY_GROUP = "user"
 KEY_GROUP_NOT_STAFF = ['admin', 'user']
 
 STATUS_ORDER = {

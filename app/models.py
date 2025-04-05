@@ -138,6 +138,7 @@ class Salary(db.Model):
     allowance_salary = db.Column(INTEGER(unsigned=True))
     created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
 
+
 class SalaryReport(db.Model):
     __tablename__ = 'salary_report'
 
@@ -328,6 +329,7 @@ class Permission(db.Model):
     key = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=False, unique=False)
     resource = db.Column(db.String(500), nullable=False, unique=False)
+
 
 class Role(db.Model):
     __tablename__ = 'role'
@@ -522,23 +524,6 @@ class Product(db.Model):
             dict_data["discount"] = self.discount
 
         return dict_data
-
-
-class DiscountCoupon(db.Model):
-    __tablename__ = 'discount_coupon'
-
-    id = db.Column(db.String(50), primary_key=True)  # Coupon ID
-    discount_value = db.Column(db.Float, nullable=False)
-    discount_limit = db.Column(db.Integer, nullable=True)
-    expiration_date = db.Column(db.Integer, default=get_timestamp_now())
-    order_price_from = db.Column(db.Integer, nullable=True)
-    is_active = db.Column(db.Boolean, default=True)
-    used_count = db.Column(db.Integer, default=0)
-
-    created_date = db.Column(db.Integer,
-                             default=get_timestamp_now())
-    modified_date = db.Column(db.Integer,
-                              default=get_timestamp_now())
 
 
 class CartItems(db.Model):

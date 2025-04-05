@@ -9,7 +9,7 @@ from sqlalchemy_pagination import paginate
 from sqlalchemy import or_
 from sqlalchemy import extract
 
-from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, ATTENDANCE
+from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, ATTENDANCE, USER_KEY_GROUP
 from app.extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helper import send_result, send_error, convert_to_datetime
@@ -330,7 +330,7 @@ def active_user(user_id):
         db.session.rollback()
         return send_error(message=str(ex))
 
-@api.route("", methods=["GET"])
+@api.route("/staff", methods=["GET"])
 def get_staff():
     try:
         try:
@@ -378,6 +378,62 @@ def get_staff():
 
         response_data = dict(
             items=staffs,
+            total_pages=paginator.pages if paginator.pages > 0 else 1,
+            total=paginator.total,
+            has_previous=paginator.has_previous,
+            has_next=paginator.has_next
+        )
+        return send_result(data=response_data)
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+
+@api.route("/customer", methods=["GET"])
+def get_customer():
+    try:
+        try:
+            params = request.args.to_dict(flat=True)
+            params = QueryParamsAllSchema().load(params) if params else dict()
+        except ValidationError as err:
+            return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
+
+
+        page = params.get('page', 1)
+        page_size = params.get('page_size', 10)
+        order_by = params.get('order_by', 'created_date')
+        sort = params.get('sort', 'desc')
+        text_search = params.get('text_search', None)
+
+        query = User.query.join(Group).filter(
+            Group.is_staff == False, Group.is_super_admin == False,
+            Group.key == USER_KEY_GROUP
+        )
+
+
+        if text_search:
+            text_search = text_search.strip()
+            text_search = text_search.lower()
+            text_search = escape_wildcard(text_search)
+            text_search = "%{}%".format(text_search)
+
+            query = query.filter(
+                or_(
+                    User.full_name.ilike(f"%{text_search}%"),
+                    User.email.ilike(f"%{text_search}%")
+                )
+            )
+
+
+        column_sorted = getattr(User, order_by)
+
+        query = query.order_by(desc(column_sorted)) if sort == "desc" else query.order_by(asc(column_sorted))
+
+        paginator = paginate(query, page, page_size)
+
+        customers = UserSchema(many=True).dump(paginator.items)
+
+        response_data = dict(
+            items=customers,
             total_pages=paginator.pages if paginator.pages > 0 else 1,
             total=paginator.total,
             has_previous=paginator.has_previous,
