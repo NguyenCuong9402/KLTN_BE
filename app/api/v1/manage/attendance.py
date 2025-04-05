@@ -1,0 +1,288 @@
+import json
+from shortuuid import uuid
+from datetime import datetime, date, time
+
+from flask import Blueprint, request
+from marshmallow import ValidationError
+from sqlalchemy import desc, asc
+from sqlalchemy_pagination import paginate
+from sqlalchemy import or_
+from sqlalchemy import extract
+
+from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, ATTENDANCE, USER_KEY_GROUP, WORK_UNIT_TYPE
+from app.extensions import db
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.api.helper import send_result, send_error, convert_to_datetime
+from app.models import User, Group, Files, Address, Attendance
+from app.utils import trim_dict, escape_wildcard, get_timestamp_now, generate_password, find_attendance_data, \
+    save_attendance_data
+from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema, AttendanceSchema, QueryTimeSheetSchema
+
+api = Blueprint('manage/attendance', __name__)
+
+
+# Nhan vien
+@api.route('/check_in', methods=['POST'])
+@jwt_required
+def check_in():
+    try:
+        user_id = get_jwt_identity()
+
+        user = User.query.filter_by(id=user_id).first()
+
+        if user is None:
+            return send_error(message='Tài khoản không tồn tại ')
+
+        if user.group.key in KEY_GROUP_NOT_STAFF:
+            return send_error(message='Tài khoản không có quyền')
+
+        today = date.today()
+        now = datetime.now().time()
+
+        attendance = Attendance.query.filter_by(user_id=user_id, work_date=today).first()
+
+        # Nếu đã check-in trước đó
+        if attendance and attendance.check_in:
+            return send_result(message=f'Bạn đã check in {attendance.check_in} rồi')
+
+        # Nếu chưa có bản ghi, tạo mới
+        if not attendance:
+            attendance = Attendance(id=str(uuid()), user_id=user_id, work_date=today)
+
+        # Ghi nhận giờ check-in
+        attendance.check_in = now
+        db.session.add(attendance)
+        db.session.commit()
+
+        data = AttendanceSchema().dump(attendance)
+
+        return send_result(data=data, message=f'Check in thành công lúc {attendance.check_in}')
+
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex))
+
+
+@api.route('/check_out', methods=['POST'])
+@jwt_required
+def check_out():
+    try:
+        user_id = get_jwt_identity()
+
+        user = User.query.filter_by(id=user_id).first()
+
+        if user is None:
+            return send_error(message='Tài khoản không tồn tại ')
+
+        if user.group.key in KEY_GROUP_NOT_STAFF:
+            return send_error(message='Tài khoản không có quyền')
+
+        today = date.today()
+        now = datetime.now().time()
+
+        attendance = Attendance.query.filter_by(user_id=user_id, work_date=today).first()
+
+        # Nếu chưa có bản ghi, tạo mới
+        if not attendance:
+            return send_error(message='Bạn chưa check in')
+
+        # Kiểm tra thời gian check-in hợp lệ
+        if now < ATTENDANCE['CHECK_OUT']:
+            return send_error(message='Chưa đến giờ check out')
+
+        # Ghi nhận giờ check-in
+        attendance.check_out = now
+        db.session.flush()
+        db.session.commit()
+        data = AttendanceSchema().dump(attendance)
+
+        return send_result(data=data, message=f'Check out thành công lúc {attendance.check_out}')
+
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex), code=442)
+
+
+@api.route('/timekeeping', methods=['GET'])
+@jwt_required
+def timekeeping():
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+
+        if user is None:
+            return send_error(message="Tài khoản không tồn tại")
+
+        if user.group.key in KEY_GROUP_NOT_STAFF:
+            return send_error(message="Tài khoản không có quyền")
+
+        # Lấy tham số thời gian (mm-yyyy)
+        time_str = request.args.get("time_str", type=str)
+        if not time_str:
+            time_obj = datetime.now()
+        else:
+            try:
+                time_obj = datetime.strptime(time_str, "%m-%Y")
+            except ValueError:
+                return send_error(message="Định dạng time không hợp lệ, yêu cầu MM-YYYY")
+
+        # Lấy tháng và năm từ time_obj
+        month = time_obj.month
+        year = time_obj.year
+
+        # Truy vấn danh sách Attendance
+        attendances = Attendance.query.filter(
+            Attendance.user_id == user_id,
+            extract("month", Attendance.work_date) == month,
+            extract("year", Attendance.work_date) == year
+        ).order_by(Attendance.work_date.asc()).all()
+
+        # Serialize dữ liệu
+        result = AttendanceSchema(many=True).dump(attendances)
+
+        return send_result(data=result, message="Thành công")
+
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+
+@api.route('/time_check', methods=['GET'])
+@jwt_required
+def time_check():
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+
+        if user is None:
+            return send_error(message="Tài khoản không tồn tại")
+
+        if user.group.key in KEY_GROUP_NOT_STAFF:
+            return send_error(message="Tài khoản không có quyền")
+
+        # Truy vấn danh sách Attendance
+        attendances = Attendance.query.filter(
+            Attendance.user_id == user_id,
+            Attendance.work_date == date.today()
+        ).first()
+
+        # Serialize dữ liệu
+        result = AttendanceSchema().dump(attendances)
+
+        data = {
+            "result": result,
+            "join_date": str(user.join_date)
+        }
+        return send_result(data=data, message="Thành công")
+
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+
+# Bảng chấm công
+
+@api.route("/timesheet", methods=["GET"])
+def timesheet():
+    try:
+        try:
+            params = request.args.to_dict(flat=True)
+            params = QueryTimeSheetSchema().load(params) if params else dict()
+        except ValidationError as err:
+            return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
+
+        page = params.get('page', 1)
+        page_size = params.get('page_size', 10)
+        order_by = params.get('order_by', 'created_date')
+        sort = params.get('sort', 'desc')
+        text_search = params.get('text_search', None)
+        time_str = params.get('time_str', None)
+
+        current_date = datetime.now()
+
+        if not time_str:
+            time_obj = current_date
+        else:
+            try:
+                time_obj = datetime.strptime(time_str, "%m-%Y")
+            except ValueError:
+                return send_error(message="Định dạng time không hợp lệ, yêu cầu MM-YYYY")
+
+        # Lấy tháng và năm từ time_obj
+        month = time_obj.month
+        year = time_obj.year
+        is_past = time_obj < current_date
+        time_str = time_obj.strftime("%m-%Y")
+
+        query = User.query.join(Group).filter(
+            Group.is_staff == True,
+            Group.key.notin_(ADMIN_KEY_GROUP)
+        )
+
+        if text_search:
+            text_search = text_search.strip()
+            text_search = text_search.lower()
+            text_search = escape_wildcard(text_search)
+            text_search = "%{}%".format(text_search)
+
+            query = query.filter(
+                or_(
+                    User.full_name.ilike(f"%{text_search}%"),
+                    User.email.ilike(f"%{text_search}%")
+                )
+            )
+
+        column_sorted = getattr(User, order_by)
+
+        query = query.order_by(desc(column_sorted)) if sort == "desc" else query.order_by(asc(column_sorted))
+
+        paginator = paginate(query, page, page_size)
+
+        staffs = UserSchema(many=True).dump(paginator.items)
+        base_date = datetime.today().date()
+        check_in_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_IN'])
+        check_out_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_OUT'])
+        for staff in staffs:
+            data = {
+                'time_str': time_str,
+                'work_later_and_leave_early': 0,
+                'forget_checkout': 0,
+                'work_unit': 0,
+                'number_work_date': 0
+            }
+            if is_past:
+                existing_data = find_attendance_data(staff.id, time_str)
+                if existing_data:
+                    data = existing_data
+                else:
+                    attendances = Attendance.query.filter(
+                        Attendance.user_id == staff.id,
+                        extract("month", Attendance.work_date) == month,
+                        extract("year", Attendance.work_date) == year
+                    ).order_by(Attendance.work_date.asc()).all()
+                    data['number_work_date'] = len(attendances)
+                    for attendance in attendances:
+                        if attendance.work_unit in list(WORK_UNIT_TYPE.values()):
+                            data['work_unit'] += 1
+                        if attendance.check_in:
+                            check_in_dt = datetime.combine(base_date, attendance.check_in)
+                            if check_in_dt > check_in_attendance:
+                                data['work_later_and_leave_early'] += 1
+                            if not attendance.check_out:
+                                data['forget_checkout'] += 1
+                            else:
+                                check_out_dt = datetime.combine(base_date, attendance.check_out)
+                                if check_out_dt < check_out_attendance:
+                                    data['work_later_and_leave_early'] += 1
+
+            staff['time_keeping'] = data
+
+
+        response_data = dict(
+            items=staffs,
+            total_pages=paginator.pages if paginator.pages > 0 else 1,
+            total=paginator.total,
+            has_previous=paginator.has_previous,
+            has_next=paginator.has_next
+        )
+        return send_result(data=response_data)
+    except Exception as ex:
+        return send_error(message=str(ex))

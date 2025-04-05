@@ -653,6 +653,9 @@ class QueryParamsAllSchema(BaseValidation):
     )
     text_search = fields.String(allow_none=True)  # Có thể None
 
+class QueryTimeSheetSchema(QueryParamsAllSchema):
+    time_str=fields.String(allow_none=True)
+
 class ParamTypeProduct(QueryParamsAllSchema):
     type_id = fields.String(allow_none=True)
 

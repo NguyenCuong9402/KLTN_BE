@@ -360,12 +360,9 @@ def statistic_attendance():
         # Lấy tháng và năm từ time_obj
         month = time_obj.month
         year = time_obj.year
-
         is_past = time_obj < current_date
-
         # Tìm kiếm trong mongo db: mongo_db[f"attendance_statistics_{user_id}"] xem có time-obj nào bằng time-obj không.
         # Nếu None thì thực thi ở đoạn dưới
-
         time_str = time_obj.strftime("%m-%Y")
         if is_past:
             existing_data = find_attendance_data(user_id, time_str)
@@ -435,3 +432,4 @@ def statistic_attendance():
 
     except Exception as ex:
         return send_error(message=str(ex))
+
