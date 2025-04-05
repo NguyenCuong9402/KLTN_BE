@@ -56,12 +56,6 @@ class User(db.Model):
     nationality = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=True) # Quoc Tich
 
     attendances = db.relationship('Attendance', back_populates='user', cascade="all, delete-orphan")
-    latest_salary = db.relationship(
-        'Salary',
-        primaryjoin="and_(User.id == Salary.user_id)",
-        order_by="desc(Salary.created_date)",
-        uselist=False
-    )
 
     @property
     def address(self):
@@ -125,40 +119,6 @@ class Attendance(db.Model):
                 return ATTENDANCE_STATUS['ABSENT']
 
         return ATTENDANCE_STATUS['ACCEPTABLE_ABSENT']
-
-
-class Salary(db.Model):
-    __tablename__ = 'salary'
-
-    id = db.Column(db.String(50), primary_key=True)
-    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
-                           nullable=False)
-    base_salary = db.Column(db.Numeric(10, 2), nullable=False)
-    kpi_salary = db.Column(INTEGER(unsigned=True))
-    allowance_salary = db.Column(INTEGER(unsigned=True))
-    created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
-
-
-class SalaryReport(db.Model):
-    __tablename__ = 'salary_report'
-
-    id = db.Column(db.String(50), primary_key=True)
-    user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    salary_id = db.Column(ForeignKey('salary.id', ondelete='SET NULL', onupdate='CASCADE'), nullable=True)
-
-    user = db.relationship('User', viewonly=True)
-    salary = relationship('Salary', viewonly=True)
-
-    payment_date = db.Column(db.Date, nullable=False)
-
-    kpi_score = db.Column(INTEGER(unsigned=True), default=0, nullable=False)
-    number_dependent = db.Column(INTEGER(unsigned=True), default=0) # người phụ thuộc
-    reward = db.Column(INTEGER(unsigned=True), default=0, nullable=False)
-
-    total_salary = db.Column(db.Numeric(10, 2), nullable=False)
-
-    created_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now(), index=True)
-    modified_date = db.Column(INTEGER(unsigned=True), default=get_timestamp_now())
 
 
 class DocumentStorage(db.Model):

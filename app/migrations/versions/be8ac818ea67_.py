@@ -268,17 +268,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_reaction_created_date'), 'reaction', ['created_date'], unique=False)
-    op.create_table('salary',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('user_id', sa.String(length=50), nullable=False),
-    sa.Column('base_salary', sa.Numeric(precision=10, scale=2), nullable=False),
-    sa.Column('kpi_salary', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.Column('allowance_salary', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_salary_created_date'), 'salary', ['created_date'], unique=False)
     op.create_table('session_order',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('created_date', sa.Integer(), nullable=True),
@@ -381,22 +370,6 @@ def upgrade():
     sa.ForeignKeyConstraint(['session_order_id'], ['session_order.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('salary_report',
-    sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('user_id', sa.String(length=50), nullable=False),
-    sa.Column('salary_id', sa.String(length=50), nullable=True),
-    sa.Column('payment_date', sa.Date(), nullable=False),
-    sa.Column('kpi_score', mysql.INTEGER(unsigned=True), nullable=False),
-    sa.Column('number_dependent', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.Column('reward', mysql.INTEGER(unsigned=True), nullable=False),
-    sa.Column('total_salary', sa.Numeric(precision=10, scale=2), nullable=False),
-    sa.Column('created_date', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.Column('modified_date', mysql.INTEGER(unsigned=True), nullable=True),
-    sa.ForeignKeyConstraint(['salary_id'], ['salary.id'], onupdate='CASCADE', ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_salary_report_created_date'), 'salary_report', ['created_date'], unique=False)
     op.create_table('orders',
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('user_id', sa.String(length=50), nullable=True),
@@ -469,8 +442,6 @@ def downgrade():
     op.drop_table('session_order_cart_items')
     op.drop_index(op.f('ix_orders_address_id'), table_name='orders')
     op.drop_table('orders')
-    op.drop_index(op.f('ix_salary_report_created_date'), table_name='salary_report')
-    op.drop_table('salary_report')
     op.drop_table('payment_online')
     op.drop_table('notify_detail')
     op.drop_index(op.f('ix_comment_created_date'), table_name='comment')
@@ -483,8 +454,6 @@ def downgrade():
     op.drop_index(op.f('ix_size_created_date'), table_name='size')
     op.drop_table('size')
     op.drop_table('session_order')
-    op.drop_index(op.f('ix_salary_created_date'), table_name='salary')
-    op.drop_table('salary')
     op.drop_index(op.f('ix_reaction_created_date'), table_name='reaction')
     op.drop_table('reaction')
     op.drop_table('notify')
