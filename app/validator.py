@@ -808,7 +808,7 @@ class DocumentStaff(Schema):
     id = fields.String()
     user = fields.Nested(UserSchema(only=("id","email", "full_name")))
     document = fields.Nested(DocumentSchema)
-    files = fields.List(fields.Nested(FileSchema()))
+    file = fields.Nested(FileSchema())
 
 class ArticleSchema(Schema):
     id = fields.String()
