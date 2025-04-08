@@ -8,7 +8,7 @@ from app.api.helper import send_result, send_error
 from app.extensions import db
 from app.models import User, DocumentStorage, Files, StaffDocumentFile
 
-from app.validator import DocumentSchema
+from app.validator import DocumentSchema, DocumentStaff
 
 api = Blueprint('manage/document', __name__)
 
@@ -16,11 +16,33 @@ api = Blueprint('manage/document', __name__)
 
 @api.route("", methods=["GET"])
 @jwt_required
-def get_item():
+def get_items():
     try:
         documents = DocumentStorage.query.filter().order_by(asc(DocumentStorage.index)).all()
         data = DocumentSchema(many=True).dump(documents)
         return send_result(data=data)
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+
+@api.route("<document_id>", methods=["GET"])
+@jwt_required
+def get_item(document_id):
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+
+        # Kiểm tra xem người dùng có tồn tại hay không
+        if user is None:
+            return send_error(message='Tài khoản không tồn tại')
+
+        document = StaffDocumentFile.query.filter(StaffDocumentFile.document_id==document_id,
+                                                  StaffDocumentFile.user_id == user_id).all()
+
+        # Chuẩn bị dữ liệu trả về
+        data = DocumentStaff(many=True).dump(document)
+        return send_result(data=data)
+
     except Exception as ex:
         return send_error(message=str(ex))
 

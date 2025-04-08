@@ -804,6 +804,12 @@ class DocumentSchema(Schema):
     id = fields.String()
     name = fields.String()
 
+class DocumentStaff(Schema):
+    id = fields.String()
+    user = fields.Nested(UserSchema(only=("id","email", "full_name")))
+    document = fields.Nested(DocumentSchema)
+    files = fields.List(fields.Nested(FileSchema()))
+
 class ArticleSchema(Schema):
     id = fields.String()
     title = fields.String()
