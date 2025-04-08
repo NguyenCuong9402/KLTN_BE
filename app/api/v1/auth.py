@@ -201,7 +201,7 @@ def register():
             queue_mail.call(body)
         else:
             msg = MessageMail(title_mail, recipients=[email])
-            msg.body = mail_send.body
+            msg.body = body
             mail.send(msg)
 
         db.session.commit()

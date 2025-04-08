@@ -162,3 +162,26 @@ def get_articles():
         return send_error(message=str(ex), code=442)
 
 
+@api.route('/update_avatar', methods=['PUT'])
+@jwt_required
+def update_avatar():
+    user_id = get_jwt_identity()
+
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        return send_error(message='Nguười dùng không tồn tại')
+
+    body_request = request.get_json()
+
+    avatar_id = body_request.get('avatar_id')
+    if avatar_id is None:
+        return send_error(message='Chưa chọn file')
+    user.avatar_id = avatar_id
+    db.session.commit()
+
+    data = UserSchema().dump(user)
+
+    return send_result(data=data)
+
+
+
