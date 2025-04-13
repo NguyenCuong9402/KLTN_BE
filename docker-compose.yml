@@ -1,6 +1,22 @@
 version: '3.8'
 
 services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: cuong942002
+    ports:
+      - "3306:3306"
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --bind-address=0.0.0.0
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - dev-csoc-net
   rabbitmq:
     image: rabbitmq:3-management  # Phiên bản có giao diện web
     container_name: rabbitmq_container
@@ -27,22 +43,6 @@ services:
       - 27017:27017
     volumes:
       - mongodb_data_container:/data/db
-    networks:
-      - dev-csoc-net
-  mysqldb:
-    image: mysql:8.0
-    container_name: mysql_container
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: cuong942002
-    ports:
-      - "3306:3306"
-    command:
-      - --default-authentication-plugin=mysql_native_password
-      - --bind-address=0.0.0.0
-    volumes:
-      - db_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - dev-csoc-net
   redis:

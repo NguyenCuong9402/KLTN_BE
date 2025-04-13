@@ -11,6 +11,8 @@
 - Nạp tiền vào.
 
 * chạy Docker-compose
+- Chạy lệnh sau để cho connect db: docker exec -it mysql_container mysql -u root -p
+-  Xong nhập password mysql
 ```
 -connect mongo compass
 - mongodb://root:admin-password@127.0.0.1:27017/dev-shop?authSource=admin
@@ -101,7 +103,8 @@ setx COMPOSE_DOCKER_CLI_BUILD 1
 ```
 * Staging
 ```
-docker-compose --env-file ./config/.env.stg up --build -d
+docker-compose up --build -d
+
 ```
 * Production
 ```
