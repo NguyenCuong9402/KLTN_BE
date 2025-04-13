@@ -33,16 +33,16 @@ services:
     image: mysql:8.0
     container_name: mysql_container
     restart: always
-    command:
-      - --default-authentication-plugin=mysql_native_password
-      - --bind-address=0.0.0.0
     environment:
       MYSQL_ROOT_PASSWORD: cuong942002
     ports:
       - "3306:3306"
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --bind-address=0.0.0.0
     volumes:
       - db_data:/var/lib/mysql
-      - ./mysql-init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - dev-csoc-net
   redis:
@@ -56,7 +56,7 @@ services:
       - cache:/data
     networks:
       - dev-csoc-net
-#  app:
+##  app:
 #    build:
 #      context: .
 #      dockerfile: Dockerfile
@@ -74,11 +74,10 @@ services:
 #      - mysqldb
 #      - redis
 #      - rabbitmq
-networks:
-  dev-csoc-net:
-
 volumes:
   rabbitmq_data:
   mongodb_data_container:
-  db_data:
   cache:
+  db_data:
+networks:
+  dev-csoc-net:
