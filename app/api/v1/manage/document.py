@@ -101,3 +101,22 @@ def upload_multi_file(user_id, document_id):
         db.session.rollback()
         return send_error(message=str(ex))
 
+
+@api.route("/<document_id>", methods=["DELETE"])
+@jwt_required
+def delete_item(document_id):
+    try:
+        user_id = get_jwt_identity()
+        user = User.query.filter_by(id=user_id).first()
+
+        # Kiểm tra xem người dùng có tồn tại hay không
+        if user is None:
+            return send_error(message='Tài khoản không tồn tại')
+
+        StaffDocumentFile.query.filter(StaffDocumentFile.id == document_id).delete()
+        db.session.commit()
+        # Chuẩn bị dữ liệu trả về
+        return send_result(message="Xóa thành công")
+
+    except Exception as ex:
+        return send_error(message=str(ex))
