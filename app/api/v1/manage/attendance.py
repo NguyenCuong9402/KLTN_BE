@@ -1,4 +1,8 @@
+import io
 import json
+from flask import send_file
+
+import xlsxwriter
 from shortuuid import uuid
 from datetime import datetime, date, time
 
@@ -181,6 +185,7 @@ def time_check():
 # Bảng chấm công
 
 @api.route("/timesheet", methods=["GET"])
+@jwt_required
 def timesheet():
     try:
         try:
@@ -236,7 +241,7 @@ def timesheet():
 
         paginator = paginate(query, page, page_size)
 
-        staffs = UserSchema(many=True).dump(paginator.items)
+        staffs = UserSchema(many=True, only=("id", "email", "full_name")).dump(paginator.items)
         base_date = datetime.today().date()
         check_in_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_IN'])
         check_out_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_OUT'])
@@ -284,5 +289,146 @@ def timesheet():
             has_next=paginator.has_next
         )
         return send_result(data=response_data)
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+
+@api.route("/timesheet/export", methods=["GET"])
+@jwt_required
+def export():
+    try:
+        try:
+            params = request.args.to_dict(flat=True)
+            params = QueryTimeSheetSchema().load(params) if params else dict()
+        except ValidationError as err:
+            return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
+
+        order_by = params.get('order_by', 'created_date')
+        sort = params.get('sort', 'desc')
+        text_search = params.get('text_search', None)
+        time_str = params.get('time_str', None)
+
+        current_date = datetime.now()
+
+        if not time_str:
+            time_obj = current_date
+        else:
+            try:
+                time_obj = datetime.strptime(time_str, "%Y-%m")
+            except ValueError:
+                return send_error(message="Định dạng time không hợp lệ, yêu cầu MM-YYYY")
+
+        # Lấy tháng và năm từ time_obj
+        month = time_obj.month
+        year = time_obj.year
+        is_past = time_obj < current_date
+        time_str = time_obj.strftime("%Y-%m")
+
+        query = User.query.join(Group).filter(
+            Group.is_staff == True,
+            Group.key.notin_(ADMIN_KEY_GROUP)
+        )
+
+        if text_search:
+            text_search = text_search.strip()
+            text_search = text_search.lower()
+            text_search = escape_wildcard(text_search)
+            text_search = "%{}%".format(text_search)
+
+            query = query.filter(
+                or_(
+                    User.full_name.ilike(f"%{text_search}%"),
+                    User.email.ilike(f"%{text_search}%")
+                )
+            )
+
+        column_sorted = getattr(User, order_by)
+
+        query = query.order_by(desc(column_sorted)).all() if sort == "desc" else query.order_by(asc(column_sorted))
+
+        staffs = UserSchema(many=True, only=("id", "email", "full_name")).dump(query)
+
+        base_date = datetime.today().date()
+        check_in_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_IN'])
+        check_out_attendance = datetime.combine(base_date, ATTENDANCE['CHECK_OUT'])
+        for staff in staffs:
+            data = {
+                'time_str': time_str,
+                'work_later_and_leave_early': 0,
+                'forget_checkout': 0,
+                'work_unit': 0,
+                'number_work_date': 0
+            }
+            if is_past:
+                existing_data = find_attendance_data(staff['id'], time_str)
+                if existing_data:
+                    data = existing_data
+                else:
+                    attendances = Attendance.query.filter(
+                        Attendance.user_id == staff['id'],
+                        extract("month", Attendance.work_date) == month,
+                        extract("year", Attendance.work_date) == year
+                    ).order_by(Attendance.work_date.asc()).all()
+                    data['number_work_date'] = len(attendances)
+                    for attendance in attendances:
+                        if attendance.work_unit in list(WORK_UNIT_TYPE.values()):
+                            data['work_unit'] += 1
+                        if attendance.check_in:
+                            check_in_dt = datetime.combine(base_date, attendance.check_in)
+                            if check_in_dt > check_in_attendance:
+                                data['work_later_and_leave_early'] += 1
+                            if not attendance.check_out:
+                                data['forget_checkout'] += 1
+                            else:
+                                check_out_dt = datetime.combine(base_date, attendance.check_out)
+                                if check_out_dt < check_out_attendance:
+                                    data['work_later_and_leave_early'] += 1
+
+            staff['time_keeping'] = data
+        ### Viết csv
+        day = date.today()
+        filename = f'Bảng chấm công_{time_str}.xlsx'
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output)
+        # Tạo Worksheet mới
+        worksheet = workbook.add_worksheet()
+
+        # format
+        format_cell_bold = workbook.add_format({'font_name': 'Times New Roman', 'bold': True, 'font_size': 11,
+                                                'align': 'center', 'valign': 'vcenter',
+                                                'bg_color': '#92d050', 'border': 1})
+        format_cell_not_bold = workbook.add_format({'font_name': 'Times New Roman', 'font_size': 11, 'border': 1,
+                                                    'align': 'center', 'valign': 'vcenter', 'bg_color': '#92d050'})
+        format_cell = workbook.add_format({'font_name': 'Times New Roman', 'font_size': 11, 'border': 1,
+                                           'align': 'center', 'valign': 'vcenter'})
+        center_format = workbook.add_format({'align': 'center', 'font_name': 'Times New Roman', 'border': 1,
+                                             'valign': 'vcenter'})
+
+        # merge cell : TRACEABILITY REPORT DETAIL - NAME PROJECT
+        worksheet.merge_range(0, 0, 0, 5, f'Bảng chấm công - {time_str}',
+                              workbook.add_format({'font_name': 'Times New Roman', 'bold': True, 'font_size': 14,
+                                                   'align': 'center', 'valign': 'vcenter', 'border': 1}))
+        list_name = ['EMAIL', 'TÊN NHÂN SỰ', 'SỐ CÔNG', 'SỐ NGÀY ĐIỂM DANH', 'QUÊN CHECKOUT', 'LỖI ĐIỂM DANH']
+
+        list_map = ['email', 'full_name', 'work_unit', 'number_work_date', 'forget_checkout', 'work_later_and_leave_early']
+
+        for index, name in enumerate(list_name):
+            if index in [0, 1, 3]:
+                worksheet.set_column(0, index, 40)
+            else:
+                worksheet.set_column(0, index, 30)
+
+            worksheet.write(1, index, name, format_cell_bold)
+
+        for row, staff in enumerate(staffs):
+            for column, key in enumerate(list_map):
+                if key in [ 'email', 'full_name']:
+                    worksheet.write(row + 2, column, staff[key], center_format)
+                else:
+                    worksheet.write(row + 2, column, staff['time_keeping'][key], center_format)
+        workbook.close()
+        # Lấy nội dung của Workbook và gửi đi như là file đính kèm
+        excel_data = output.getvalue()
+        return send_file(io.BytesIO(excel_data), attachment_filename=filename, as_attachment=True)
     except Exception as ex:
         return send_error(message=str(ex))
