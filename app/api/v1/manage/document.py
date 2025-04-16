@@ -21,7 +21,7 @@ FOLDER = "/files/document/"
 
 @api.route("", methods=["GET"])
 @jwt_required
-def get_items():
+def danh_sach_document():
     try:
         documents = DocumentStorage.query.filter().order_by(asc(DocumentStorage.index)).all()
         data = DocumentSchema(many=True).dump(documents)
