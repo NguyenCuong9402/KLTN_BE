@@ -54,6 +54,7 @@ def get_item(user_id, document_id):
 
 
 @api.route('/<user_id>/upload/<document_id>', methods=['POST'])
+@jwt_required
 def upload_multi_file(user_id, document_id):
     try:
         user = User.query.filter_by(id=user_id).first()
