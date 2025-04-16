@@ -32,6 +32,9 @@ def create_app(config_object=CONFIG):
         # Task Scheduler backup data runs every 2 week at 03:00:00pm
         scheduler.add_job(backup_data, trigger='cron', hour='15', minute='00', second='00')
 
+        # Test
+        # scheduler.add_job(backup_data, trigger='cron', second=0)
+
     return app
 
 
