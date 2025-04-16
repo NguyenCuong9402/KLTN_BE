@@ -87,4 +87,8 @@ class DevConfig(Config):
     USER_RABBIT = os.environ.get("USER_RABBIT", "admin")
     PASSWORD_RABBIT = os.environ.get("PASSWORD_RABBIT", "admin")
 
+    # backup
+    BACKUP = os.environ.get("BACKUP", "False").lower() == "true"
+
+
 
