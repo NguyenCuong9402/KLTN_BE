@@ -9,8 +9,6 @@ RUN apt-get update && apt-get install -y wget
 RUN apt-get install -y curl
 RUN apt-get install -y default-mysql-client
 RUN apt-get install -y gnupg
-RUN curl -fsSL https://pgp.mongodb.com/server-6.0.asc |  gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg  --dearmor --yes
-RUN echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg] http://repo.mongodb.org/apt/debian bullseye/mongodb-org/6.0 main" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list
 RUN apt-get update
 
 RUN wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
