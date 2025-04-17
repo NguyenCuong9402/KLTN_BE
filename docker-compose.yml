@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  mysqldb:
+  mysql:
     image: mysql:8.0
     container_name: mysql_container
     restart: always
@@ -12,6 +12,7 @@ services:
     command:
       - --default-authentication-plugin=mysql_native_password
       - --bind-address=0.0.0.0
+      - --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -30,7 +31,7 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - dev-csoc-net
-  mongodb:
+  mongo:
     image: mongo:7.0.5
     container_name: mongodb_container
     restart: always
@@ -66,17 +67,17 @@ services:
     networks:
       - dev-csoc-net
     volumes:
-      - ./:/dev-csoc-backend
+      - ./:/kltn-backend
       - /home/kltn/new_tmp_directory:/tmp
     depends_on:
-      - mongodb
-      - mysqldb
+      - mongo
+      - mysql
       - redis
       - rabbitmq
 volumes:
+  db_data:
   rabbitmq_data:
   mongodb_data_container:
   cache:
-  db_data:
 networks:
   dev-csoc-net:
