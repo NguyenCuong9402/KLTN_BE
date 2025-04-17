@@ -42,7 +42,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - mongodb_data_container:/data/db
+      - mongodb_data:/data/db
     networks:
       - dev-csoc-net
   redis:
@@ -76,7 +76,7 @@ services:
 volumes:
   db_data:
   rabbitmq_data:
-  mongodb_data_container:
+  mongodb_data:
   cache:
 networks:
   dev-csoc-net:
