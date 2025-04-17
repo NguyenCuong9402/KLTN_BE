@@ -11,7 +11,7 @@ class Config(object):
 
 class DevConfig(Config):
     """Development configuration."""
-
+    # Tôi biết rồi
     name_file_env = '.env.dev'
     # name_file_env = '.env.test'
 
@@ -93,6 +93,4 @@ class DevConfig(Config):
 
     # backup
     BACKUP = os.environ.get("BACKUP", "False").lower() == "true"
-
-
 
