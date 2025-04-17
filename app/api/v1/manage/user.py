@@ -160,13 +160,13 @@ def active_user(user_id):
             return send_error(message="Người dùng không tồn tại!")
 
         # Đảo trạng thái active
-        user.active = not user.active
+        user.is_active = not user.is_active
         db.session.flush()
-        db.session.refresh(user)  # Cập nhật trạng thái mới sau flush()
+        db.session.refresh(user)
         db.session.commit()
 
         # Xác định trạng thái mở/khoá
-        status = "mở" if user.active else "khóa"
+        status = "mở" if user.is_active else "khóa"
         return send_result(message=f"Tài khoản {user.email} đã được {status}.")
 
     except Exception as ex:
