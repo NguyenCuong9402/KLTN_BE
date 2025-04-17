@@ -31,7 +31,7 @@ class DevConfig(Config):
     # mysql config
     TIME_ZONE = 'Asia/Ho_Chi_Minh'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    BK_HOST_MYSQL =  os.environ.get('BK_HOST_MYSQL', "127.0.0.1")
+    BK_HOST_MYSQL =  os.environ.get('BK_HOST_MYSQL', "localhost")
     BK_PORT_MYSQL = os.environ.get('BK_PORT_MYSQL', "3306")
     BK_USERNAME_MYSQL = os.environ.get('BK_USERNAME_MYSQL', "root")
     BK_PASSWORD_MYSQL = os.environ.get('BK_PASSWORD_MYSQL', "cuong942002")
@@ -40,7 +40,7 @@ class DevConfig(Config):
 
 
     # redis config
-    REDIS_HOST = os.environ.get('REDIS_HOST', "127.0.0.1")
+    REDIS_HOST = os.environ.get('REDIS_HOST', "localhost")
     REDIS_PORT = os.environ.get('REDIS_PORT', "6379")
     REDIS_DB = 2
     REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
@@ -60,7 +60,7 @@ class DevConfig(Config):
 
     # Config Mongodb
 
-    BK_HOST_MONGODB = os.environ.get("BK_HOST_MONGODB", "127.0.0.1")
+    BK_HOST_MONGODB = os.environ.get("BK_HOST_MONGODB", "localhost")
     BK_PORT_MONGODB = os.environ.get("BK_PORT_MONGODB", "27017")
     BK_USERNAME_MONGODB = os.environ.get("BK_USERNAME_MONGODB", "root")
     BK_PASSWORD_MONGODB = os.environ.get("BK_PASSWORD_MONGODB", "admin-password")
