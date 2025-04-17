@@ -1,9 +1,10 @@
-FROM python:3.11-slim
+FROM python:3.11
 
 
-RUN apt-get -y install zip
-
-RUN apt update && apt install tzdata -y
+RUN apt-get update && apt-get install -y \
+    zip \
+    tzdata \
+ && rm -rf /var/lib/apt/lists/*
 ENV TZ="Asia/Ho_Chi_Minh"
 ENV LANG=vi_VN.UTF-8
 ENV LC_ALL=vi_VN.UTF-8
