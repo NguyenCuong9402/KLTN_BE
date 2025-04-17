@@ -11,7 +11,11 @@ class Config(object):
 
 class DevConfig(Config):
     """Development configuration."""
-    load_dotenv("config/.env.dev", override=True)
+
+    name_file_env = '.env.dev'
+    # name_file_env = '.env.test'
+
+    load_dotenv(f"config/{name_file_env}", override=True)
 
     # app config
     ENV = 'dev'
