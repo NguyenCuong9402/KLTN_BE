@@ -56,24 +56,24 @@ services:
       - cache:/data
     networks:
       - dev-csoc-net
-##  app:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    restart: always
-#    command: gunicorn --workers=3 --threads=1 -b 0.0.0.0:5012 --preload --log-level=debug server:app
-#    ports:
-#      - "5012:5012"
-#    networks:
-#      - dev-csoc-net
-#    volumes:
-#      - ./:/dev-csoc-backend
-#      - /home/kltn/new_tmp_directory:/tmp
-#    depends_on:
-#      - mongodb
-#      - mysqldb
-#      - redis
-#      - rabbitmq
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: gunicorn --workers=3 --threads=1 -b 0.0.0.0:5012 --preload --log-level=debug server:app
+    ports:
+      - "5012:5012"
+    networks:
+      - dev-csoc-net
+    volumes:
+      - ./:/dev-csoc-backend
+      - /home/kltn/new_tmp_directory:/tmp
+    depends_on:
+      - mongodb
+      - mysqldb
+      - redis
+      - rabbitmq
 volumes:
   rabbitmq_data:
   mongodb_data_container:
