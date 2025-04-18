@@ -9,6 +9,4 @@ __pycache__/
 *.idea
 .vscode/
 .git
-.env
-*.env
 tests/
