@@ -67,7 +67,7 @@ services:
     networks:
       - dev-csoc-net
     volumes:
-      - /home/kltn/new_tmp_directory:/tmp
+      - /var/lib/jenkins/workspace/new_tmp_directory:/tmp
     depends_on:
       - mongo
       - mysql
