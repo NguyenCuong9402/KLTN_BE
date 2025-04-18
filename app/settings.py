@@ -11,7 +11,7 @@ class Config(object):
 
 class DevConfig(Config):
     """Development configuration."""
-    # Test deploy
+    # Test deploy 1
     name_file_env = '.env.dev'
     # name_file_env = '.env.test'
 
