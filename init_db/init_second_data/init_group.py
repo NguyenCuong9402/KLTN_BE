@@ -62,9 +62,7 @@ class Worker:
             list_group = [
                 {'key': 'admin', 'name': 'Quản trị viên', 'description': 'admin', 'is_super_admin': True},
                 {'key': 'user', 'name': 'Khách hàng', 'description': 'khách hàng'},
-                {'key': 'director', 'name': 'Giám đốc', 'description': 'giám đốc', 'is_staff': True},
-                {'key': 'accountant', 'name': 'Kế toán', 'description': 'kế toán', 'is_staff': True},
-                {'key': 'hr_manager', 'name': 'Quản lý nhân sự', 'description': 'quản lý nhân sự', 'is_staff': True},
+                {'key': 'manager', 'name': 'Quản lý', 'description': 'Quản lts', 'is_staff': True},
                 {'key': 'employee', 'name': 'Nhân viên', 'description': 'nhân viên', 'is_staff': True}
             ]
 
