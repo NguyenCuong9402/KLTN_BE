@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: cuong942002
+    ports:
+      - "3306:3306"
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --bind-address=0.0.0.0
+      - --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - dev-csoc-net
+  rabbitmq:
+    image: rabbitmq:3-management  # Phiên bản có giao diện web
+    container_name: rabbitmq_container
+    restart: always
+    ports:
+      - "5672:5672"  # Cổng cho giao tiếp AMQP
+      - "15672:15672"  # Cổng giao diện quản lý web
+    environment:
+      RABBITMQ_DEFAULT_USER: admin  # Tên đăng nhập mặc định
+      RABBITMQ_DEFAULT_PASS: admin  # Mật khẩu mặc định
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - dev-csoc-net
+  mongo:
+    image: mongo:6.0.6
+    container_name: mongodb_container
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: admin-password
+      MONGO_INITDB_DATABASE: dev-shop
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - dev-csoc-net
+  redis:
+    image: redis:6.2.14-alpine
+    container_name: redis_container
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - cache:/data
+    networks:
+      - dev-csoc-net
+volumes:
+  db_data:
+  rabbitmq_data:
+  mongodb_data:
+  cache:
+networks:
+  dev-csoc-net:
