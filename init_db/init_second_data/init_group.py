@@ -77,7 +77,7 @@ class Worker:
                  'birthday': fake.date_of_birth(minimum_age=14, maximum_age=60, )
                  }
                 for role in ['admin', 'user', 'manager', 'employee']
-                for user in ['cuong', 'loc']
+                for user in ['cuong', 'loc', 'tuan', 'ngoc_anh']
             ]
 
             # Tạo thêm 100,000 user giả
