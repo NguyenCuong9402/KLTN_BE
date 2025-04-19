@@ -71,6 +71,8 @@ services:
       - mysql
       - redis
       - rabbitmq
+    environment:
+      BUILD_PRD: ${BUILD_PRD}
 volumes:
   db_data:
   rabbitmq_data:
