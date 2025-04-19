@@ -56,7 +56,7 @@ class Worker:
         for user in users:
 
             start_date = user.join_date
-            end_date = date(2025, 3, 31)
+            end_date = date(2025, 4, 21)
             delta = timedelta(days=1)
 
             attendances = []
