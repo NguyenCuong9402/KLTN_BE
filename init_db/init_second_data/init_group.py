@@ -76,7 +76,7 @@ class Worker:
 
                  'birthday': fake.date_of_birth(minimum_age=14, maximum_age=60, )
                  }
-                for role in ['admin', 'user', 'director', 'employee', 'hr_manager', 'accountant']
+                for role in ['admin', 'user', 'manager', 'employee']
                 for user in ['cuong', 'loc']
             ]
 
