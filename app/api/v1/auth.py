@@ -23,11 +23,10 @@ from app.extensions import mail
 from app.validator import UserSchema, AuthValidation, PasswordValidation, RegisterValidation
 from flask_mail import Message as MessageMail
 
-ACCESS_EXPIRES = timedelta(days=1)
-# ACCESS_EXPIRES = timedelta(seconds=30)
-
-REFRESH_EXPIRES = timedelta(days=31)
-# REFRESH_EXPIRES = timedelta(minutes=2)
+# ACCESS_EXPIRES = timedelta(days=1)
+# REFRESH_EXPIRES = timedelta(days=31)
+ACCESS_EXPIRES = timedelta(seconds=30)
+REFRESH_EXPIRES = timedelta(minutes=2)
 
 api = Blueprint('auth', __name__)
 
@@ -154,7 +153,7 @@ def logout():
     """
 
     jti = get_raw_jwt()['jti']
-    Token.revoke_token(jti)  # revoke current token from database
+    # Token.revoke_token(jti)
 
     return send_result(message="Logout successfully!")
 
