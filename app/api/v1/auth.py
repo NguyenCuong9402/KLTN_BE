@@ -23,8 +23,12 @@ from app.extensions import mail
 from app.validator import UserSchema, AuthValidation, PasswordValidation, RegisterValidation
 from flask_mail import Message as MessageMail
 
-ACCESS_EXPIRES = timedelta(days=7)
-REFRESH_EXPIRES = timedelta(days=7)
+ACCESS_EXPIRES = timedelta(days=1)
+# ACCESS_EXPIRES = timedelta(seconds=30)
+
+REFRESH_EXPIRES = timedelta(days=31)
+# REFRESH_EXPIRES = timedelta(minutes=2)
+
 api = Blueprint('auth', __name__)
 
 # Message_ID variable
@@ -122,15 +126,15 @@ def refresh():
 
     """
 
-    user_identity = get_jwt_identity()
-    user = User.get_by_id(user_identity)
+    user_id = get_jwt_identity()
+    user = User.query.filter_by(id=user_id).first()
 
-    list_permission = get_permissions(user)
-    access_token = create_access_token(identity=user.id)
+    # list_permission = get_permissions(user)
+    access_token = create_access_token(identity=user.id, expires_delta=ACCESS_EXPIRES, )
 
-    # Store the tokens in our store with a status of not currently revoked.
-    Token.add_token_to_database(access_token, user_identity)
-    Token.add_list_permission(user.id, list_permission)
+    # # Store the tokens in our store with a status of not currently revoked.
+    # Token.add_token_to_database(access_token, user_identity)
+    # Token.add_list_permission(user.id, list_permission)
 
     data = {
         'access_token': access_token

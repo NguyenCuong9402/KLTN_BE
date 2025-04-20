@@ -174,6 +174,7 @@ def active_user(user_id):
         return send_error(message=str(ex))
 
 @api.route("/staff", methods=["GET"])
+@jwt_required
 def get_staff():
     try:
         try:
@@ -232,6 +233,7 @@ def get_staff():
 
 
 @api.route("/customer", methods=["GET"])
+@jwt_required
 def get_customer():
     try:
         try:
