@@ -44,7 +44,7 @@ class Worker:
                 ]
             },
             {
-                'key': 'phukien',
+                'key': 'phu_kien',
                 'name': 'Phụ Kiện',
                 'child_type': [
                     {'key': 'that_lung', 'name': 'Thắt Lưng'},
