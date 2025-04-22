@@ -78,7 +78,7 @@ class Worker:
         db.session.commit()
 
         data = {
-            "describe": "Áo đẹp giá tốt",
+            "describe": "Đẹp, chất lượng cao, giá tốt",
             "sizes": [
                 "S",
                 "M",
@@ -87,7 +87,7 @@ class Worker:
             ],
             "colors": [
                 "Xanh",
-                "Đen"
+                "Đen",
                 "Trắng"
             ],
             "files": result
@@ -109,8 +109,21 @@ class Worker:
             db.session.add(product)
             db.session.flush()
 
-            size_objects = [Size(id=str(uuid()), name=size, product_id=product.id, index=index,
-                                 created_date=get_timestamp_now() + index) for index, size in enumerate(sizes)]
+            if random_type.parent and random_type.parent.key == 'phu_kien':
+                size_list = ['FreeSize']
+            else:
+                size_list = sizes
+
+            size_objects = [
+                Size(
+                    id=str(uuid()),
+                    name=size,
+                    product_id=product.id,
+                    index=index,
+                    created_date=get_timestamp_now() + index
+                )
+                for index, size in enumerate(size_list)
+            ]
             color_objects = [Color(id=str(uuid()), name=color, product_id=product.id, index=index,
                                    created_date=get_timestamp_now() + index) for index, color in enumerate(colors)]
             db.session.bulk_save_objects(size_objects)
