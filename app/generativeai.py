@@ -58,7 +58,8 @@ Với yêu cầu: "Tôi muốn tìm áo mùa hè khoảng 300 nghìn đến 1 tr
 """
 
 # ✏️ Text đầu vào có thể thay đổi
-user_text = "Tôi muốn tìm áo mát mẻ mặc được mà giá chưa đến 1 triệu VNĐ."
+user_text = "Tôi cần tìm một chiếc áo khoác dày để mặc vào mùa đông, nhưng giá phải dưới 800 nghìn VNĐ. Nếu có thể, tôi cũng muốn xem thêm một vài chiếc quần jeans hoặc quần kaki, không quá đắt đỏ. Thêm vào đó, tôi cần một chiếc nón để che nắng trong những ngày mùa hè nóng bức, tốt nhất là dưới 200 nghìn."
+
 
 
 def search(prompt_ai, text_search: str, list_san_pham: list):
