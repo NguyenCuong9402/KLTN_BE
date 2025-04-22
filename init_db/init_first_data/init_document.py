@@ -23,7 +23,7 @@ class Worker:
 
     def init_DocumentStorage(self):
         list_documents = [
-            'Ảnh'
+            'Ảnh',
             'CMND/CCCD',
             'Đơn Xin Việc',
             'Bằng Cấp',

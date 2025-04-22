@@ -169,15 +169,22 @@ class Article(db.Model):
     community_id = db.Column(db.String(50), db.ForeignKey('community.id',
                                                           ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
 
+    user = db.relationship('User', viewonly=True)
+    community = db.relationship('Community', viewonly=True)
+
+    tag_product = db.relationship(
+        'ArticleTagProduct',
+        backref='article',
+        lazy='joined',  # hoặc 'select', tùy cách bạn muốn truy cập
+        cascade='all, delete-orphan',
+        primaryjoin='Article.id == ArticleTagProduct.article_id'
+    )
+
     @property
     def reaction_count(self):
         return Reaction.query.filter(
             Reaction.reactable_id == self.id, Reaction.category == TYPE_REACTION.get('ARTICLE', "article"),
             Reaction.vote == True).count()
-
-    user = db.relationship('User', viewonly=True)
-    community = db.relationship('Community', viewonly=True)
-
 
 class ArticleTagProduct(db.Model):
     __tablename__ = 'article_tag_product'
@@ -187,6 +194,7 @@ class ArticleTagProduct(db.Model):
     product_id = db.Column(db.String(50), db.ForeignKey('product.id',
                                                         ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
     index = db.Column(db.Integer, nullable=True)
+    product = db.relationship('Product', viewonly=True)
 
 
 class Reaction(db.Model):

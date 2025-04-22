@@ -97,6 +97,7 @@ def get_articles():
         text_search = params.get('text_search', '')
         community_id = params.get('community_id')
         timestamp = params.get('timestamp')
+        product_id = params.get('product_id')
 
         query = Article.query.filter()
         user_id = get_user_id_request()
@@ -105,6 +106,14 @@ def get_articles():
             if check_community is None:
                 return send_error(message='Community not found', code=404)
             query = query.filter(Article.community_id == community_id)
+        if product_id:
+            check_product = Product.query.filter_by(id=product_id).first()
+            if check_product is None:
+                return send_error(message='Product not found', code=404)
+            query = Article.query.join(ArticleTagProduct).filter(
+                ArticleTagProduct.product_id == product_id
+            )
+
         if timestamp:
             query = query.filter(Article.modified_date < timestamp)
 

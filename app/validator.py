@@ -663,6 +663,7 @@ class QueryParamsArticleSchema(QueryParamsAllSchema):
     community_id = fields.String(allow_none=True)
     timestamp = fields.Integer(allow_none=True)
     profile_id = fields.String(allow_none=True)
+    product_id = fields.String(allow_none=True)
 
 
 class CommentParamsValidation(BaseValidation):
@@ -810,6 +811,11 @@ class DocumentStaff(Schema):
     document = fields.Nested(DocumentSchema)
     file = fields.Nested(FileSchema())
 
+class ArticleTagProductSchema(Schema):
+    id = fields.String()
+    product = fields.Nested(ProductSchema(only=("id", "name", "files")))
+    index = fields.Integer()
+
 class ArticleSchema(Schema):
     id = fields.String()
     title = fields.String()
@@ -822,6 +828,7 @@ class ArticleSchema(Schema):
     community = fields.Nested(CommunitySchema(only=("id","name")))
     has_reacted = fields.Method("get_has_reacted")
     reaction_count = fields.Integer()
+    tag_product = fields.Nested(ArticleTagProductSchema, many=True)
     def get_has_reacted(self, article):
         # Lấy user_id từ context (nếu có)
         user_id = self.context.get("user_id")
