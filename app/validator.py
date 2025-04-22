@@ -824,7 +824,7 @@ class ArticleSchema(Schema):
     body_type = fields.String()
     created_date = fields.Integer()
     modified_date = fields.Integer()
-    user = fields.Nested(UserSchema(only=("id","full_name")))
+    user = fields.Nested(UserSchema(only=("id","full_name", "avatar")))
     community = fields.Nested(CommunitySchema(only=("id","name")))
     has_reacted = fields.Method("get_has_reacted")
     reaction_count = fields.Integer()
