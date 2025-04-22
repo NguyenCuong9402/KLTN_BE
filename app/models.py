@@ -186,6 +186,7 @@ class Article(db.Model):
             Reaction.reactable_id == self.id, Reaction.category == TYPE_REACTION.get('ARTICLE', "article"),
             Reaction.vote == True).count()
 
+
 class ArticleTagProduct(db.Model):
     __tablename__ = 'article_tag_product'
     id = db.Column(db.String(50), primary_key=True)

@@ -50,12 +50,12 @@ def get_all_type():
 
         page = params.get('page', 1)
         page_size = params.get('page_size', 20)
-        order_by = params.get('order_by', 'created_date')
-        sort = params.get('sort', 'desc')
+        order_by = params.get('order_by', 'name')
+        sort = params.get('sort', 'asc')
         text_search = params.get('text_search', None)
         type_id = params.get('type_id', None)
 
-        query = TypeProduct.query.filter()
+        query = TypeProduct.query.filter(TypeProduct.type_id.isnot(None))
 
         if type_id:
             check = TypeProduct.query.filter_by(id=type_id).first()

@@ -571,12 +571,18 @@ class ReportValidation(BaseValidation):
         error_messages={"required": "Nội dung báo cáo không được để trống."}
     )
 
+class TypeProductSchema2(Schema):
+    id = fields.String()
+    key = fields.String()
+    name = fields.String()
+
 class TypeProductSchema(Schema):
     id = fields.String()
     key = fields.String()
     name = fields.String()
     created_date = fields.Integer()
     modified_date = fields.Integer()
+    parent = fields.Nested(TypeProductSchema2)
 
 class TypeProductWithChildrenSchema(TypeProductSchema):
     type_child = fields.List(fields.Nested(TypeProductSchema))
@@ -656,7 +662,17 @@ class QueryParamsAllSchema(BaseValidation):
 class QueryTimeSheetSchema(QueryParamsAllSchema):
     time_str=fields.String(allow_none=True)
 
-class ParamTypeProduct(QueryParamsAllSchema):
+
+class QueryParamsTypeSchema(BaseValidation):
+    page = fields.Integer(required=True, validate=validate.Range(min=1))  # Bắt buộc, không nhỏ hơn 1
+    page_size = fields.Integer(missing=10, validate=validate.Range(min=1, max=100))  # Mặc định là 10, giới hạn tối đa 100
+    order_by = fields.String(missing="name")
+    sort = fields.String(
+        missing="asc", validate=validate.OneOf(["asc", "desc"])  # Chỉ chấp nhận 'asc' hoặc 'desc'
+    )
+    text_search = fields.String(allow_none=True)  # Có thể None
+
+class ParamTypeProduct(QueryParamsTypeSchema):
     type_id = fields.String(allow_none=True)
 
 class QueryParamsArticleSchema(QueryParamsAllSchema):
