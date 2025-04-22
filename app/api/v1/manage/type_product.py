@@ -79,7 +79,11 @@ def put(id_type):
 
         db.session.flush()
         db.session.commit()
-        return send_result(message='Thành công')
+
+        data = TypeProductSchema().dump(type_product)
+
+
+        return send_result(data=data, message='Thành công')
 
     except Exception as ex:
         db.session.rollback()
