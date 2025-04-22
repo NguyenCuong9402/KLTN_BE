@@ -11,7 +11,7 @@ model = genai.GenerativeModel(model_name="models/learnlm-2.0-flash-experimental"
 base_prompt = """
 Bạn là AI trích xuất thông tin từ yêu cầu mua sắm.
 
-Cho một đoạn văn tiếng Việt, hãy phân tích và trả về JSON có dạng sau:
+Cho một đoạn văn tiếng Việt, hãy phân tích và trả về dữ liệu phân tích có dạng sau:
 
 {
   "min_price": <giá tối thiểu dưới dạng số nguyên VNĐ, nếu không có thì null>,
@@ -19,7 +19,7 @@ Cho một đoạn văn tiếng Việt, hãy phân tích và trả về JSON có 
   "type": <danh sách các loại sản phẩm có trong đoạn văn, lấy từ: ["Áo sơ mi", "áo khoác", "áo phông", "quần thun", "Áo cộc tay", "Áo đi biển"]>
 }
 
-Chỉ trả về JSON, không thêm giải thích.
+Chỉ trả về dữ liệu dạng json hay dictionary của Python để tôi json load được, không thêm giải thích.
 """
 
 # ✏️ Text đầu vào có thể thay đổi
@@ -31,10 +31,18 @@ full_prompt = base_prompt + f'\n\nĐoạn văn:\n"{user_text}"'
 # Gửi tới model
 response = model.generate_content(full_prompt)
 
-# Convert từ chuỗi JSON sang dict
+text = response.text.strip()
+
+# Nếu có markdown ```json thì loại bỏ
+if text.startswith("```json"):
+    text = text.removeprefix("```json").strip()
+if text.endswith("```"):
+    text = text.removesuffix("```").strip()
+
+# Parse JSON
 try:
-    result = json.loads(response.text)
-    print(result)
+    result = json.loads(text)
+    print("✅ Kết quả parse JSON:", result)
 except json.JSONDecodeError as e:
-    print("Lỗi khi chuyển JSON:", e)
-    print("Text gốc:", response.text)
+    print("❌ JSON không hợp lệ:", e)
+    print("Dữ liệu lỗi:", text)
