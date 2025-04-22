@@ -48,6 +48,43 @@ def new():
         db.session.rollback()
         return send_error(message=str(ex), code=442)
 
+
+@api.route('/<id_type>', methods=['PUT'])
+@jwt_required
+def put(id_type):
+    try:
+
+        json_req = request.get_json()
+        json_body = trim_dict(json_req)
+        validator_input = TypeProductValidation()
+        is_not_validate = validator_input.validate(json_body)
+
+        type_product = TypeProduct.query.filter_by(id=id_type).first()
+
+        if type_product is None:
+            return send_error(message='Loại sản phẩm không tồn tại')
+
+        if is_not_validate:
+            return send_error(data=is_not_validate, message='Validate Error')
+
+        if check_coincided_name(json_req['name'], id_type):
+            return send_error(message='Tên đã tồn tại')
+
+        if check_coincided_key(json_req['key'], id_type):
+            return send_error(message='Key đã tồn tại')
+
+        type_product.key = json_req['key']
+        type_product.name = json_req['name']
+        type_product.type_id = json_req['type_id']
+
+        db.session.flush()
+        db.session.commit()
+        return send_result(message='Thành công')
+
+    except Exception as ex:
+        db.session.rollback()
+        return send_error(message=str(ex), code=442)
+
 def check_coincided_name(name='', type_id=''):
     existed_name = TypeProduct.query.filter(TypeProduct.name == name)
     if type_id:
@@ -144,8 +181,6 @@ def get_parent_type():
         return send_result(data=response_data)
     except Exception as ex:
         return send_error(message=str(ex))
-
-
 
 
 
