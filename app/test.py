@@ -5,7 +5,7 @@ import os
 
 genai.configure(api_key="AIzaSyCe2e9GWXqFkLBmQ2zec4YjZCOF-5QhDig")
 
-model = genai.GenerativeModel(model_name="models/learnlm-2.0-flash-experimental")
+model = genai.GenerativeModel(model_name="models/gemini-2.0-flash")
 
 # Prompt cố định
 prompt = """
