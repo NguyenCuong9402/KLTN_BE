@@ -97,3 +97,5 @@ class DevConfig(Config):
     # backup
     BACKUP = os.environ.get("BACKUP", "False").lower() == "true"
 
+    GOOGLE_API_KEY="AIzaSyCe2e9GWXqFkLBmQ2zec4YjZCOF-5QhDig"
+
