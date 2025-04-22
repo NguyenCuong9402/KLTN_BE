@@ -42,7 +42,9 @@ if text.endswith("```"):
 # Parse JSON
 try:
     result = json.loads(text)
+    print("✅ Kết quả loại:", type(result))
     print("✅ Kết quả parse JSON:", result)
+
 except json.JSONDecodeError as e:
     print("❌ JSON không hợp lệ:", e)
     print("Dữ liệu lỗi:", text)
