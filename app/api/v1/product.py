@@ -102,15 +102,8 @@ def get_items():
 @jwt_required
 def get_items_ai():
     try:
-        try:
-            params = request.args.to_dict(flat=True)
-            params = QueryParamsProductAiSchema().load(params) if params else dict()
-        except ValidationError as err:
-            return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
-        page = params.get('page', 1)
-        page_size = params.get('page_size', 10)
-        text_search = params.get('text_search', '')
 
+        text_search = request.args.get('text_search', '')
 
         query = Product.query.filter(Product.is_delete.is_(False))
 
@@ -121,20 +114,7 @@ def get_items_ai():
                  .order_by(asc(TypeProduct.key)).all())
         name_type_list = [name for (name,) in names]
 
-        # result = search_ai(PROMPT_AI, text_search, name_type_list)
-
-        if DevConfig.ENABLE_RABBITMQ_CONSUMER:
-
-            message = {
-                'text_search': text_search,
-                'name_type': name_type_list
-            }
-
-            print("oke", message)
-            queue_ai = RabbitMQProducerGenerateSearchProduct()
-            result = queue_ai.call_rpc(message)
-        else:
-            result = search_ai(PROMPT_AI, text_search, name_type_list)
+        result = search_ai(PROMPT_AI, text_search, name_type_list)
 
         max_price = result.get('max_price', None)
         min_price = result.get('min_price', None)
@@ -155,18 +135,10 @@ def get_items_ai():
 
         query = query.order_by(desc(Product.original_price))
 
-        paginator = paginate(query, page, page_size)
 
-        products = ProductSchema(many=True).dump(paginator.items)
+        products = ProductSchema(many=True).dump(query.all())
 
-        response_data = dict(
-            items=products,
-            total_pages=paginator.pages if paginator.pages > 0 else 1,
-            total=paginator.total,
-            # current_page=paginator.page,  # Số trang hiện tại
-            has_previous=paginator.has_previous,  # Có trang trước không
-            has_next=paginator.has_next  # Có trang sau không
-        )
-        return send_result(data=response_data)
+
+        return send_result(data=products)
     except Exception as ex:
         return send_error(message=str(ex))
