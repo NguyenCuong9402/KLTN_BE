@@ -97,6 +97,7 @@ def get_items():
 
 
 @api.route("/search_by_ai", methods=["GET"])
+@jwt_required
 def get_items_ai():
     try:
         try:
