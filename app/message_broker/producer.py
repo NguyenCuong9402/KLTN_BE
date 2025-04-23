@@ -1,6 +1,7 @@
 import pika
 import json
 import abc
+from shortuuid import uuid
 from app.settings import DevConfig
 
 CONFIG = DevConfig
@@ -68,6 +69,42 @@ class RabbitMQProducerGenerateSearchProduct(BaseRabbitMQProducer):
     def __init__(self):
         super().__init__()
         self.channel.queue_declare(queue=CONFIG.GENERATIVE_AI_QUEUE, durable=True)
+
+    def call_rpc(self, message):
+        """
+        Gửi tin nhắn RPC và đợi phản hồi qua reply_to.
+        """
+        self.corr_id = str(uuid())  # Tạo correlation_id ngẫu nhiên
+
+        print(f"[{self.__class__.__name__}] Sending RPC message: {message}")
+
+        # Tạo một queue tạm thời để nhận phản hồi
+        response_queue = self.channel.queue_declare(queue='', exclusive=True)
+        reply_to = response_queue.method.queue
+
+        # Gửi thông điệp với reply_to và correlation_id
+        self.channel.basic_publish(
+            exchange=self.exchange_name,
+            routing_key=self.routing_key,
+            body=json.dumps(message),  # Chuyển message thành chuỗi JSON
+            properties=pika.BasicProperties(
+                reply_to=reply_to,
+                correlation_id=self.corr_id,
+            )
+        )
+
+        # Hàm callback xử lý phản hồi
+        def on_response(ch, method, properties, body):
+            if properties.correlation_id == self.corr_id:
+                self.response = body
+
+        # Tạo một callback để lắng nghe phản hồi
+        self.channel.basic_consume(queue=reply_to, on_message_callback=on_response, auto_ack=True)
+
+        # Chờ phản hồi trong thời gian giới hạn
+        self.connection.process_data_events(time_limit=60)
+
+        return json.loads(self.response) if hasattr(self, 'response') else {"message": "Timeout"}
 
 
 def tinh_ttl(phut=0, giay=0):
