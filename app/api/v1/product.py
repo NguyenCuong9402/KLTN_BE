@@ -15,9 +15,11 @@ from sqlalchemy_pagination import paginate
 from werkzeug.utils import secure_filename
 
 from app.api.helper import send_result, send_error
-from app.models import db, Product
+from app.enums import PROMPT_AI
+from app.generativeai import search_ai
+from app.models import db, Product, TypeProduct
 from app.utils import trim_dict, escape_wildcard
-from app.validator import ProductSchema, QueryParamsSchema
+from app.validator import ProductSchema, QueryParamsSchema, QueryParamsProductAiSchema
 
 api = Blueprint('product', __name__)
 
@@ -76,6 +78,66 @@ def get_items():
         column_sorted = getattr(Product, order_by)
 
         query = query.order_by(desc(column_sorted)) if sort == "desc" else query.order_by(asc(column_sorted))
+
+        paginator = paginate(query, page, page_size)
+
+        products = ProductSchema(many=True).dump(paginator.items)
+
+        response_data = dict(
+            items=products,
+            total_pages=paginator.pages if paginator.pages > 0 else 1,
+            total=paginator.total,
+            # current_page=paginator.page,  # Số trang hiện tại
+            has_previous=paginator.has_previous,  # Có trang trước không
+            has_next=paginator.has_next  # Có trang sau không
+        )
+        return send_result(data=response_data)
+    except Exception as ex:
+        return send_error(message=str(ex))
+
+
+@api.route("/search_by_ai", methods=["GET"])
+def get_items_ai():
+    try:
+        try:
+            params = request.args.to_dict(flat=True)
+            params = QueryParamsProductAiSchema().load(params) if params else dict()
+        except ValidationError as err:
+            return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
+        page = params.get('page', 1)
+        page_size = params.get('page_size', 10)
+        text_search = params.get('text_search', '')
+
+
+        query = Product.query.filter(Product.is_delete.is_(False))
+
+        if not text_search:
+            return send_error(message='Không được để trống')
+
+        names = (db.session.query(TypeProduct.name).filter(TypeProduct.type_id.isnot(None))
+                 .order_by(asc(TypeProduct.key)).all())
+        name_type_list = [name for (name,) in names]
+
+        result = search_ai(PROMPT_AI, text_search, name_type_list)
+
+        max_price = result.get('max_price', None)
+        min_price = result.get('min_price', None)
+        list_type =  result.get('type', [])
+
+        type_finds = TypeProduct.query.filter(TypeProduct.name.in_(list_type)).all()
+
+        type_list = [type_find.name for type_find in type_finds]
+
+        if type_list:
+            query = query.filter(Product.type_product_id.in_(type_list))
+
+        if isinstance(min_price, (int, float)):
+            query = query.filter(Product.original_price >= min_price)
+
+        if isinstance(max_price, (int, float)):
+            query = query.filter(Product.original_price <= max_price)
+
+        query = query.order_by(desc(Product.original_price))
 
         paginator = paginate(query, page, page_size)
 
