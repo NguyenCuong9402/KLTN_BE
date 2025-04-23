@@ -20,7 +20,7 @@ from app.generativeai import search_ai
 from app.models import db, Product, TypeProduct
 from app.settings import DevConfig
 from app.utils import trim_dict, escape_wildcard
-from app.validator import ProductSchema, QueryParamsSchema, QueryParamsProductAiSchema
+from app.validator import ProductSchema, QueryParamsSchema
 
 api = Blueprint('product', __name__)
 
