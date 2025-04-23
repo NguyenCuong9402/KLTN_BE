@@ -127,7 +127,7 @@ def get_items_ai():
 
         type_finds = TypeProduct.query.filter(TypeProduct.name.in_(list_type)).all()
 
-        type_list = [type_find.name for type_find in type_finds]
+        type_list = [type_find.id for type_find in type_finds]
 
         if type_list:
             query = query.filter(Product.type_product_id.in_(type_list))

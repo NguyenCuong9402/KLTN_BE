@@ -663,7 +663,7 @@ class QueryParamsAllSchema(BaseValidation):
 class QueryParamsProductAiSchema(BaseValidation):
     page = fields.Integer(required=True, validate=validate.Range(min=1))  # Bắt buộc, không nhỏ hơn 1
     page_size = fields.Integer(missing=10, validate=validate.Range(min=1, max=100))  # Mặc định là 10, giới hạn tối đa 100
-    text_search = fields.String(required=True, validate=validate.Range(min=20, error="Phải có ít nhất 20 ký tự"))  # Có thể None
+    text_search = fields.String(required=True, validate=validate.Length(min=20, error="Phải có ít nhất 20 ký tự"))  # Có thể None
 
 class QueryTimeSheetSchema(QueryParamsAllSchema):
     time_str=fields.String(allow_none=True)
