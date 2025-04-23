@@ -17,7 +17,6 @@ from werkzeug.utils import secure_filename
 from app.api.helper import send_result, send_error
 from app.enums import PROMPT_AI
 from app.generativeai import search_ai
-from app.message_broker import RabbitMQProducerGenerateSearchProduct
 from app.models import db, Product, TypeProduct
 from app.settings import DevConfig
 from app.utils import trim_dict, escape_wildcard
