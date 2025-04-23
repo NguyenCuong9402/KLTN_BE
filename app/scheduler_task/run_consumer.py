@@ -1,21 +1,37 @@
 import threading
 
-from app.message_broker import (RabbitMQConsumerSendMailConsumer, RabbitMQConsumerGenerateReportConsumer
-, RabbitMQConsumerStatisticsConsumer)
+from app.message_broker import (RabbitMQConsumerSendMailConsumer, RabbitMQConsumerGenerateReportConsumer,
+                                RabbitMQConsumerStatisticsConsumer)
 
-def start_consumer(consumer_class, app):
-    consumer = consumer_class()
-    with app.app_context():  # Đảm bảo app context tồn tại trong thread
-        consumer.start_consuming()
 
-def run_consumers_in_thread(app):
+def start_consumers_in_single_thread(app):
+    """
+    Hàm này chạy tất cả các consumers trong cùng một thread.
+    Đảm bảo app context tồn tại trong thread.
+    """
+    try:
+        # Tạo các consumer
         consumers = [
-            RabbitMQConsumerSendMailConsumer,
-            # RabbitMQConsumerGenerateReportConsumer,
-            # RabbitMQConsumerStatisticsConsumer
+            RabbitMQConsumerSendMailConsumer(),
+            # RabbitMQConsumerGenerateReportConsumer(),
+            # RabbitMQConsumerStatisticsConsumer()
         ]
 
-        for consumer_class in consumers:
-            thread = threading.Thread(target=start_consumer, args=(consumer_class,app))
-            thread.daemon = True  # Để thread kết thúc khi app dừng
-            thread.start()
+        # Chạy các consumer trong app context
+        with app.app_context():
+            for consumer in consumers:
+                consumer.start_consuming()
+
+    except Exception as e:
+        print(f"[Error] Error in starting consumers: {e}")
+
+
+def run_consumers_in_thread(app):
+    """
+    Chạy tất cả các consumer trong một thread duy nhất.
+    """
+    if app.config.get('ENABLE_RABBITMQ_CONSUMER', False):
+        # Chạy consumer trong một thread duy nhất
+        thread = threading.Thread(target=start_consumers_in_single_thread, args=(app,))
+        thread.daemon = True  # Đảm bảo thread kết thúc khi ứng dụng dừng
+        thread.start()
