@@ -83,7 +83,8 @@ class RabbitMQConsumerGenerativeAIConsumer(BaseRabbitMQConsumer):
     def process_message(self, message):
         text_search = message.get('text_search', '')
         name_type = message.get('name_type', [])
-
+        print("Đã nhận phản hồi")
         result = search_ai(PROMPT_AI, text_search, name_type)
+        print("Xử lí phản hồi")
 
         return result  # ← gửi trả lại producer
