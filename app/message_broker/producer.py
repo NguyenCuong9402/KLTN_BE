@@ -104,7 +104,7 @@ class RabbitMQProducerGenerateSearchProduct(BaseRabbitMQProducer):
         # Chờ phản hồi trong thời gian giới hạn
         self.connection.process_data_events(time_limit=60)
 
-        return json.loads(self.response) if hasattr(self, 'response') else {"message": "Timeout"}
+        return json.loads(self.response) if hasattr(self, 'response') else {}
 
 
 def tinh_ttl(phut=0, giay=0):

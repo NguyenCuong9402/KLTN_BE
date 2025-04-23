@@ -3,7 +3,8 @@ import json
 from flask import current_app
 from flask_mail import Message as MessageMail
 
-from app.enums import TYPE_ACTION_SEND_MAIL
+from app.enums import TYPE_ACTION_SEND_MAIL, PROMPT_AI
+from app.generativeai import search_ai
 from app.settings import DevConfig
 from app.extensions import mail
 
@@ -80,10 +81,9 @@ class RabbitMQConsumerGenerativeAIConsumer(BaseRabbitMQConsumer):
         super().__init__(CONFIG.GENERATIVE_AI_QUEUE, CONFIG.GENERATIVE_AI_ROUTING_KEY)
 
     def process_message(self, message):
-        print(f"[GenerateAI] Processing: {message}")
-        result = {
-            "status": "success",
-            "query": message.get("query"),
-            "result": f"Gợi ý cho: {message.get('query')}"
-        }
+        text_search = message.get('text_search', '')
+        name_type = message.get('name_type', [])
+
+        result = search_ai(PROMPT_AI, text_search, name_type)
+
         return result  # ← gửi trả lại producer

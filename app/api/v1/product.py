@@ -17,7 +17,9 @@ from werkzeug.utils import secure_filename
 from app.api.helper import send_result, send_error
 from app.enums import PROMPT_AI
 from app.generativeai import search_ai
+from app.message_broker import RabbitMQProducerGenerateSearchProduct
 from app.models import db, Product, TypeProduct
+from app.settings import DevConfig
 from app.utils import trim_dict, escape_wildcard
 from app.validator import ProductSchema, QueryParamsSchema, QueryParamsProductAiSchema
 
@@ -119,7 +121,20 @@ def get_items_ai():
                  .order_by(asc(TypeProduct.key)).all())
         name_type_list = [name for (name,) in names]
 
-        result = search_ai(PROMPT_AI, text_search, name_type_list)
+        # result = search_ai(PROMPT_AI, text_search, name_type_list)
+
+        if DevConfig.ENABLE_RABBITMQ_CONSUMER:
+
+            message = {
+                'text_search': text_search,
+                'name_type': name_type_list
+            }
+
+            print("oke", message)
+            queue_ai = RabbitMQProducerGenerateSearchProduct()
+            result = queue_ai.call_rpc(message)
+        else:
+            result = search_ai(PROMPT_AI, text_search, name_type_list)
 
         max_price = result.get('max_price', None)
         min_price = result.get('min_price', None)
