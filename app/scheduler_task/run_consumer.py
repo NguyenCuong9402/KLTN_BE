@@ -1,29 +1,35 @@
 import threading
-from app.message_broker import RabbitMQConsumerSendMailConsumer, RabbitMQConsumerGenerativeAIConsumer
 
-def start_consumer(consumer_class, app):
+from app.message_broker import (RabbitMQConsumerSendMailConsumer, RabbitMQConsumerGenerativeAIConsumer,)
+
+
+def start_consumers_in_single_thread(app):
     """
-    Hàm này sẽ được gọi trong từng thread để bắt đầu consumer.
-    Đảm bảo app context tồn tại trong thread và consumer sử dụng queue riêng biệt.
+    Hàm này chạy tất cả các consumers trong cùng một thread.
+    Đảm bảo app context tồn tại trong thread.
     """
     try:
-        consumer = consumer_class()
-        with app.app_context():  # Đảm bảo app context tồn tại trong thread
-            consumer.start_consuming()
+        # Tạo các consumer
+        consumers = [
+            RabbitMQConsumerSendMailConsumer(),
+            RabbitMQConsumerGenerativeAIConsumer(),
+        ]
+
+        # Chạy các consumer trong app context
+        with app.app_context():
+            for consumer in consumers:
+                consumer.start_consuming()
+
     except Exception as e:
-        print(f"[Error] Error in consumer: {e}")
+        print(f"[Error] Error in starting consumers: {e}")
+
 
 def run_consumers_in_thread(app):
     """
-    Chạy các consumer trong các thread riêng biệt, mỗi consumer sẽ sử dụng queue riêng biệt.
+    Chạy tất cả các consumer trong một thread duy nhất.
     """
-    consumers = [
-        RabbitMQConsumerSendMailConsumer,
-        RabbitMQConsumerGenerativeAIConsumer
-    ]
-
-    for consumer_class in consumers:
-        # Khởi tạo một thread mới cho mỗi consumer
-        thread = threading.Thread(target=start_consumer, args=(consumer_class, app))
-        thread.daemon = True  # Để thread kết thúc khi app dừng
+    if app.config.get('ENABLE_RABBITMQ_CONSUMER', False):
+        # Chạy consumer trong một thread duy nhất
+        thread = threading.Thread(target=start_consumers_in_single_thread, args=(app,))
+        thread.daemon = True  # Đảm bảo thread kết thúc khi ứng dụng dừng
         thread.start()
