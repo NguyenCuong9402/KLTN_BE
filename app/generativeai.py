@@ -22,7 +22,6 @@ model = genai.GenerativeModel(model_name="models/gemini-2.0-flash")
 def search_ai(prompt_ai, text_search: str, list_san_pham: list):
     # Chuyển danh sách sản phẩm thành một chuỗi có định dạng phù hợp
     product_list_str = ", ".join([f'"{item}"' for item in list_san_pham])
-    print(product_list_str)
     # Thay thế #LIST_SAN_PHAM trong prompt bằng danh sách sản phẩm
     full_prompt = prompt_ai.replace("#LIST_SAN_PHAM", product_list_str) + f'\n\nĐoạn văn:\n"{text_search}"'
 

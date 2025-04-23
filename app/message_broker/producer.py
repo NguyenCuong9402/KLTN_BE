@@ -56,10 +56,10 @@ class RabbitMQProducerSendMail(BaseRabbitMQProducer):
         self.channel.queue_declare(queue=CONFIG.SEND_MAIL_QUEUE, durable=True)
 
 
-class RabbitMQProducerGenerateReport(BaseRabbitMQProducer):
+class RabbitMQProducerGenerateSearchProduct(BaseRabbitMQProducer):
     @property
     def routing_key(self):
-        return CONFIG.GENERATE_REPORT_ROUTING_KEY
+        return CONFIG.GENERATIVE_AI_ROUTING_KEY
 
     @property
     def expiration(self):
@@ -67,21 +67,7 @@ class RabbitMQProducerGenerateReport(BaseRabbitMQProducer):
 
     def __init__(self):
         super().__init__()
-        self.channel.queue_declare(queue=CONFIG.GENERATE_REPORT_QUEUE, durable=True)
-
-
-class RabbitMQProducerStatistics(BaseRabbitMQProducer):
-    @property
-    def routing_key(self):
-        return CONFIG.STATISTICS_ROUTING_KEY
-
-    @property
-    def expiration(self):
-        return tinh_ttl(phut=6)
-
-    def __init__(self):
-        super().__init__()
-        self.channel.queue_declare(queue=CONFIG.STATISTICS_QUEUE, durable=True)
+        self.channel.queue_declare(queue=CONFIG.GENERATIVE_AI_QUEUE, durable=True)
 
 
 def tinh_ttl(phut=0, giay=0):

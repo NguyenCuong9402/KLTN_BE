@@ -62,17 +62,9 @@ class RabbitMQConsumerSendMailConsumer(BaseRabbitMQConsumer):
         elif type_action == TYPE_ACTION_SEND_MAIL['FORGET_PASS']:
             pass
 
-class RabbitMQConsumerGenerateReportConsumer(BaseRabbitMQConsumer):
+class RabbitMQConsumerGenerativeAIConsumer(BaseRabbitMQConsumer):
     def __init__(self):
-        super().__init__(CONFIG.GENERATE_REPORT_QUEUE, CONFIG.GENERATE_REPORT_ROUTING_KEY)
+        super().__init__(CONFIG.GENERATIVE_AI_QUEUE, CONFIG.GENERATIVE_AI_ROUTING_KEY)
 
     def process_message(self, message):
         print(f"[GenerateReport] Generating report: {message}")
-
-
-class RabbitMQConsumerStatisticsConsumer(BaseRabbitMQConsumer):
-    def __init__(self):
-        super().__init__(CONFIG.STATISTICS_QUEUE, CONFIG.STATISTICS_ROUTING_KEY)
-
-    def process_message(self, message):
-        print(f"[Statistics] Processing statistics: {message}")

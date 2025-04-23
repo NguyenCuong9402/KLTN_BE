@@ -80,11 +80,8 @@ class DevConfig(Config):
     SEND_MAIL_QUEUE = os.environ.get("SEND_MAIL_QUEUE", "send_mail_queue")
     SEND_MAIL_ROUTING_KEY = os.environ.get("SEND_MAIL_ROUTING_KEY", "send.mail")
 
-    GENERATE_REPORT_QUEUE = os.environ.get("GENERATE_REPORT_QUEUE", "generate_report_queue")
-    GENERATE_REPORT_ROUTING_KEY = os.environ.get("GENERATE_REPORT_ROUTING_KEY", "generate.report")
-
-    STATISTICS_QUEUE = os.environ.get("STATISTICS_QUEUE", "statistics_queue")
-    STATISTICS_ROUTING_KEY = os.environ.get("STATISTICS_ROUTING_KEY", "statistics.process")
+    GENERATIVE_AI_QUEUE = os.environ.get("GENERATIVE_AI_QUEUE", "generative_ai_queue")
+    GENERATIVE_AI_ROUTING_KEY = os.environ.get("GENERATIVE_AI_ROUTING_KEY", "search.generative_ai")
 
     EXCHANGE_NAME = os.environ.get("EXCHANGE_NAME", "default_exchange")
     EXCHANGE_TYPE = os.environ.get("EXCHANGE_TYPE", "direct")
