@@ -10,6 +10,7 @@ from .api import v1 as api_v1
 from .api.helper import send_error
 from .enums import TIME_FORMAT_LOG
 from .scheduler_task import backup_data, run_consumers_in_thread
+import requests
 
 
 def create_app(config_object=CONFIG):
@@ -35,6 +36,17 @@ def create_app(config_object=CONFIG):
         # Test
         scheduler.add_job(backup_data, trigger='cron', second=0)
 
+
+    # Run webhook bot tele
+    try:
+        delete_webhook_url = f"https://api.telegram.org/bot{config_object.TOKEN_BOT_TELE}/deleteWebhook"
+        requests.get(delete_webhook_url)
+
+        # Step 2: Set a new webhook
+        set_webhook_url = f"https://api.telegram.org/bot{config_object.TOKEN_BOT_TELE}/setWebhook?url={config_object.BASE_URL_WEBSITE}/api/v1/bot_tele"
+        requests.get(set_webhook_url)
+    except:
+        pass
     return app
 
 
@@ -160,3 +172,5 @@ def register_blueprints(app):
     app.register_blueprint(api_v1.type_product.api, url_prefix='/api/v1/type_product')
     app.register_blueprint(api_v1.payment_online.api, url_prefix='/api/v1/payment_online')
     app.register_blueprint(api_v1.notify.api, url_prefix='/api/v1/notify')
+    app.register_blueprint(api_v1.bot_tele.api, url_prefix='/api/v1/bot_tele')
+

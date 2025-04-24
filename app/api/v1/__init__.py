@@ -16,5 +16,6 @@ from app.api.v1 import comment
 from app.api.v1 import type_product
 from app.api.v1 import payment_online
 from app.api.v1 import notify
+from app.api.v1 import bot_tele
 
 
