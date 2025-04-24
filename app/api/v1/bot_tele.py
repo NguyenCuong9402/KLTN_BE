@@ -31,20 +31,61 @@ api = Blueprint('bot_tele', __name__)
 def web_hook_tele():
     data = request.get_json()
 
-    print(data)
     if 'message' not in data:
         print("Không có message")
+        return 'Invalid message', 200
 
     message = data['message']['text']
     chat_id = data['message']['chat']['id']
 
-    MESSAGE = "Chào bạn, tôi là bot. Còn bạn là top"
+    if not chat_id:
+        return 'Invalid message', 200
 
+    user = User.query.filter_by(chat_tele_id=chat_id).first()
+    if not user:
+        MESSAGE = f"Bạn chưa đăng ký tài khoản. Tạo tài khoản và sử dụng dịch vụ của chúng tôi. [Đăng ký ngay]({DevConfig.BASE_URL_WEBSITE}/register)"
+        sendMessage(chat_id, MESSAGE)
+        return 'Invalid chat', 200
+
+    parts = message.strip().split(' ', 1)  # Tách theo khoảng trắng và giới hạn 2 phần
+
+    if len(parts) == 2:  # Kiểm tra nếu có đúng 2 phần
+        command = parts[0]  # Phần đầu tiên (lệnh)
+        content = parts[1]  # Phần thứ 2 (nội dung nếu có)
+
+        # Kiểm tra lệnh và gọi các function tương ứng
+        func = command_dict.get(command)
+        if func:
+            func(content)  # Gọi hàm tương ứng với lệnh
+        else:
+            MESSAGE = f"Lệnh không hợp lệ"
+            sendMessage(chat_id, MESSAGE)
+            return 'Invalid command', 200
+
+    else:
+        MESSAGE = f"Lệnh không hợp lệ"
+        sendMessage(chat_id, MESSAGE)
+        return 'Invalid message format', 200
+
+    return 'OK', 200
+
+
+def tele_start(content):
+    print(f"Received message: {content}")
+
+def tele_about(content):
+    print(f"Received message: {content}")
+
+def tele_search(content):
+    print(f"Received message: {content}")
+
+command_dict = {
+    '/start': tele_start,
+    '/about': tele_about,
+    '/search': tele_search
+}
+
+def sendMessage(chat_id, MESSAGE):
     url = f"https://api.telegram.org/bot{DevConfig.TOKEN_BOT_TELE}/sendMessage"
     payload = {"chat_id": chat_id, "text": MESSAGE}
-
-    response = requests.post(url, json=payload)
-
-    print("Done")
-
-    return '', 200  # Phản hồi trống với mã trạng thái 200
+    requests.post(url, json=payload)
