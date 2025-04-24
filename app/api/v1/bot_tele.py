@@ -56,7 +56,7 @@ def web_hook_tele():
         # Kiểm tra lệnh và gọi các function tương ứng
         func = command_dict.get(command)
         if func:
-            func(content)  # Gọi hàm tương ứng với lệnh
+            func(chat_id, content)  # Gọi hàm tương ứng với lệnh
         else:
             MESSAGE = f"Lệnh không hợp lệ"
             sendMessage(chat_id, MESSAGE)
@@ -70,13 +70,13 @@ def web_hook_tele():
     return 'OK', 200
 
 
-def tele_start(content):
+def tele_start(chat_id, content):
     print(f"Received message: {content}")
 
-def tele_about(content):
+def tele_about(chat_id, content):
     print(f"Received message: {content}")
 
-def tele_search(content):
+def tele_search(chat_id, content):
     print(f"Received message: {content}")
 
 command_dict = {
