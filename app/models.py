@@ -1,5 +1,7 @@
 # coding: utf-8
 from datetime import time, timedelta, datetime
+
+from shortuuid import uuid
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
@@ -57,6 +59,9 @@ class User(db.Model):
 
     attendances = db.relationship('Attendance', back_populates='user', cascade="all, delete-orphan")
 
+    # Tele bot
+    user_tele_id = db.Column(db.String(50), nullable=True, default=str(uuid()))
+    chat_tele_id =  db.Column(db.String(50), nullable=True)
     @property
     def address(self):
         data = {

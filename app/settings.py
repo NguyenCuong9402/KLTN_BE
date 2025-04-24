@@ -99,3 +99,7 @@ class DevConfig(Config):
 
     GOOGLE_API_KEY="AIzaSyCe2e9GWXqFkLBmQ2zec4YjZCOF-5QhDig"
 
+    #BOT TELE
+
+    TOKEN_BOT_TELE = os.environ.get("TOKEN_BOT_TELE", "7572579273:AAHnb4pnCs8OUthEP0tbJ68yB6v8uNT60Fw")
+

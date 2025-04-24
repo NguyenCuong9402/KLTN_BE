@@ -89,7 +89,6 @@ TYPE_FILE_LINK = {
     'ORDER_REPORT': 'order_report',
 }
 
-TOKEN_BOT_TELE = "7727055654:AAFJnBNiMv58Vy46mjxXFVyaW-geF3nFZ18"
 
 MAIL_VERITY_CODE = 'verity_register'
 GROUP_ADMIN_KEY = 'admin'
