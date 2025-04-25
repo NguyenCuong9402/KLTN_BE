@@ -104,7 +104,6 @@ def profile_staff(profile_id):
 @jwt_required
 def update_staff(profile_id):
 
-    body = request.get_json()
     json_req = request.get_json()
     json_body = trim_dict(json_req)
     validator_input = StaffValidation()
@@ -145,6 +144,8 @@ def update_staff(profile_id):
 
         # Lưu thay đổi vào cơ sở dữ liệu
     db.session.commit()
+
+    # Check finish date nếu hết hạn thì xóa token trển redis
     
     data=UserSchema().dump(user)
 

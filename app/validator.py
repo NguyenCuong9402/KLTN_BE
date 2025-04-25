@@ -379,10 +379,7 @@ class StaffValidation(BaseValidation):
         error_messages={"required": "Ngày sinh không được để trống."}
     )
 
-    detail_address = fields.String(
-        required=True,
-        error_messages={"required": "Địa chỉ chi tiết không được để trống."}
-    )
+    detail_address = fields.String(allow_none=True)
 
     address = fields.Dict(
         required=True,

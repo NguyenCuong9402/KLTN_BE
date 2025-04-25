@@ -1,5 +1,5 @@
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from shortuuid import uuid
 from flask import Blueprint, request
@@ -79,6 +79,14 @@ def login():
     if not user.is_active:
         return send_error(message='Tài khoản đang bị khóa')
 
+    if user.group.is_staff:
+        current_date = datetime.now().date()
+        # Kiểm tra xem finish_date có >= ngày hiện tại không
+        if user.join_date  and user.join_date  >= current_date:
+            return send_error(message='Tài khoản chưa đến ngày làm việc.')
+        if user.finish_date:
+            if user.finish_date <= current_date:
+                return send_error(message='Tài khoản đã hết thời gian làm việc.')
     # list_permission = get_permissions(user)
 
     access_token = create_access_token(identity=user.id, expires_delta=ACCESS_EXPIRES, )
