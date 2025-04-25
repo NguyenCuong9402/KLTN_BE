@@ -379,7 +379,7 @@ def save_attendance_data(user_id, data):
         pass
 
 
-def tele_start(chat_id, content):
+def tele_active(chat_id, content):
 
     from .models import User
 
@@ -416,7 +416,7 @@ def tele_love(chat_id, content):
     sendMessage(chat_id, message)
 
 command_dict = {
-    '/start': tele_start,
+    '/active': tele_active,
     '/about': tele_about,
     '/secret': tele_love
 }

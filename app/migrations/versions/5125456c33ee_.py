@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: be8ac818ea67
+Revision ID: 5125456c33ee
 Revises: 
-Create Date: 2025-04-03 16:56:59.199800
+Create Date: 2025-04-25 20:41:36.961710
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'be8ac818ea67'
+revision = '5125456c33ee'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -192,10 +192,13 @@ def upgrade():
     sa.Column('number_dependent', mysql.INTEGER(unsigned=True), nullable=True),
     sa.Column('ethnicity', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
     sa.Column('nationality', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=True),
+    sa.Column('user_tele_id', sa.String(length=50), nullable=False),
+    sa.Column('chat_tele_id', sa.String(length=50), nullable=True),
     sa.ForeignKeyConstraint(['address_id'], ['address.id'], onupdate='CASCADE', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['avatar_id'], ['files.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['group_id'], ['group.id'], onupdate='CASCADE', ondelete='SET NULL'),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_tele_id')
     )
     op.create_index(op.f('ix_user_created_date'), 'user', ['created_date'], unique=False)
     op.create_table('address_order',
@@ -305,6 +308,7 @@ def upgrade():
     sa.Column('id', sa.String(length=50), nullable=False),
     sa.Column('code', sa.String(length=20), nullable=True),
     sa.Column('user_id', sa.String(length=50), nullable=True),
+    sa.Column('limit', mysql.INTEGER(unsigned=True), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
