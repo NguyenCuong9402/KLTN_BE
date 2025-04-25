@@ -9,7 +9,6 @@ from marshmallow import fields, validate as validate_
 from pytz import timezone
 from .enums import ALLOWED_EXTENSIONS_IMG, MONGO_COLLECTION_STATISTIC_ATTENDANCE_USER
 from .extensions import mongo_db, db
-from .models import User
 from .settings import DevConfig
 import requests
 
@@ -380,6 +379,8 @@ def save_attendance_data(user_id, data):
 
 
 def tele_start(chat_id, content):
+    from .models import User
+
     user = User.query.filter_by(user_tele_id=content).first()
     user.chat_tele_id = chat_id
 
@@ -398,6 +399,8 @@ def tele_about(chat_id, content):
     print(f"Received message: {content}")
 
 def tele_search(chat_id, content):
+    from .models import User
+
     user = User.query.filter_by(chat_tele_id=chat_id).first()
     if not user:
         MESSAGE = (f"Bạn chưa đăng ký tài khoản. Tạo tài khoản và sử dụng dịch vụ của chúng tôi. [Đăng ký ngay]({DevConfig.BASE_URL_WEBSITE}/register) "

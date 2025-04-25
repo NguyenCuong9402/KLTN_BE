@@ -5,7 +5,7 @@ from sqlalchemy.event import listens_for
 from app.enums import NOTIFY_TYPE, CONTENT_TYPE, TYPE_REACTION
 from app.extensions import db
 from app.models import Article, Comment, Reaction, Orders, Product, Notify, NotifyDetail, User
-from app.utils import get_timestamp_now, sendmessage
+from app.utils import get_timestamp_now, sendMessage
 
 
 def get_notify(user_id, notify_type, action_type=None, action_id=None):
@@ -68,7 +68,7 @@ def handle_article_notification(instance):
         handle_notify(instance, CONTENT_TYPE["ARTICLE"], admin.id, NOTIFY_TYPE["ARTICLE"])
         if admin.chat_tele_id:
             message = f"Người dùng {user.email} đã đăng 1 bài viết mới"
-            sendmessage(admin.chat_tele_id, message)
+            sendMessage(admin.chat_tele_id, message)
 
 def handle_comment_notification(instance):
     user_id = instance.ancestry.user_id if instance.ancestry_id else instance.article.user_id
@@ -85,7 +85,7 @@ def handle_comment_notification(instance):
 
     if user_receive.chat_tele_id:
         message = f"{user_comment.full_name} đã {action} của bạn"
-        sendmessage(user_receive.chat_tele_id, message)
+        sendMessage(user_receive.chat_tele_id, message)
     
 
 def handle_reaction_notification(instance):
@@ -108,7 +108,7 @@ def handle_reaction_notification(instance):
 
     if user_receive.chat_tele_id:
         message = f"{user_reaction.full_name} đã reaction {action} của bạn"
-        sendmessage(user_receive.chat_tele_id, message)
+        sendMessage(user_receive.chat_tele_id, message)
         
 
     if instance.user_id != user_id:
@@ -125,7 +125,7 @@ def handle_orders_notification(instance):
         handle_notify(instance, CONTENT_TYPE["ORDERS"], admin.id, NOTIFY_TYPE["ORDERS"])
         if admin.chat_tele_id:
             message = f"Người dùng {user.email} đã đặt đơn hàng mới"
-            sendmessage(admin.chat_tele_id, message)
+            sendMessage(admin.chat_tele_id, message)
     
 
 
@@ -137,4 +137,4 @@ def handle_ship_orders_notification(instance):
 
     if user.chat_tele_id:
         message = f"Đơn hàng #{instance.id} đã được vận chuyển"
-        sendmessage(user.chat_tele_id, message)
+        sendMessage(user.chat_tele_id, message)
