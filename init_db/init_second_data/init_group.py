@@ -5,6 +5,8 @@ from faker import Faker
 import random
 import json
 
+from shortuuid import uuid
+
 fake = Faker("vi_VN")
 
 import pandas as pd
@@ -37,7 +39,6 @@ def generate_vietnam_tax_code():
     """
     Generate a fake Vietnam-style tax code.
     """
-    import random
     return f"{random.randint(1000000000, 9999999999)}"
 
 class Worker:
@@ -50,14 +51,6 @@ class Worker:
         app_context.push()
 
     def init_group(self):
-        from faker import Faker
-        import random
-        import datetime
-        import shortuuid
-        from sqlalchemy.sql.expression import func
-
-        fake = Faker("vi_VN")
-
         try:
             list_group = [
                 {'key': 'admin', 'name': 'Quản trị viên', 'description': 'admin', 'is_super_admin': True},
@@ -71,7 +64,7 @@ class Worker:
                  'group_key': role, 'phone': f"0{random.randint(3200000000, 3999999999)}", 'identification_card': generate_vietnam_id(),
                  'tax_code': generate_vietnam_tax_code(), 'join_date': datetime.datetime(2024, 1, 1),
                  'finish_date': datetime.datetime(2027, 1, 1), 'number_dependent': random.choice([0,1]),
-                 'nationality': 'Việt Nam', 'ethnicity': 'Kinh',
+                 'nationality': 'Việt Nam', 'ethnicity': 'Kinh', 'user_tele_id': str(uuid()),
                  'gender': random.choice([0, 1]), 'social_insurance_number':  f"0{random.randint(3200000000, 3999999999)}",
 
                  'birthday': fake.date_of_birth(minimum_age=14, maximum_age=60, )
@@ -84,13 +77,13 @@ class Worker:
             list_user.extend([
                 {'email': f"{fake.user_name()}{random.randint(1000, 9999)}@gmail.com",
                  "phone": f"0{random.randint(3200000000, 3999999999)}", 'gender': random.choice([0, 1]),
-                 'birthday': fake.date_of_birth(minimum_age=14, maximum_age=60),
+                 'birthday': fake.date_of_birth(minimum_age=14, maximum_age=60), 'user_tele_id': str(uuid()),
                  "password": "123456789", "full_name": fake.name(), "group_key": "user"}
                 for _ in range(10000)
             ])
 
             print("Thêm nhóm")
-            db.session.bulk_insert_mappings(Group, [{**g, 'id': str(shortuuid.uuid())} for g in list_group])
+            db.session.bulk_insert_mappings(Group, [{**g, 'id': str(uuid())} for g in list_group])
             db.session.commit()
 
             group_dict = {g.key: g.id for g in Group.query.all()}
@@ -102,7 +95,7 @@ class Worker:
             users_to_insert = []
             for item in list_user:
                 item["group_id"] = group_dict.get(item.pop("group_key"))
-                item["id"] = str(shortuuid.uuid())
+                item["id"] = str(uuid())
                 item["is_active"] = True
                 item["address_id"] = random.choice(address_ids)
                 users_to_insert.append(item)

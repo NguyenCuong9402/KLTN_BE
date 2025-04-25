@@ -41,12 +41,6 @@ def web_hook_tele():
     if not chat_id:
         return 'Invalid message', 200
 
-    user = User.query.filter_by(chat_tele_id=chat_id).first()
-    if not user:
-        MESSAGE = f"Bạn chưa đăng ký tài khoản. Tạo tài khoản và sử dụng dịch vụ của chúng tôi. [Đăng ký ngay]({DevConfig.BASE_URL_WEBSITE}/register)"
-        sendMessage(chat_id, MESSAGE)
-        return 'Invalid chat', 200
-
     parts = message.strip().split(' ', 1)  # Tách theo khoảng trắng và giới hạn 2 phần
 
     if len(parts) == 2:  # Kiểm tra nếu có đúng 2 phần
@@ -71,13 +65,30 @@ def web_hook_tele():
 
 
 def tele_start(chat_id, content):
-    print(f"Received message: {content}")
+    user = User.query.filter_by(user_tele_id=content).first()
+    user.chat_tele_id = chat_id
+
+    User.query.filter(
+        User.id != user.id,
+        User.chat_tele_id == chat_id
+    ).update({User.chat_tele_id: None})
+    db.session.flush()
+    db.session.commit()
+
+    MESSAGE = 'Bạn đã xác thực tài khoản thành công, từ giờ bạn sẽ nhận thông báo đến tele của bạn.'
+
+    sendMessage(chat_id, MESSAGE)
 
 def tele_about(chat_id, content):
     print(f"Received message: {content}")
 
 def tele_search(chat_id, content):
-    print(f"Received message: {content}")
+    user = User.query.filter_by(chat_tele_id=chat_id).first()
+    if not user:
+        MESSAGE = (f"Bạn chưa đăng ký tài khoản. Tạo tài khoản và sử dụng dịch vụ của chúng tôi. [Đăng ký ngay]({DevConfig.BASE_URL_WEBSITE}/register) "
+                   f"và /start ID_USER để kích hoạt bot")
+        sendMessage(chat_id, MESSAGE)
+        return 'Invalid chat', 200
 
 command_dict = {
     '/start': tele_start,

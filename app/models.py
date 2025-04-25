@@ -60,7 +60,7 @@ class User(db.Model):
     attendances = db.relationship('Attendance', back_populates='user', cascade="all, delete-orphan")
 
     # Tele bot
-    user_tele_id = db.Column(db.String(50), nullable=True, default=str(uuid()))
+    user_tele_id = db.Column(db.String(50), nullable=False, unique=True, default=str(uuid()))
     chat_tele_id =  db.Column(db.String(50), nullable=True)
     @property
     def address(self):
