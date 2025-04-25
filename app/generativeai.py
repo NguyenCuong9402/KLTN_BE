@@ -43,6 +43,11 @@ def search_ai(prompt_ai, text_search: str, list_san_pham: list):
     return result
 
 
+def about_us(prompt):
+    response = model.generate_content(prompt)
+    text = response.text.strip()
+    return text
+
 # Gọi hàm search để phân tích
 # result = search(prompt, user_text, product_types)
 # print(result)

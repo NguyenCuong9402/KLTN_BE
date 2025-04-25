@@ -7,8 +7,9 @@ import string
 import urllib.parse
 from marshmallow import fields, validate as validate_
 from pytz import timezone
-from .enums import ALLOWED_EXTENSIONS_IMG, MONGO_COLLECTION_STATISTIC_ATTENDANCE_USER
+from .enums import ALLOWED_EXTENSIONS_IMG, MONGO_COLLECTION_STATISTIC_ATTENDANCE_USER, PROMPT_AI_ABOUT_US
 from .extensions import mongo_db, db
+from .generativeai import about_us
 from .settings import DevConfig
 import requests
 
@@ -396,7 +397,16 @@ def tele_start(chat_id, content):
     sendMessage(chat_id, message)
 
 def tele_about(chat_id, content):
-    print(f"Received message: {content}")
+    contact = f"""
+    Link website : {DevConfig.BASE_URL_WEBSITE}
+    Email: cn.company.enterprise@gmail.com
+    
+    Xin giới thiệu bạn qua 1 bài thơ:
+
+    """
+    ax = about_us(PROMPT_AI_ABOUT_US)
+    message = contact + ax
+    sendMessage(chat_id, message)
 
 def tele_search(chat_id, content):
     from .models import User

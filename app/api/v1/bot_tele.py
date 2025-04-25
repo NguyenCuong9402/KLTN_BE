@@ -43,10 +43,9 @@ def web_hook_tele():
 
     parts = message.strip().split(' ', 1)  # Tách theo khoảng trắng và giới hạn 2 phần
 
-    if len(parts) == 2:  # Kiểm tra nếu có đúng 2 phần
+    if parts:  # Kiểm tra nếu có đúng 2 phần
         command = parts[0]  # Phần đầu tiên (lệnh)
-        content = parts[1]  # Phần thứ 2 (nội dung nếu có)
-
+        content = parts[1] if len(parts) > 1 else ''
         # Kiểm tra lệnh và gọi các function tương ứng
         func = command_dict.get(command)
         if func:

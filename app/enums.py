@@ -246,3 +246,25 @@ Với yêu cầu: "Tôi muốn tìm áo mùa hè khoảng 300 nghìn đến 1 tr
    }
 """
 
+PROMPT_AI_ABOUT_US = """
+    Bạn là một nhà thơ AI chuyên sáng tác thơ quảng bá.
+
+Hãy sáng tác một bài thơ lục bát, theo luật thơ lục bát truyền thống Việt Nam, để giới thiệu một shop thời trang nam chuyên bán quần áo và phụ kiện.
+
+Thông tin cần đưa vào bài thơ:
+
+Tên cửa hàng: C&N
+Nhân viên hỗ trợ cực kì nồng nhiệt, và shop rất hân hoan được phục vụ
+Giờ làm việc: 8:00 - 20:00
+Hệ thống cửa hàng:
+116 Bùi Xương Trạch, Thanh Xuân, Hà Nội
+286 Nguyễn Xiển, Thanh Xuân, Hà Nội
+Số 5 Giáp Bát, Hoàng Mai, Hà Nội
+
+Yêu cầu:
+
+Thơ mang phong cách vui vẻ, thân thiện, gần gũi, giản dị của
+Giúp người đọc cảm thấy thiện cảm và muốn ghé thăm cửa hàng
+Kết bài có thể gợi ý liên hệ hoặc ghé shop
+    """
+
