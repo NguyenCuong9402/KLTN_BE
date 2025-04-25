@@ -382,6 +382,7 @@ class VerityCode(db.Model):
     code = db.Column(db.String(20))
     user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
                         nullable=True)
+    limit = db.Column(INTEGER(unsigned=True), nullable=True)  # Cho phép NULL
 
 
 class Region(db.Model):

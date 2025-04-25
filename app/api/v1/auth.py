@@ -9,7 +9,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.enums import ADMIN_EMAIL, MAIL_VERITY_CODE, GROUP_KEY_PARAM, GROUP_ADMIN_KEY, GROUP_USER_KEY, \
     TYPE_ACTION_SEND_MAIL
-from app.api.helper import get_permissions, CONFIG, send_email_template, get_roles_key, Token, convert_to_datetime
+from app.api.helper import get_permissions, CONFIG, send_email_template, get_roles_key, Token, convert_to_datetime, \
+    get_user_id_request
 from app.api.helper import send_error, send_result, Token
 from app.extensions import jwt, db
 from app.gateway import authorization_require
@@ -69,6 +70,9 @@ def login():
 
     if user is None:
         return send_error(message='Tài khoản không tồn tại.')
+
+    if not user.status:
+        return send_error(message='Tài khoản không tồn tại')
 
     if user.password != password:
         return send_error(message='Mật khẩu không đúng.')
@@ -181,10 +185,11 @@ def register():
             return send_error(message='Confirm password khác password.')
 
         json_body.pop('confirm_password')
-        if User.query.filter(User.email == json_body.get('email'), User.phone == json_body.get('phone')).first():
-            return send_error(message='Gmail/ Phone đã được đăng ký.')
+        if User.query.filter(User.email == json_body.get('email'), User.status == 1).first():
+            return send_error(message='Gmail đã được đăng ký.')
+        User.query.filter(User.email == json_body.get('email'), User.status == 0).delete()
         group = Group.query.filter(Group.key == GROUP_USER_KEY).first()
-        user = User(id=str(uuid()), **json_body, group_id=group.id, status=False, is_active=True)
+        user = User(id=str(uuid()), **json_body, group_id=group.id, status=False, is_active=True, user_tele_id=str(uuid()))
         db.session.add(user)
         db.session.flush()
 
@@ -195,11 +200,11 @@ def register():
         # Mail
 
         # Tạo verity code
-        code = VerityCode(id=str(uuid()), user_id=user.id, code=code)
+        code = VerityCode(id=str(uuid()), user_id=user.id, code=code, limit=get_timestamp_now() + 5 * 60)
         db.session.add(code)
         db.session.flush()
 
-        title_mail = 'MÃ XÁC THỰC ĐĂNG KÝ TÀI KHOẢN C&M'
+        title_mail = 'MÃ XÁC THỰC ĐĂNG KÝ TÀI KHOẢN C&N'
         # gửi mail neu co queue
         if DevConfig.ENABLE_RABBITMQ_CONSUMER:
             body = {
@@ -224,23 +229,31 @@ def register():
 
 
 @api.route('/send_code', methods=['POST'])
-@jwt_required
 def send_code():
     try:
         json_req = request.get_json()
 
         type_input_code = json_req.get('type_input_code', None)
+        email = json_req.get('email', None)
 
-        user_id = get_jwt_identity()
-        user = User.query.filter_by(id=user_id).first()
-        if user is None:
-            send_error(message='Người dùng không hợp lệ.')
+
+        user_id = get_user_id_request()
+
+        if user_id:
+            user = User.query.filter_by(id=user_id).first()
+            email = user.email
+        else:
+            if type_input_code == TYPE_ACTION_SEND_MAIL['REGISTER'] and not email.strip():
+                return send_error(message='Bạn chưa nhập email')
+            user = User.query.filter_by(email=email).first()
+            user_id = user.id
+
 
         code = generate_random_number_string()
         # body = body_mail(MAIL_VERITY_CODE, {'code': code})
         body = f"Mã Code của bạn là : {code} "
         # Tạo verity code
-        code = VerityCode(id=str(uuid()), user_id=user.id, code=code)
+        code = VerityCode(id=str(uuid()), user_id=user_id, code=code, limit=get_timestamp_now() + 5 * 60)
         db.session.add(code)
 
         db.session.flush()
@@ -249,16 +262,17 @@ def send_code():
         # msg = MessageMail('Mã xác thực là:', recipients=[user.email])
         # msg.body = mail_send.body
         # mail.send(msg)
-        email = user.email
 
         title_mail = 'MÃ XÁC THỰC'
 
         if type_input_code == TYPE_ACTION_SEND_MAIL['OPEN_ACCOUNT']:
-            title_mail = 'MÃ XÁC THỰC MỞ KHÓA TÀI KHOẢN C&M'
+            title_mail = 'MÃ XÁC THỰC MỞ KHÓA TÀI KHOẢN C&N'
 
         elif type_input_code == TYPE_ACTION_SEND_MAIL['UPDATE_ACCOUNT']:
-            title_mail = 'MÃ XÁC THAY ĐỔI MẬT KHẨU TÀI KHOẢN C&M'
+            title_mail = 'MÃ XÁC THAY ĐỔI MẬT KHẨU TÀI KHOẢN C&N'
 
+        elif type_input_code == TYPE_ACTION_SEND_MAIL['REGISTER']:
+            title_mail = 'MÃ XÁC THAY ĐỔI MẬT KHẨU TÀI KHOẢN C&N'
 
         if DevConfig.ENABLE_RABBITMQ_CONSUMER:
             body = {
@@ -322,11 +336,18 @@ def change_password():
 def verity_code():
     try:
         json_req = request.get_json()
-        # user_id = get_jwt_identity()
+        user_id = get_user_id_request()
         code = json_req.get('code', '')
         verity_code_id = json_req.get('verity_code_id', '')
         type_input_code = json_req.get('type_input_code', None)
         verity = VerityCode.query.filter(VerityCode.id == verity_code_id).first()
+
+        if verity is None:
+            return send_error('Không tìm thấy mã xác thực')
+
+        if verity and verity.limit:
+            if verity.limit < get_timestamp_now():
+                return send_error(message='Code đã hết hạn')
         if verity.code != code:
             return send_error(message='Mã Code không hợp lệ.')
 
