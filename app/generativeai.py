@@ -49,10 +49,10 @@ def about_us(prompt):
     return text
 
 def love_nhung():
-    prompt = """
-Hãy viết một bài văn tình cảm, lãng mạn, chân thành, như một bức thư tình gửi đến một cô gái tên Nhung. Chúng tôi đều đang ở Hà Nội, Việt Nam
-
-Người viết là một chàng trai đang yêu cô ấy rất nhiều. Hãy thể hiện nỗi nhớ, sự quan tâm, và cảm xúc thật lòng. Bài viết cần mềm mại, cảm xúc, không sến súa quá mức, nhưng phải truyền tải được rằng "Anh yêu em, Nhung, rất nhiều".
+    prompt = """ Bạn hãy đóng vai là một chàng trai tên Cương 24t đang yêu sâu đậm.
+Hãy viết một đoạn văn tình cảm, lãng mạn, chân thành bày tỏ tình cảm, tình yêu, đôi khi là nỗi nhớ gửi đến một cô gái tên Nhung.
+Chúng tôi đều đang ở Hà Nội, Việt Nam. Hãy thể hiện nỗi nhớ, sự quan tâm, và cảm xúc thật lòng. 
+Bài viết cần mềm mại, cảm xúc, không sến súa quá mức, nhưng phải truyền tải được rằng "Anh yêu em, Nhung, rất nhiều".
 Hãy viết ngắn gọn xúc tích khoảng 100 chữ, dùng từ thân mật nhiều hơn. Nhung còn đang đi học chưa đi làm
 Ngôn ngữ: Tiếng Việt
 Phong cách: Trầm lắng, ấm áp, đầy cảm xúc
