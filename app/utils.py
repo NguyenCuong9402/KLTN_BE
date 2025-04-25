@@ -402,26 +402,26 @@ def tele_about(chat_id, content):
     Email: cn.company.enterprise@gmail.com
     
     Xin giới thiệu bạn qua 1 bài thơ:
-
+    --------------------------------
     """
     ax = about_us(PROMPT_AI_ABOUT_US)
     message = contact + ax
     sendMessage(chat_id, message)
 
-def tele_search(chat_id, content):
-    from .models import User
-
-    user = User.query.filter_by(chat_tele_id=chat_id).first()
-    if not user:
-        message = (f"Bạn chưa liên kết tài khoản (/start ID) để kích hoạt bot. Nếu chưa có tài khoản, "
-                   f"tạo tài khoản và sử dụng dịch vụ của chúng tôi. [Đăng ký ngay]({DevConfig.BASE_URL_WEBSITE}/register)")
-        sendMessage(chat_id, message)
-        return 'Invalid chat', 200
+# def tele_search(chat_id, content):
+#     from .models import User
+#
+#     user = User.query.filter_by(chat_tele_id=chat_id).first()
+#     if not user:
+#         message = (f"Bạn chưa liên kết tài khoản (/start ID) để kích hoạt bot. Nếu chưa có tài khoản, "
+#                    f"tạo tài khoản và sử dụng dịch vụ của chúng tôi. [Đăng ký ngay]({DevConfig.BASE_URL_WEBSITE}/register)")
+#         sendMessage(chat_id, message)
+#         return 'Invalid chat', 200
 
 command_dict = {
     '/start': tele_start,
     '/about': tele_about,
-    '/search': tele_search
+    # '/search': tele_search
 }
 
 def sendMessage(chat_id, message):
