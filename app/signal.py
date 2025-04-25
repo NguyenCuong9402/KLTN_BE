@@ -5,7 +5,7 @@ from sqlalchemy.event import listens_for
 from app.enums import NOTIFY_TYPE, CONTENT_TYPE, TYPE_REACTION
 from app.extensions import db
 from app.models import Article, Comment, Reaction, Orders, Product, Notify, NotifyDetail, User
-from app.utils import get_timestamp_now
+from app.utils import get_timestamp_now, sendmessage
 
 
 def get_notify(user_id, notify_type, action_type=None, action_id=None):
@@ -64,9 +64,11 @@ def handle_article_notification(instance):
         return
 
     users = User.query.filter(User.group.has(is_staff=True)).all()
-    for user in users:
-        handle_notify(instance, CONTENT_TYPE["ARTICLE"], user.id, NOTIFY_TYPE["ARTICLE"])
-
+    for admin in users:
+        handle_notify(instance, CONTENT_TYPE["ARTICLE"], admin.id, NOTIFY_TYPE["ARTICLE"])
+        if admin.chat_tele_id:
+            message = f"Người dùng {user.email} đã đăng 1 bài viết mới"
+            sendmessage(admin.chat_tele_id, message)
 
 def handle_comment_notification(instance):
     user_id = instance.ancestry.user_id if instance.ancestry_id else instance.article.user_id
@@ -76,11 +78,22 @@ def handle_comment_notification(instance):
         handle_notify(instance, action_detail_type=CONTENT_TYPE["COMMENT"], user_id=user_id,
                       notify_type=NOTIFY_TYPE["COMMENT"], action_type=action_type, action_id=action_id)
 
+    user_receive = User.query.filter_by(id=user_id).first()
+    user_comment = User.query.filter_by(id=instance.user_id).first()
+
+    action = 'trả lời bình luận' if action_type == CONTENT_TYPE["COMMENT"] else 'bình luận bài viết'
+
+    if user_receive.chat_tele_id:
+        message = f"{user_comment.full_name} đã {action} của bạn"
+        sendmessage(user_receive.chat_tele_id, message)
+    
 
 def handle_reaction_notification(instance):
     action_id = instance.reactable_id
     action_type = instance.category
-
+    
+    user_reaction = User.query.filter_by(id=instance.user_id).first()
+    
     if action_type == TYPE_REACTION["COMMENT"]:
         comment = Comment.query.filter_by(id=action_id).first()
         user_id = comment.user_id
@@ -88,6 +101,15 @@ def handle_reaction_notification(instance):
     else:
         article = Article.query.filter_by(id=action_id).first()
         user_id = article.user_id
+        
+    user_receive = User.query.filter_by(id=user_id).first()
+    
+    action = 'bình luận' if action_type == TYPE_REACTION["COMMENT"] else 'bài viết'
+
+    if user_receive.chat_tele_id:
+        message = f"{user_reaction.full_name} đã reaction {action} của bạn"
+        sendmessage(user_receive.chat_tele_id, message)
+        
 
     if instance.user_id != user_id:
         handle_notify(instance, action_detail_type=CONTENT_TYPE["REACTION"], user_id=user_id,
@@ -99,8 +121,12 @@ def handle_orders_notification(instance):
     if not user or user.group.is_staff or user.group.is_super_admin:
         return
     users = User.query.filter(User.group.has(is_staff=True), User.id != instance.user_id).all()
-    for user in users:
-        handle_notify(instance, CONTENT_TYPE["ORDERS"], user.id, NOTIFY_TYPE["ORDERS"])
+    for admin in users:
+        handle_notify(instance, CONTENT_TYPE["ORDERS"], admin.id, NOTIFY_TYPE["ORDERS"])
+        if admin.chat_tele_id:
+            message = f"Người dùng {user.email} đã đặt đơn hàng mới"
+            sendmessage(admin.chat_tele_id, message)
+    
 
 
 def handle_ship_orders_notification(instance):
@@ -108,3 +134,7 @@ def handle_ship_orders_notification(instance):
 
     handle_notify(instance, CONTENT_TYPE["ORDERS"], user.id, NOTIFY_TYPE["DELIVERING_ORDERS"],
                             action_type=CONTENT_TYPE["ORDERS"], action_id=instance.id)
+
+    if user.chat_tele_id:
+        message = f"Đơn hàng #{instance.id} đã được vận chuyển"
+        sendmessage(user.chat_tele_id, message)

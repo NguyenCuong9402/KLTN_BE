@@ -12,7 +12,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_req
 from app.api.helper import send_result, send_error, get_user_id_request
 from app.models import User, Article, Community, Product, ArticleTagProduct, Comment
 from app.signal import handle_article_notification
-from app.utils import trim_dict, escape_wildcard, get_timestamp_now
+from app.utils import trim_dict, escape_wildcard, get_timestamp_now, command_dict, sendMessage
 from app.validator import ProductValidation, ArticleSchema, QueryParamsAllSchema, ArticleValidate, \
     QueryParamsArticleSchema, CommentParamsValidation, CommentSchema
 
@@ -64,39 +64,4 @@ def web_hook_tele():
     return 'OK', 200
 
 
-def tele_start(chat_id, content):
-    user = User.query.filter_by(user_tele_id=content).first()
-    user.chat_tele_id = chat_id
 
-    User.query.filter(
-        User.id != user.id,
-        User.chat_tele_id == chat_id
-    ).update({User.chat_tele_id: None})
-    db.session.flush()
-    db.session.commit()
-
-    MESSAGE = 'Bạn đã xác thực tài khoản thành công, từ giờ bạn sẽ nhận thông báo đến tele của bạn.'
-
-    sendMessage(chat_id, MESSAGE)
-
-def tele_about(chat_id, content):
-    print(f"Received message: {content}")
-
-def tele_search(chat_id, content):
-    user = User.query.filter_by(chat_tele_id=chat_id).first()
-    if not user:
-        MESSAGE = (f"Bạn chưa đăng ký tài khoản. Tạo tài khoản và sử dụng dịch vụ của chúng tôi. [Đăng ký ngay]({DevConfig.BASE_URL_WEBSITE}/register) "
-                   f"và /start ID_USER để kích hoạt bot")
-        sendMessage(chat_id, MESSAGE)
-        return 'Invalid chat', 200
-
-command_dict = {
-    '/start': tele_start,
-    '/about': tele_about,
-    '/search': tele_search
-}
-
-def sendMessage(chat_id, MESSAGE):
-    url = f"https://api.telegram.org/bot{DevConfig.TOKEN_BOT_TELE}/sendMessage"
-    payload = {"chat_id": chat_id, "text": MESSAGE}
-    requests.post(url, json=payload)

@@ -5,12 +5,13 @@ import random
 import re
 import string
 import urllib.parse
-from time import strftime
-from flask import request
 from marshmallow import fields, validate as validate_
 from pytz import timezone
-from .enums import TIME_FORMAT_LOG, ALLOWED_EXTENSIONS_IMG, MONGO_COLLECTION_STATISTIC_ATTENDANCE_USER
-from .extensions import mongo_db
+from .enums import ALLOWED_EXTENSIONS_IMG, MONGO_COLLECTION_STATISTIC_ATTENDANCE_USER
+from .extensions import mongo_db, db
+from .models import User
+from .settings import DevConfig
+import requests
 
 
 class FieldString(fields.String):
@@ -376,3 +377,41 @@ def save_attendance_data(user_id, data):
 
     except Exception:
         pass
+
+
+def tele_start(chat_id, content):
+    user = User.query.filter_by(user_tele_id=content).first()
+    user.chat_tele_id = chat_id
+
+    User.query.filter(
+        User.id != user.id,
+        User.chat_tele_id == chat_id
+    ).update({User.chat_tele_id: None})
+    db.session.flush()
+    db.session.commit()
+
+    MESSAGE = 'Bạn đã xác thực tài khoản thành công, từ giờ bạn sẽ nhận thông báo đến tele của bạn.'
+
+    sendMessage(chat_id, MESSAGE)
+
+def tele_about(chat_id, content):
+    print(f"Received message: {content}")
+
+def tele_search(chat_id, content):
+    user = User.query.filter_by(chat_tele_id=chat_id).first()
+    if not user:
+        MESSAGE = (f"Bạn chưa đăng ký tài khoản. Tạo tài khoản và sử dụng dịch vụ của chúng tôi. [Đăng ký ngay]({DevConfig.BASE_URL_WEBSITE}/register) "
+                   f"và /start ID_USER để kích hoạt bot")
+        sendMessage(chat_id, MESSAGE)
+        return 'Invalid chat', 200
+
+command_dict = {
+    '/start': tele_start,
+    '/about': tele_about,
+    '/search': tele_search
+}
+
+def sendMessage(chat_id, MESSAGE):
+    url = f"https://api.telegram.org/bot{DevConfig.TOKEN_BOT_TELE}/sendMessage"
+    payload = {"chat_id": chat_id, "text": MESSAGE}
+    requests.post(url, json=payload)
