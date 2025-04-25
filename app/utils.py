@@ -9,7 +9,7 @@ from marshmallow import fields, validate as validate_
 from pytz import timezone
 from .enums import ALLOWED_EXTENSIONS_IMG, MONGO_COLLECTION_STATISTIC_ATTENDANCE_USER, PROMPT_AI_ABOUT_US
 from .extensions import mongo_db, db
-from .generativeai import about_us
+from .generativeai import about_us, love_nhung
 from .settings import DevConfig
 import requests
 
@@ -380,9 +380,12 @@ def save_attendance_data(user_id, data):
 
 
 def tele_start(chat_id, content):
+
     from .models import User
 
     user = User.query.filter_by(user_tele_id=content).first()
+    if user is None:
+        return False
     user.chat_tele_id = chat_id
 
     User.query.filter(
@@ -408,20 +411,14 @@ def tele_about(chat_id, content):
     message = contact + ax
     sendMessage(chat_id, message)
 
-# def tele_search(chat_id, content):
-#     from .models import User
-#
-#     user = User.query.filter_by(chat_tele_id=chat_id).first()
-#     if not user:
-#         message = (f"Bạn chưa liên kết tài khoản (/start ID) để kích hoạt bot. Nếu chưa có tài khoản, "
-#                    f"tạo tài khoản và sử dụng dịch vụ của chúng tôi. [Đăng ký ngay]({DevConfig.BASE_URL_WEBSITE}/register)")
-#         sendMessage(chat_id, message)
-#         return 'Invalid chat', 200
+def tele_love(chat_id, content):
+    message = love_nhung()
+    sendMessage(chat_id, message)
 
 command_dict = {
     '/start': tele_start,
     '/about': tele_about,
-    # '/search': tele_search
+    '/secret': tele_love
 }
 
 def sendMessage(chat_id, message):

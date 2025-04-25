@@ -35,8 +35,12 @@ def web_hook_tele():
         print("Không có message")
         return 'Invalid message', 200
 
-    message = data['message']['text']
+    message_obj = data['message']
+
+    if 'text' not in message_obj:
+        return 'Unsupported message type', 200
     chat_id = data['message']['chat']['id']
+    message = data['message']['text']
 
     if not chat_id:
         return 'Invalid message', 200

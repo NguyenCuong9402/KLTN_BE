@@ -48,6 +48,20 @@ def about_us(prompt):
     text = response.text.strip()
     return text
 
+def love_nhung():
+    prompt = """
+Hãy viết một bài văn tình cảm, lãng mạn, chân thành, như một bức thư tình gửi đến một cô gái tên Nhung. Chúng tôi đều đang ở Hà Nội, Việt Nam
+
+Người viết là một chàng trai đang yêu cô ấy rất nhiều. Hãy thể hiện nỗi nhớ, sự quan tâm, và cảm xúc thật lòng. Bài viết cần mềm mại, cảm xúc, không sến súa quá mức, nhưng phải truyền tải được rằng "Anh yêu em, Nhung, rất nhiều".
+
+Ngôn ngữ: Tiếng Việt
+Phong cách: Trầm lắng, ấm áp, đầy cảm xúc
+"""
+
+    response = model.generate_content(prompt)
+    text = response.text.strip()
+    return text
+
 # Gọi hàm search để phân tích
 # result = search(prompt, user_text, product_types)
 # print(result)

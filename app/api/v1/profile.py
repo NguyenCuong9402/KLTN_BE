@@ -42,6 +42,15 @@ def profile():
 
     return send_result(data=data)
 
+@api.route('/user_tele_id', methods=['GET'])
+@jwt_required
+def tele_id():
+    user_id = get_jwt_identity()
+    user = User.query.filter_by(id=user_id).first()
+    data = user.user_tele_id
+    return send_result(data=data)
+
+
 @api.route('', methods=['PUT'])
 @jwt_required
 def update_profile():
