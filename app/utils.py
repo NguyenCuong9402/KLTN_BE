@@ -415,10 +415,16 @@ def tele_love(chat_id, content):
     message = love_nhung()
     sendMessage(chat_id, message)
 
+def tele_start(chat_id, content):
+    message = "Chào mừng bạn đến với chúng tôi"
+    sendMessage(chat_id, message)
+
+
 command_dict = {
     '/active': tele_active,
     '/about': tele_about,
-    '/secret': tele_love
+    '/secret': tele_love,
+    '/start': tele_start,
 }
 
 def sendMessage(chat_id, message):

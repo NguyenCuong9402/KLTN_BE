@@ -53,7 +53,7 @@ def love_nhung():
 Hãy viết một bài văn tình cảm, lãng mạn, chân thành, như một bức thư tình gửi đến một cô gái tên Nhung. Chúng tôi đều đang ở Hà Nội, Việt Nam
 
 Người viết là một chàng trai đang yêu cô ấy rất nhiều. Hãy thể hiện nỗi nhớ, sự quan tâm, và cảm xúc thật lòng. Bài viết cần mềm mại, cảm xúc, không sến súa quá mức, nhưng phải truyền tải được rằng "Anh yêu em, Nhung, rất nhiều".
-
+Hãy viết ngắn gọn xúc tích khoảng 100 chữ, dùng từ thân mật nhiều hơn. Nhung còn đang đi học chưa đi làm
 Ngôn ngữ: Tiếng Việt
 Phong cách: Trầm lắng, ấm áp, đầy cảm xúc
 """
