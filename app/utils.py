@@ -391,9 +391,9 @@ def tele_start(chat_id, content):
     db.session.flush()
     db.session.commit()
 
-    MESSAGE = 'Bạn đã xác thực tài khoản thành công, từ giờ bạn sẽ nhận thông báo đến tele của bạn.'
+    message = f"Bạn đã xác thực tài khoản thành công, từ giờ bạn sẽ nhận thông báo tài khoản {user.email} đến tele của bạn."
 
-    sendMessage(chat_id, MESSAGE)
+    sendMessage(chat_id, message)
 
 def tele_about(chat_id, content):
     print(f"Received message: {content}")
@@ -403,9 +403,9 @@ def tele_search(chat_id, content):
 
     user = User.query.filter_by(chat_tele_id=chat_id).first()
     if not user:
-        MESSAGE = (f"Bạn chưa đăng ký tài khoản. Tạo tài khoản và sử dụng dịch vụ của chúng tôi. [Đăng ký ngay]({DevConfig.BASE_URL_WEBSITE}/register) "
-                   f"và /start ID_USER để kích hoạt bot")
-        sendMessage(chat_id, MESSAGE)
+        message = (f"Bạn chưa liên kết tài khoản (/start ID) để kích hoạt bot. Nếu chưa có tài khoản, "
+                   f"tạo tài khoản và sử dụng dịch vụ của chúng tôi. [Đăng ký ngay]({DevConfig.BASE_URL_WEBSITE}/register)")
+        sendMessage(chat_id, message)
         return 'Invalid chat', 200
 
 command_dict = {
@@ -414,7 +414,7 @@ command_dict = {
     '/search': tele_search
 }
 
-def sendMessage(chat_id, MESSAGE):
+def sendMessage(chat_id, message):
     url = f"https://api.telegram.org/bot{DevConfig.TOKEN_BOT_TELE}/sendMessage"
-    payload = {"chat_id": chat_id, "text": MESSAGE}
+    payload = {"chat_id": chat_id, "text": message}
     requests.post(url, json=payload)
