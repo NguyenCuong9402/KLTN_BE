@@ -5,13 +5,12 @@ from marshmallow import ValidationError
 from sqlalchemy import desc, asc, or_
 from sqlalchemy_pagination import paginate
 
-from app.enums import TYPE_FILE_LINK
 from app.extensions import db
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.api.helper import send_result, send_error
-from app.models import Shipper
+from app.models import Shipper, PriceShip
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now
-from app.validator import ProductValidation, QueryParamsAllSchema, ShipperSchema
+from app.validator import ProductValidation, QueryParamsAllSchema, ShipperSchema, ShipperValidation
 
 api = Blueprint('manage/shipper', __name__)
 
@@ -20,14 +19,26 @@ api = Blueprint('manage/shipper', __name__)
 @jwt_required
 def new():
     try:
-
         json_req = request.get_json()
         json_body = trim_dict(json_req)
-        validator_input = ProductValidation()
+        validator_input = ShipperValidation()
         is_not_validate = validator_input.validate(json_body)
         if is_not_validate:
             return send_error(data=is_not_validate, message='Validate Error')
+        name = json_body.pop('name')
+        count = Shipper.query.count()
+        shipper = Shipper(id=str(uuid()), name=name, index=count)
 
+        db.session.add(shipper)
+        db.session.flush()
+        list_ship_prices= []
+        for region_id, price in json_body.items():
+            price_ship = PriceShip(
+                id=str(uuid()), price=price,
+                region_id=region_id, shipper_id=shipper.id
+            )
+            list_ship_prices.append(price_ship)
+        db.session.bulk_save_objects(list_ship_prices)
         db.session.commit()
         return send_result(message='Thành công')
 

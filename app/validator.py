@@ -288,6 +288,36 @@ class TypeProductValidation(BaseValidation):
         allow_none=True
     )
 
+class ShipperValidation(BaseValidation):
+    name = fields.String(
+        required=True,
+        error_messages={"required": "Tên đơn vị vận chuyển không được để trống."}
+    )
+
+    thu_do = fields.Integer(
+        required=True,
+        validate=validate.Range(min=1, error="Giá nội thành phải là số nguyên lớn hơn 0."),
+        error_messages={"required": "Giá nội thành không được để trống."}
+    )
+
+    mien_bac = fields.Integer(
+        required=True,
+        validate=validate.Range(min=1, error="Giá miền Bắc phải là số nguyên lớn hơn 0."),
+        error_messages={"required": "Giá miền Bắc không được để trống."}
+    )
+
+    mien_trung = fields.Integer(
+        required=True,
+        validate=validate.Range(min=1, error="Giá miền Trung phải là số nguyên lớn hơn 0."),
+        error_messages={"required": "Giá miền Trung không được để trống."}
+    )
+
+    mien_nam = fields.Integer(
+        required=True,
+        validate=validate.Range(min=1, error="Giá miền Nam phải là số nguyên lớn hơn 0."),
+        error_messages={"required": "Giá miền Nam không được để trống."}
+    )
+
 class ProductValidation(BaseValidation):
     files = fields.List(
         fields.Dict(
