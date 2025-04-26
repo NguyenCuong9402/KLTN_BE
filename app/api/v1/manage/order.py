@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from marshmallow import ValidationError
 from shortuuid import uuid
 from flask import Blueprint, request
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, or_
 from sqlalchemy_pagination import paginate
 
 from app.enums import STATUS_ORDER
@@ -107,7 +107,12 @@ def get_items():
             text_search = text_search.lower()
             text_search = escape_wildcard(text_search)
             text_search = "%{}%".format(text_search)
-            query = query.filter(Orders.id.ilike(text_search))
+            query = query.join(User).filter(
+                or_(
+                    Orders.id.ilike(text_search),
+                    User.email.ilike(text_search)
+                )
+            )
 
         column_sorted = getattr(Orders, order_by)
 
