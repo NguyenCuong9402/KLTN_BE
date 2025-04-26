@@ -59,9 +59,12 @@ def handle_notify(instance, action_detail_type, user_id, notify_type, action_typ
 
 def handle_article_notification(instance):
     user = User.query.filter_by(id=instance.user_id).first()
-
     if not user or user.group.is_staff or user.group.is_super_admin:
         return
+
+    if user.chat_tele_id:
+        message = f"Bạn vừa đăng bài viết mới #{instance.title}"
+        sendMessage(user.chat_tele_id, message)
 
     users = User.query.filter(User.group.has(is_staff=True)).all()
     for admin in users:
@@ -120,8 +123,15 @@ def handle_orders_notification(instance):
     user = User.query.filter_by(id=instance.user_id).first()
     if not user or user.group.is_staff or user.group.is_super_admin:
         return
-    users = User.query.filter(User.group.has(is_staff=True), User.id != instance.user_id).all()
-    for admin in users:
+    #Notify User
+    if user.chat_tele_id:
+        message = f"Bạn vừa đặt đơn hàng mới #{instance.id}"
+        sendMessage(user.chat_tele_id, message)
+
+
+    #Notify Admin
+    admins = User.query.filter(User.group.has(is_staff=True), User.id != instance.user_id).all()
+    for admin in admins:
         handle_notify(instance, CONTENT_TYPE["ORDERS"], admin.id, NOTIFY_TYPE["ORDERS"])
         if admin.chat_tele_id:
             message = f"Người dùng {user.email} đã đặt đơn hàng mới"
