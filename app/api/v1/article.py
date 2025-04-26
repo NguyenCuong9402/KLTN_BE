@@ -69,14 +69,18 @@ def remove_article(article_id):
         user_id = get_jwt_identity()
         user = User.query.filter(User.id == user_id).first()
         if user is None:
-            return send_error(message='User not found', code=404)
-        artice = Article.query.filter(Article.id == article_id, user.id == user.id)
-        if artice.first() is None:
-            return send_error(message='Article not found', code=404)
-        artice.delete()
-        db.session.flush()
-        db.session.commit()
-        return send_result(message="Xóa bài viết thành công")
+            return send_error(message='User not found')
+        artice = Article.query.filter(Article.id == article_id).first()
+        if artice is None:
+            return send_error(message='Bài viết không tồn tại')
+
+        if artice.user_id == user.id or user.group.is_staff or user.group.is_super_admin:
+            Article.query.filter(Article.id == article_id).delete()
+            db.session.flush()
+            db.session.commit()
+            return send_result(message="Xóa bài viết thành công")
+        else:
+            return send_error(message='Bạn không có quyền')
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))
