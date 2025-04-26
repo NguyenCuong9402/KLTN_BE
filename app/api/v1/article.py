@@ -69,7 +69,7 @@ def remove_article(article_id):
         user_id = get_jwt_identity()
         user = User.query.filter(User.id == user_id).first()
         if user is None:
-            return send_error(message='User not found')
+            return send_error(message='Người dùng không tồn tại')
         artice = Article.query.filter(Article.id == article_id).first()
         if artice is None:
             return send_error(message='Bài viết không tồn tại')
