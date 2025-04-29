@@ -22,8 +22,8 @@ class DevConfig(Config):
 
     # app config
     ENV = os.environ.get("ENV", "dev")
-    DEBUG = True
-    DEBUG_TB_ENABLED = True  # Disable Debug toolbar
+    DEBUG = False if ENV == "dev" else False
+    DEBUG_TB_ENABLED = DEBUG  # Disable Debug toolbar
     TEMPLATES_AUTO_RELOAD = True
     HOST = '0.0.0.0'
 

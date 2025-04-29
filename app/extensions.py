@@ -58,3 +58,4 @@ mongo_db = pymongo.MongoClient(CONFIG.MONGO_CONN, serverSelectionTimeoutMS=5000)
 
 # scheduler
 scheduler = BackgroundScheduler(timezone="Asia/Ho_Chi_Minh")
+scheduler.start()
