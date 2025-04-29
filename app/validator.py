@@ -828,7 +828,7 @@ class OrderSchema(Schema):
     payment_online = fields.Nested(PaymentOnlineSchema)
     is_paid = fields.Boolean()
     user = fields.Nested(UserSchema(only=("id","email", "full_name")))
-
+    is_complaint = fields.Boolean()
 
 class NotifySchema(Schema):
     id = fields.String()

@@ -582,6 +582,16 @@ class Orders(db.Model):
         return False
 
     @property
+    def is_complaint(self):
+
+        report = OrderReport.query.filter_by(order_id=self.id, user_id=self.user_id).first()
+
+        if report is not None:
+            return True
+
+        return False
+
+    @property
     def address(self):
         data = {
             'province': '',
