@@ -12,16 +12,16 @@ class Config(object):
 class DevConfig(Config):
     """Development configuration."""
     env_prd = '.env.prd'
-    env_test = '.env.test'
+    env_dev = '.env.dev'
 
     build_prd = os.environ.get("BUILD_PRD", "False").lower() == "true"
 
-    name_file_env = env_prd if os.environ.get("BUILD_PRD", "False").lower() == "true" else env_test
+    name_file_env = env_prd if os.environ.get("BUILD_PRD", "False").lower() == "true" else env_dev
 
     load_dotenv(f"config/{name_file_env}", override=True)
 
     # app config
-    ENV = 'dev'
+    ENV = os.environ.get("ENV", "dev")
     DEBUG = True
     DEBUG_TB_ENABLED = True  # Disable Debug toolbar
     TEMPLATES_AUTO_RELOAD = True

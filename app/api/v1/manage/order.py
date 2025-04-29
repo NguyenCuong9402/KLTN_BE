@@ -35,6 +35,9 @@ def change_status(order_id):
         if status not in list(STATUS_ORDER.values()):
             return send_error(message='Status không đúng')
 
+        if status == STATUS_ORDER['DELIVERING']:
+            order.modified_date = get_timestamp_now()
+
         order.status = status
         db.session.flush()
         db.session.commit()

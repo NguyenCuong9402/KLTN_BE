@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
-from time import strftime
-
-from flask import Flask, request
+from flask import Flask
 from flask_cors import CORS
 
 from app.api.helper import CONFIG, send_result
 from app.extensions import jwt, db, red, mail, migrate, scheduler
 from .api import v1 as api_v1
-from .api.helper import send_error
-from .enums import TIME_FORMAT_LOG
-from .scheduler_task import backup_data, run_consumers_in_thread
+from .scheduler_task import backup_data, run_consumers_in_thread, resolved_orders
 import requests
 
 
@@ -29,13 +25,21 @@ def create_app(config_object=CONFIG):
     if config_object.ENABLE_RABBITMQ_CONSUMER:
         run_consumers_in_thread(app)
 
-    if config_object.BACKUP:
-        # Task Scheduler backup data runs every 2 week at 03:00:00pm
-        # scheduler.add_job(backup_data, trigger='cron', hour='15', minute='00', second='00')
-
-        # Test
-        scheduler.add_job(backup_data, trigger='cron', second=0)
-
+    try:
+        if config_object.ENV == 'prd':
+            scheduler.add_job(resolved_orders, trigger='cron', hour=0, minute=0)
+        else:
+            scheduler.add_job(resolved_orders, trigger='cron', second=0)
+    except:
+        print("Lỗi run resolved_orders")
+    try:
+        if config_object.BACKUP:
+            if config_object.ENV == 'prd':
+                scheduler.add_job(backup_data, trigger='cron', hour=1, minute=0)
+            else:
+                scheduler.add_job(backup_data, trigger='cron', second=0)
+    except:
+        print("Lỗi run backup_data")
 
     # Run webhook bot tele
     try:
