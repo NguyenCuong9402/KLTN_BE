@@ -35,7 +35,7 @@ def create_app(config_object=CONFIG):
 
     try:
         if config_object.ENV == 'prd':
-            scheduler.add_job(attendence, trigger='cron', hour=2, minute=0)
+            scheduler.add_job(attendence, trigger='cron', day=1 ,hour=2, minute=0)
         else:
             scheduler.add_job(attendence, trigger='cron', second=20)
     except:
