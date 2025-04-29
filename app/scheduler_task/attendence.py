@@ -1,11 +1,11 @@
-from datetime import timedelta, date, datetime
+from datetime import date, datetime
 
 from dateutil.relativedelta import relativedelta
-from sqlalchemy import and_, extract
-from app.enums import STATUS_ORDER, ATTENDANCE, WORK_UNIT_TYPE
+from sqlalchemy import extract
+from app.enums import ATTENDANCE, WORK_UNIT_TYPE
 from app.extensions import db
-from app.models import Orders, User, Attendance
-from app.utils import get_datetime_now, save_attendance_data, find_attendance_data
+from app.models import User, Attendance
+from app.utils import save_attendance_data, find_attendance_data
 from threading import Thread
 
 def __thread_attendance():

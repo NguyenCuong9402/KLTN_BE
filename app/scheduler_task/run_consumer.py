@@ -1,8 +1,7 @@
 import os
 import threading
 
-from app.message_broker import (RabbitMQConsumerSendMailConsumer, RabbitMQConsumerGenerateReportConsumer,
-                                RabbitMQConsumerStatisticsConsumer)
+from app.message_broker import (RabbitMQConsumerSendMailConsumer)
 
 
 def start_consumers_in_single_thread(app):
@@ -14,8 +13,6 @@ def start_consumers_in_single_thread(app):
         # Tạo các consumer
         consumers = [
             RabbitMQConsumerSendMailConsumer(),
-            # RabbitMQConsumerGenerateReportConsumer(),
-            # RabbitMQConsumerStatisticsConsumer()
         ]
 
         # Chạy các consumer trong app context
