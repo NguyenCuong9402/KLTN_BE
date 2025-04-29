@@ -29,7 +29,6 @@ def __thread_attendance():
             existing_data = find_attendance_data(user.id, time_str)
             if existing_data:
                 continue
-
             attendances = Attendance.query.filter(
                 Attendance.user_id == user.id,
                 extract("month", Attendance.work_date) == month,
