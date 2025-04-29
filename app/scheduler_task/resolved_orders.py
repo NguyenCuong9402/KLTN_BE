@@ -8,6 +8,7 @@ from app.utils import get_datetime_now
 from threading import Thread
 
 def __thread_resolved_orders():
+    print("Running __thread_resolved_orders")
     with db.app.app_context():
         fourteen_days_ago = int((get_datetime_now() - timedelta(days=14)).timestamp())
 

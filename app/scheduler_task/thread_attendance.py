@@ -9,6 +9,7 @@ from app.utils import save_attendance_data, find_attendance_data
 from threading import Thread
 
 def __thread_attendance():
+    print("Running thread attendance")
     with db.app.app_context():
         today = date.today()
         # Tháng trước của hiện tại
