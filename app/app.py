@@ -29,6 +29,8 @@ def create_app(config_object=CONFIG):
         if config_object.ENV == 'prd':
             scheduler.add_job(resolved_orders, trigger='cron', hour=0, minute=0)
         else:
+            print("Running __thread_resolved_orders")
+
             scheduler.add_job(resolved_orders, trigger='cron', second=0)
     except Exception as ex:
         print("Lỗi Run thread Resolved", str(ex))
@@ -37,6 +39,8 @@ def create_app(config_object=CONFIG):
         if config_object.ENV == 'prd':
             scheduler.add_job(attendance, trigger='cron', day=1 ,hour=2, minute=0)
         else:
+            print("Running __thread_attendance")
+
             scheduler.add_job(attendance, trigger='cron', second=20)
     except Exception as ex:
         print("Lỗi Run thread attendance", str(ex))
