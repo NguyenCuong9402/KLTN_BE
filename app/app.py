@@ -5,7 +5,7 @@ from flask_cors import CORS
 from app.api.helper import CONFIG, send_result
 from app.extensions import jwt, db, red, mail, migrate, scheduler
 from .api import v1 as api_v1
-from .scheduler_task import backup_data, run_consumers_in_thread, resolved_orders
+from .scheduler_task import backup_data, run_consumers_in_thread, resolved_orders, attendence
 import requests
 
 
@@ -32,12 +32,21 @@ def create_app(config_object=CONFIG):
             scheduler.add_job(resolved_orders, trigger='cron', second=0)
     except:
         print("Lỗi run resolved_orders")
+
+    try:
+        if config_object.ENV == 'prd':
+            scheduler.add_job(attendence, trigger='cron', hour=2, minute=0)
+        else:
+            scheduler.add_job(attendence, trigger='cron', second=20)
+    except:
+        print("Lỗi run resolved_orders")
+
     try:
         if config_object.BACKUP:
             if config_object.ENV == 'prd':
-                scheduler.add_job(backup_data, trigger='cron', hour=1, minute=0)
+                scheduler.add_job(backup_data, trigger='cron', hour=3, minute=0)
             else:
-                scheduler.add_job(backup_data, trigger='cron', second=0)
+                scheduler.add_job(backup_data, trigger='cron', second=40)
     except:
         print("Lỗi run backup_data")
 
