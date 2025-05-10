@@ -128,7 +128,7 @@ def put_item_to_cart(cart_id):
         return send_error(message=str(ex), code=442)
 
 
-@api.route("/delete", methods=["DELETE"])
+@api.route("", methods=["DELETE"])
 @jwt_required
 def remove_item():
     try:
