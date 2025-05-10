@@ -34,6 +34,8 @@
 ```
 
 - Cài đặt ngrok -> Sau đó bật ngrok chạy lệnh: ( Chỉ cần khi test phần thanh toán QR)
+sudo nginx -s reload
+
  + ngrok http 5012
  + Thấy dòng https://599e-42-112-72-4.ngrok-free.app -> http://localhost:5012
 - Đặt env:( Chỉ cần khi test phần thanh toán QR)
@@ -41,6 +43,7 @@
      
 - run file Server.py
 ```
+
 
 
 
