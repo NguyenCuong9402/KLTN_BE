@@ -76,9 +76,6 @@ def check_out():
         if user is None:
             return send_error(message='Tài khoản không tồn tại ')
 
-        if user.group.key in KEY_GROUP_NOT_STAFF:
-            return send_error(message='Tài khoản không có quyền')
-
         today = date.today()
         now = datetime.now().time()
 
@@ -114,9 +111,6 @@ def timekeeping():
 
         if user is None:
             return send_error(message="Tài khoản không tồn tại")
-
-        if user.group.key in KEY_GROUP_NOT_STAFF:
-            return send_error(message="Tài khoản không có quyền")
 
         # Lấy tham số thời gian (mm-yyyy)
         time_str = request.args.get("time_str", type=str)
@@ -157,9 +151,6 @@ def time_check():
 
         if user is None:
             return send_error(message="Tài khoản không tồn tại")
-
-        if user.group.key in KEY_GROUP_NOT_STAFF:
-            return send_error(message="Tài khoản không có quyền")
 
         # Truy vấn danh sách Attendance
         attendances = Attendance.query.filter(
