@@ -14,8 +14,6 @@ class DevConfig(Config):
     env_prd = '.env.prd'
     env_dev = '.env.test'
 
-    build_prd = os.environ.get("BUILD_PRD", "False").lower() == "true"
-
     name_file_env = env_prd if os.environ.get("BUILD_PRD", "False").lower() == "true" else env_dev
 
     load_dotenv(f"config/{name_file_env}", override=True)
@@ -44,7 +42,6 @@ class DevConfig(Config):
     BK_PASSWORD_MYSQL = os.environ.get('BK_PASSWORD_MYSQL', "cuong942002")
     BK_DBNAME_MYSQL = os.environ.get('BK_DBNAME_MYSQL', "dev_kltn")
     SQLALCHEMY_DATABASE_URI = f'mysql://{BK_USERNAME_MYSQL}:{BK_PASSWORD_MYSQL}@{BK_HOST_MYSQL}:{BK_PORT_MYSQL}/{BK_DBNAME_MYSQL}?charset=utf8mb4'
-
 
     # redis config
     REDIS_HOST = os.environ.get('REDIS_HOST', "localhost")
