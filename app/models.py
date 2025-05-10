@@ -300,8 +300,8 @@ class Permission(db.Model):
     __tablename__ = 'permission'
 
     id = db.Column(db.String(50), primary_key=True)
-    key = db.Column(db.String(100), nullable=False)
-    name = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=False, unique=False)
+    # key = db.Column(db.String(100), nullable=False)
+    # name = db.Column(db.String(100, collation="utf8mb4_vietnamese_ci"), nullable=False, unique=False)
     resource = db.Column(db.String(500), nullable=False, unique=False)
 
 

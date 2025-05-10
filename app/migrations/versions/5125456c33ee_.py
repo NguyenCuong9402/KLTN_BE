@@ -71,8 +71,6 @@ def upgrade():
     op.create_index(op.f('ix_group_created_date'), 'group', ['created_date'], unique=False)
     op.create_table('permission',
     sa.Column('id', sa.String(length=50), nullable=False),
-    sa.Column('key', sa.String(length=100), nullable=False),
-    sa.Column('name', sa.String(length=100, collation='utf8mb4_vietnamese_ci'), nullable=False),
     sa.Column('resource', sa.String(length=500), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
