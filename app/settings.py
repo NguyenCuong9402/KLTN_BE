@@ -12,7 +12,7 @@ class Config(object):
 class DevConfig(Config):
     """Development configuration."""
     env_prd = '.env.prd'
-    env_dev = '.env.dev'
+    env_dev = '.env.test'
 
     build_prd = os.environ.get("BUILD_PRD", "False").lower() == "true"
 

@@ -13,8 +13,8 @@ services:
       - --default-authentication-plugin=mysql_native_password
       - --bind-address=0.0.0.0
       - --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
-    volumes:
-      - test-db-data:/var/lib/mysql
+#    volumes:
+#      - test-db-data:/var/lib/mysql
     networks:
       - test-kltn
   rabbitmq:
@@ -57,7 +57,7 @@ services:
     networks:
       - test-kltn
 volumes:
-  test-db-data:
+#  test-db-data:
   test-rabbitmq-data:
   test-mongo-db-data:
   test-cache:
