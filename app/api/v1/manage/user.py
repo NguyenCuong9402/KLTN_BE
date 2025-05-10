@@ -302,7 +302,7 @@ def remove_item():
         User.query.filter(User.id.in_(list_id)).delete()
         db.session.flush()
         db.session.commit()
-        return send_result(message="Xóa sản phẩm thành công")
+        return send_result(message="Xóa thành công")
     except Exception as ex:
         db.session.rollback()
         return send_error(message=str(ex))

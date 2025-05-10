@@ -38,9 +38,6 @@ def check_in():
         if user is None:
             return send_error(message='Tài khoản không tồn tại ')
 
-        if user.group.key in KEY_GROUP_NOT_STAFF:
-            return send_error(message='Tài khoản không có quyền')
-
         today = date.today()
         now = datetime.now().time()
 
