@@ -12,6 +12,7 @@ from app.api.helper import get_permissions, CONFIG, send_email_template, get_rol
     get_user_id_request
 from app.api.helper import send_error, send_result
 from app.extensions import jwt, db
+from app.gateway import authorization_require
 from app.models import User, Address, Article, Community
 from app.utils import trim_dict, get_timestamp_now, data_preprocessing, generate_random_number_string, \
     body_mail, escape_wildcard
@@ -43,7 +44,7 @@ def profile():
     return send_result(data=data)
 
 @api.route('/user_tele_id', methods=['GET'])
-@jwt_required
+@authorization_require()
 def tele_id():
     user_id = get_jwt_identity()
     user = User.query.filter_by(id=user_id).first()
@@ -52,7 +53,7 @@ def tele_id():
 
 
 @api.route('', methods=['PUT'])
-@jwt_required
+@authorization_require()
 def update_profile():
     try:
         user_id = get_jwt_identity()
@@ -172,7 +173,7 @@ def get_articles():
 
 
 @api.route('/update_avatar', methods=['PUT'])
-@jwt_required
+@authorization_require()
 def update_avatar():
     user_id = get_jwt_identity()
 

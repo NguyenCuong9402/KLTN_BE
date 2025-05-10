@@ -9,6 +9,7 @@ from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
 from app.enums import STATUS_ORDER
+from app.gateway import authorization_require
 from app.models import db, Product, User, Orders, Notify, NotifyDetail
 from app.utils import escape_wildcard
 from app.validator import OrderSchema, QueryParamsOrderSchema, NotifySchema, QueryNotifyParamsSchema, \
@@ -17,7 +18,7 @@ from app.validator import OrderSchema, QueryParamsOrderSchema, NotifySchema, Que
 api = Blueprint('notify', __name__)
 
 @api.route("/<notify_id>", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_item(notify_id):
     try:
         user_id = get_jwt_identity()
@@ -38,7 +39,7 @@ def get_item(notify_id):
         return send_error(message=str(ex))
 
 @api.route("/last_seen", methods=["GET"])
-@jwt_required
+@authorization_require()
 def last_seen():
     user_id = get_jwt_identity()
     user = User.query.filter_by(id=user_id).first()
@@ -61,7 +62,7 @@ def last_seen():
         return send_error(message=str(ex))
 
 @api.route("/number_unread", methods=["GET"])
-@jwt_required
+@authorization_require()
 def number_unread():
     try:
         user_id = get_jwt_identity()
@@ -81,7 +82,7 @@ def number_unread():
         return send_error(message=str(ex))
 
 @api.route("", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_items():
     try:
         user_id = get_jwt_identity()

@@ -9,6 +9,7 @@ from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
 from app.enums import STATUS_ORDER
+from app.gateway import authorization_require
 from app.models import db, Product, User, Orders
 from app.utils import escape_wildcard
 from app.validator import OrderSchema, QueryParamsOrderSchema
@@ -16,7 +17,7 @@ from app.validator import OrderSchema, QueryParamsOrderSchema
 api = Blueprint('order', __name__)
 
 @api.route("/<order_id>", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_item(order_id):
     try:
         user_id = get_jwt_identity()
@@ -32,7 +33,7 @@ def get_item(order_id):
         return send_error(message=str(ex))
 
 @api.route("", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_items():
     try:
         user_id = get_jwt_identity()
@@ -83,7 +84,7 @@ def get_items():
 
 
 @api.route('/<order_id>', methods=['PUT'])
-@jwt_required
+@authorization_require()
 def complete_order(order_id):
     try:
         user_id = get_jwt_identity()

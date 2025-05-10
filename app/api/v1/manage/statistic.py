@@ -10,6 +10,7 @@ from sqlalchemy import asc, desc, func
 from app.api.helper import send_result, send_error
 from app.enums import KEY_GROUP_NOT_STAFF, STATUS_ORDER, ATTENDANCE, WORK_UNIT_TYPE
 from app.extensions import db
+from app.gateway import authorization_require
 from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems, Files, FileLink, \
     Attendance
 from app.utils import find_attendance_data, save_attendance_data
@@ -19,7 +20,7 @@ api = Blueprint('statistic', __name__)
 
 
 @api.route('/number_product_by_type', methods=['GET'])
-@jwt_required
+@authorization_require()
 def get_number_product_by_type():
     try:
 
@@ -57,7 +58,7 @@ def get_number_product_by_type():
 
 
 @api.route('', methods=['GET'])
-@jwt_required
+@authorization_require()
 def statistic_all():
     try:
         data = {
@@ -75,7 +76,7 @@ def statistic_all():
 
 
 @api.route('/top_customer', methods=['GET'])
-@jwt_required
+@authorization_require()
 def top_customer():
     try:
         now_dt = datetime.now(timezone.utc)
@@ -108,7 +109,7 @@ def top_customer():
 
 
 @api.route('/process_orders', methods=['GET'])
-@jwt_required
+@authorization_require()
 def process_orders():
     try:
         # Lấy timestamp của 1 tháng trước chính xác
@@ -158,7 +159,7 @@ def process_orders():
 
 
 @api.route('/revenue_and_sold_product_by_type', methods=['GET'])
-@jwt_required
+@authorization_require()
 def get_number_by_type_product_6_month_ago():
     try:
         month = request.args.get('month', 12, type=int)
@@ -248,7 +249,7 @@ def get_number_by_type_product_6_month_ago():
 
 
 @api.route('/number_user_by_age_and_gender', methods=['GET'])
-@jwt_required
+@authorization_require()
 def number_user_by_age_and_gender():
     try:
         today = func.curdate()  # Lấy ngày hiện tại từ MySQL
@@ -298,7 +299,7 @@ def number_user_by_age_and_gender():
         return send_error(message=str(ex))
 
 @api.route('/top_product', methods=['GET'])
-@jwt_required
+@authorization_require()
 def top_product():
     try:
         now_dt = datetime.now(timezone.utc)
@@ -336,7 +337,7 @@ def top_product():
 
 ## Thống kê số lần đi muộn, về sớm. Số công/Tháng
 @api.route('/attendance', methods=['GET'])
-@jwt_required
+@authorization_require()
 def statistic_attendance():
     try:
         user_id = get_jwt_identity()

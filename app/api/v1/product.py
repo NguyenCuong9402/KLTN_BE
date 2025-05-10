@@ -16,6 +16,7 @@ from werkzeug.utils import secure_filename
 
 from app.api.helper import send_result, send_error
 from app.enums import PROMPT_AI
+from app.gateway import authorization_require
 from app.generativeai import search_ai
 from app.models import db, Product, TypeProduct
 from app.settings import DevConfig
@@ -98,7 +99,7 @@ def get_items():
 
 
 @api.route("/search_by_ai", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_items_ai():
     try:
 

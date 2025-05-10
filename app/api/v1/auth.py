@@ -7,7 +7,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, get_raw_jwt, jwt_refresh_token_required, jwt_required)
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.enums import ADMIN_EMAIL, MAIL_VERITY_CODE, GROUP_KEY_PARAM, GROUP_ADMIN_KEY, GROUP_USER_KEY, \
+from app.enums import GROUP_KEY_PARAM, GROUP_ADMIN_KEY, GROUP_USER_KEY, \
     TYPE_ACTION_SEND_MAIL
 from app.api.helper import get_permissions, CONFIG, send_email_template, get_roles_key, Token, convert_to_datetime, \
     get_user_id_request
@@ -15,10 +15,9 @@ from app.api.helper import send_error, send_result, Token
 from app.extensions import jwt, db
 from app.gateway import authorization_require
 from app.message_broker import RabbitMQProducerSendMail
-from app.models import User, EmailTemplate, VerityCode, GroupRole, Group, Address
+from app.models import User, VerityCode, Group
 from app.settings import DevConfig
-from app.utils import trim_dict, get_timestamp_now, data_preprocessing, generate_random_number_string, \
-    body_mail
+from app.utils import trim_dict, get_timestamp_now, data_preprocessing, generate_random_number_string
 from app.extensions import mail
 
 from app.validator import UserSchema, AuthValidation, PasswordValidation, RegisterValidation
@@ -91,15 +90,15 @@ def login():
         if user.finish_date:
             if user.finish_date <= current_date:
                 return send_error(message='Tài khoản đã hết thời gian làm việc.')
-    # list_permission = get_permissions(user)
+    list_permission = get_permissions(user)
 
     access_token = create_access_token(identity=user.id, expires_delta=ACCESS_EXPIRES, )
     refresh_token = create_refresh_token(identity=user.id, expires_delta=REFRESH_EXPIRES)
 
     # Store the tokens in our store with a status of not currently revoked.
-    # Token.add_token_to_database(access_token, user.id)
-    # Token.add_token_to_database(refresh_token, user.id)
-    # Token.add_list_permission(user.id, list_permission)
+    Token.add_token_to_database(access_token, user.id)
+    Token.add_token_to_database(refresh_token, user.id)
+    Token.add_list_permission(user.id, list_permission)
 
     data: dict = UserSchema().dump(user)
     data.setdefault('access_token', access_token)
@@ -155,7 +154,7 @@ def refresh():
 
 
 @api.route('/logout', methods=['DELETE'])
-@jwt_required
+@authorization_require()
 def logout():
     """
     This api logout current user, revoke current access token
@@ -165,7 +164,7 @@ def logout():
     """
 
     jti = get_raw_jwt()['jti']
-    # Token.revoke_token(jti)
+    Token.revoke_token(jti)
 
     return send_result(message="Logout successfully!")
 
@@ -296,7 +295,7 @@ def send_code():
 
 
 @api.route('/change_password', methods=['PUT'])
-@jwt_required
+@authorization_require()
 def change_password():
     try:
         user_id = get_jwt_identity()
@@ -388,19 +387,19 @@ def revoked_token_callback():
     return send_error(code=401, message_id='SESSION_TOKEN_EXPIRED', message='Token hết hạn')
 
 
-# @jwt.token_in_blacklist_loader
-# def check_if_token_is_revoked(decrypted_token):
-#     """
-#     :param decrypted_token:
-#     :return:
-#     """
-#     return Token.is_token_revoked(decrypted_token)
-
-### Để tạm
-jwt_blocklist = set()
-
-# Kiểm tra nếu token nằm trong blocklist
 @jwt.token_in_blacklist_loader
-def check_if_token_in_blacklist(decrypted_token):
-    jti = decrypted_token["jti"]
-    return jti in jwt_blocklist
+def check_if_token_is_revoked(decrypted_token):
+    """
+    :param decrypted_token:
+    :return:
+    """
+    return Token.is_token_revoked(decrypted_token)
+
+# ### Để tạm
+# jwt_blocklist = set()
+#
+# # Kiểm tra nếu token nằm trong blocklist
+# @jwt.token_in_blacklist_loader
+# def check_if_token_in_blacklist(decrypted_token):
+#     jti = decrypted_token["jti"]
+#     return jti in jwt_blocklist

@@ -8,6 +8,7 @@ from sqlalchemy_pagination import paginate
 from app.extensions import db
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.api.helper import send_result, send_error
+from app.gateway import authorization_require
 from app.models import Shipper, PriceShip
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now
 from app.validator import ProductValidation, QueryParamsAllSchema, ShipperSchema, ShipperValidation
@@ -16,7 +17,7 @@ api = Blueprint('manage/shipper', __name__)
 
 
 @api.route('', methods=['POST'])
-@jwt_required
+@authorization_require()
 def new():
     try:
         json_req = request.get_json()
@@ -48,7 +49,7 @@ def new():
 
 
 @api.route("/<ship_id>", methods=["DELETE"])
-@jwt_required
+@authorization_require()
 def remove_item(ship_id):
     try:
         Shipper.query.filter(Shipper.id == ship_id).update({"is_delete": True}, synchronize_session=False)
@@ -62,7 +63,7 @@ def remove_item(ship_id):
 
 
 @api.route("/<ship_id>", methods=["PUT"])
-@jwt_required
+@authorization_require()
 def update_item(ship_id):
     try:
 

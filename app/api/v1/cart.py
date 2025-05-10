@@ -8,6 +8,7 @@ from datetime import datetime
 from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
+from app.gateway import authorization_require
 from app.models import CartItems, db, User
 from app.utils import trim_dict, get_timestamp_now
 from app.validator import QueryParamsAllSchema, CartSchema, CartValidation, CartUpdateValidation
@@ -16,7 +17,7 @@ api = Blueprint('cart', __name__)
 
 
 @api.route('', methods=['POST'])
-@jwt_required
+@authorization_require()
 def add_item_to_cart():
     try:
         user_id = get_jwt_identity()
@@ -47,7 +48,7 @@ def add_item_to_cart():
 
 
 @api.route("", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_items_in_cart():
     try:
         user_id=get_jwt_identity()
@@ -82,7 +83,7 @@ def get_items_in_cart():
         return send_error(message=str(ex))
 
 @api.route('/<cart_id>', methods=['PUT'])
-@jwt_required
+@authorization_require()
 def put_item_to_cart(cart_id):
     try:
         user_id = get_jwt_identity()
@@ -129,7 +130,7 @@ def put_item_to_cart(cart_id):
 
 
 @api.route("", methods=["DELETE"])
-@jwt_required
+@authorization_require()
 def remove_item():
     try:
         user_id = get_jwt_identity()

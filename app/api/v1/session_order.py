@@ -6,6 +6,7 @@ from sqlalchemy import asc, desc
 
 from app.api.helper import send_result, send_error
 from app.enums import regions, TYPE_PAYMENT_ONLINE
+from app.gateway import authorization_require
 from app.models import db, User, SessionOrder, SessionOrderCartItems, Orders, OrderItems, CartItems, AddressOrder, \
     PriceShip, Shipper, PaymentOnline
 from app.signal import handle_orders_notification
@@ -17,7 +18,7 @@ api = Blueprint('session_order', __name__)
 
 
 @api.route('', methods=['POST'])
-@jwt_required
+@authorization_require()
 def add_item_to_session():
     try:
         user_id = get_jwt_identity()
@@ -50,7 +51,7 @@ def add_item_to_session():
 
 
 @api.route("/<session_id>", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_items_in_session(session_id):
     try:
         address_order_id = request.args.get('address_order_id', None)
@@ -107,7 +108,7 @@ def get_items_in_session(session_id):
         return send_error(message=str(ex))
 
 @api.route("/update_ship/<session_id>", methods=["PUT"])
-@jwt_required
+@authorization_require()
 def update_ship_in_session(session_id):
     try:
         user_id=get_jwt_identity()
@@ -165,7 +166,7 @@ def update_ship_in_session(session_id):
         return send_error(message=str(ex))
 
 @api.route("/<session_id>", methods=["POST"])
-@jwt_required
+@authorization_require()
 def order_session(session_id):
     try:
         user_id=get_jwt_identity()

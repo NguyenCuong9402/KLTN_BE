@@ -12,6 +12,7 @@ from app.enums import STATUS_ORDER
 from app.extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helper import send_result, send_error
+from app.gateway import authorization_require
 from app.models import Orders, User
 from app.signal import handle_ship_orders_notification
 from app.utils import escape_wildcard, get_timestamp_now, get_datetime_now
@@ -21,7 +22,7 @@ api = Blueprint('manage/order', __name__)
 
 
 @api.route('/<order_id>', methods=['PUT'])
-@jwt_required
+@authorization_require()
 def change_status(order_id):
     try:
         body_request = request.get_json()
@@ -55,7 +56,7 @@ def change_status(order_id):
 
 
 @api.route("/<order_id>", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_item(order_id):
     try:
         user_id = get_jwt_identity()
@@ -68,7 +69,7 @@ def get_item(order_id):
         return send_error(message=str(ex))
 
 @api.route("", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_items():
     try:
         try:

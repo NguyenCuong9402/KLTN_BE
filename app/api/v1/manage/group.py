@@ -9,6 +9,7 @@ from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
 from app.enums import KEY_GROUP_NOT_STAFF
+from app.gateway import authorization_require
 from app.models import Group
 from app.utils import trim_dict, escape_wildcard
 from app.validator import GroupSchema, QueryParamsAllSchema
@@ -16,7 +17,7 @@ from app.validator import GroupSchema, QueryParamsAllSchema
 api = Blueprint('group', __name__)
 
 @api.route("/<group_id>", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_item(group_id):
     try:
         item = Group.query.filter(Group.id == group_id).first()
@@ -28,7 +29,7 @@ def get_item(group_id):
         return send_error(message=str(ex))
 
 @api.route("", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_items():
     try:
 

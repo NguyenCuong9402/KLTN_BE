@@ -10,6 +10,7 @@ from datetime import datetime
 import json, hmac, hashlib
 import requests
 
+from app.gateway import authorization_require
 from app.models import PaymentOnline, User, SessionOrder, Shipper, AddressOrder, PriceShip
 from app.utils import get_timestamp_now, trim_dict
 from app.validator import ProductValidation, PaymentValidation, PaymentOnlineSchema
@@ -141,7 +142,7 @@ def check_payment(payment_id):
 
 
 @api.route("/session/<session_id>", methods=['GET'])
-@jwt_required
+@authorization_require()
 def check_payment_session(session_id):
     try:
         user_id = get_jwt_identity()
@@ -162,7 +163,7 @@ def check_payment_session(session_id):
 
 #momo create payment
 @api.route("/<session_id>", methods=['POST'])
-@jwt_required
+@authorization_require()
 def create_payment(session_id):
     try:
         user_id = get_jwt_identity()

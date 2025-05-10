@@ -8,6 +8,7 @@ from app.enums import TYPE_FILE_LINK, REPORT_ORDER_TYPE
 from app.extensions import db
 
 from app.api.helper import send_result, send_error
+from app.gateway import authorization_require
 from app.models import FileLink, OrderReport, User
 from app.utils import trim_dict, get_timestamp_now, escape_wildcard
 from app.validator import ReportValidation, OrderReportSchema, QueryParamsOrderSchema
@@ -16,7 +17,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 api = Blueprint('report', __name__)
 
 @api.route("/<report_id>", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_item(report_id):
     try:
         item = OrderReport.query.filter(OrderReport.id == report_id).first()
@@ -29,7 +30,7 @@ def get_item(report_id):
 
 
 @api.route("/<report_id>", methods=["PUT"])
-@jwt_required
+@authorization_require()
 def put_item(report_id):
     try:
         item = OrderReport.query.filter(OrderReport.id == report_id).first()
@@ -51,7 +52,7 @@ def put_item(report_id):
         return send_error(message=str(ex))
 
 @api.route("", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_items():
     try:
         try:

@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 from app.api.helper import send_result, send_error
 from app.api.v1.file import FILE_ORIGIN
 from app.extensions import db
+from app.gateway import authorization_require
 from app.models import User, DocumentStorage, Files, StaffDocumentFile
 
 from app.validator import DocumentSchema, DocumentStaff
@@ -20,7 +21,7 @@ FOLDER = "/files/document/"
 
 
 @api.route("", methods=["GET"])
-@jwt_required
+@authorization_require()
 def danh_sach_document():
     try:
         documents = DocumentStorage.query.filter().order_by(asc(DocumentStorage.index)).all()
@@ -31,7 +32,7 @@ def danh_sach_document():
 
 
 @api.route("/<user_id>/<document_id>", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_item(user_id, document_id):
     try:
         user = User.query.filter_by(id=user_id).first()
@@ -54,7 +55,7 @@ def get_item(user_id, document_id):
 
 
 @api.route('/<user_id>/upload/<document_id>', methods=['POST'])
-@jwt_required
+@authorization_require()
 def upload_multi_file(user_id, document_id):
     try:
         user = User.query.filter_by(id=user_id).first()
@@ -103,7 +104,7 @@ def upload_multi_file(user_id, document_id):
 
 
 @api.route("/<document_id>", methods=["DELETE"])
-@jwt_required
+@authorization_require()
 def delete_item(document_id):
     try:
         user_id = get_jwt_identity()

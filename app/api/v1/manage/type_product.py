@@ -10,6 +10,7 @@ from sqlalchemy_pagination import paginate
 from app.extensions import db
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.api.helper import send_result, send_error
+from app.gateway import authorization_require
 from app.models import TypeProduct, Product
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now
 from app.validator import ProductValidation, ProductSchema, QueryParamsSchema, TypeProductValidation, \
@@ -19,7 +20,7 @@ api = Blueprint('manage/type_product', __name__)
 
 
 @api.route('', methods=['POST'])
-@jwt_required
+@authorization_require()
 def new():
     try:
 
@@ -50,7 +51,7 @@ def new():
 
 
 @api.route('/<id_type>', methods=['PUT'])
-@jwt_required
+@authorization_require()
 def put(id_type):
     try:
 
@@ -109,7 +110,7 @@ def check_coincided_key(key='', type_id=''):
 
 
 @api.route("", methods=["DELETE"])
-@jwt_required
+@authorization_require()
 def remove_item():
     try:
         body_request = request.get_json()
@@ -125,7 +126,7 @@ def remove_item():
         return send_error(message=str(ex))
 
 @api.route("/<type_id>", methods=["DELETE"])
-@jwt_required
+@authorization_require()
 def remove_item_id(type_id):
     try:
         Product.query.filter(Product.id == type_id).delete()

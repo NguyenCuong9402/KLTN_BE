@@ -10,6 +10,7 @@ from app.enums import LAYER_COMMENT
 from app.extensions import db
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request_optional
 from app.api.helper import send_result, send_error, get_user_id_request
+from app.gateway import authorization_require
 from app.models import User, Article, Comment
 from app.signal import handle_comment_notification
 from app.utils import trim_dict
@@ -19,7 +20,7 @@ api = Blueprint('comment', __name__)
 
 
 @api.route('', methods=['POST'])
-@jwt_required
+@authorization_require()
 def create_comment():
     try:
         user_id = get_jwt_identity()
@@ -59,7 +60,7 @@ def create_comment():
 
 
 @api.route("/<comment_id>", methods=["DELETE"])
-@jwt_required
+@authorization_require()
 def remove_comment(comment_id):
     try:
         user_id = get_jwt_identity()

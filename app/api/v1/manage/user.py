@@ -13,6 +13,7 @@ from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, ATTENDANCE, USER_KEY
 from app.extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helper import send_result, send_error, convert_to_datetime
+from app.gateway import authorization_require
 from app.models import User, Group, Files, Address, Attendance
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now, generate_password
 from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema, AttendanceSchema
@@ -22,7 +23,7 @@ api = Blueprint('manage/user', __name__)
 
 # Quan ly nhan vien
 @api.route('', methods=['POST'])
-@jwt_required
+@authorization_require()
 def new():
     try:
 
@@ -93,7 +94,7 @@ def new():
         return send_error(message=str(ex), code=442)
 
 @api.route('/<profile_id>', methods=['GET'])
-@jwt_required
+@authorization_require()
 def profile_staff(profile_id):
 
     user = User.query.filter_by(id=profile_id).first()
@@ -101,7 +102,7 @@ def profile_staff(profile_id):
     return send_result(data=data)
 
 @api.route('/<profile_id>', methods=['PUT'])
-@jwt_required
+@authorization_require()
 def update_staff(profile_id):
 
     json_req = request.get_json()
@@ -153,7 +154,7 @@ def update_staff(profile_id):
 
 
 @api.route("/active/<user_id>", methods=["PUT"])
-@jwt_required
+@authorization_require()
 def active_user(user_id):
     try:
         user = User.query.filter(User.id == user_id).first()
@@ -175,7 +176,7 @@ def active_user(user_id):
         return send_error(message=str(ex))
 
 @api.route("/staff", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_staff():
     try:
         try:
@@ -234,7 +235,7 @@ def get_staff():
 
 
 @api.route("/customer", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_customer():
     try:
         try:
@@ -291,7 +292,7 @@ def get_customer():
 
 
 @api.route("", methods=["DELETE"])
-@jwt_required
+@authorization_require()
 def remove_item():
     try:
         body_request = request.get_json()

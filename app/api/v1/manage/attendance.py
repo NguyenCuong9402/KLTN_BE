@@ -17,6 +17,7 @@ from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, ATTENDANCE, USER_KEY
 from app.extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helper import send_result, send_error, convert_to_datetime
+from app.gateway import authorization_require
 from app.models import User, Group, Files, Address, Attendance
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now, generate_password, find_attendance_data, \
     save_attendance_data
@@ -27,7 +28,7 @@ api = Blueprint('manage/attendance', __name__)
 
 # Nhan vien
 @api.route('/check_in', methods=['POST'])
-@jwt_required
+@authorization_require()
 def check_in():
     try:
         user_id = get_jwt_identity()
@@ -68,7 +69,7 @@ def check_in():
 
 
 @api.route('/check_out', methods=['POST'])
-@jwt_required
+@authorization_require()
 def check_out():
     try:
         user_id = get_jwt_identity()
@@ -108,7 +109,7 @@ def check_out():
 
 
 @api.route('/timekeeping', methods=['GET'])
-@jwt_required
+@authorization_require()
 def timekeeping():
     try:
         user_id = get_jwt_identity()
@@ -151,7 +152,7 @@ def timekeeping():
 
 
 @api.route('/time_check', methods=['GET'])
-@jwt_required
+@authorization_require()
 def time_check():
     try:
         user_id = get_jwt_identity()
@@ -185,7 +186,7 @@ def time_check():
 # Bảng chấm công
 
 @api.route("/timesheet", methods=["GET"])
-@jwt_required
+@authorization_require()
 def timesheet():
     try:
         try:
@@ -294,7 +295,7 @@ def timesheet():
 
 
 @api.route("/timesheet/export", methods=["GET"])
-@jwt_required
+@authorization_require()
 def export():
     try:
         try:

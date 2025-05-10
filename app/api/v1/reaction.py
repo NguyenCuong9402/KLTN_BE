@@ -4,6 +4,7 @@ from app.enums import TYPE_REACTION
 from app.extensions import db
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.api.helper import send_result, send_error
+from app.gateway import authorization_require
 from app.models import Reaction, Article, Comment
 from app.signal import handle_reaction_notification
 from app.utils import trim_dict, get_timestamp_now
@@ -13,7 +14,7 @@ api = Blueprint('reaction', __name__)
 
 
 @api.route('', methods=['POST'])
-@jwt_required
+@authorization_require()
 def toggle_reaction():
     try:
         user_id = get_jwt_identity()

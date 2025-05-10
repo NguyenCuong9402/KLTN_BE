@@ -4,6 +4,7 @@ from sqlalchemy import asc
 
 from app.api.helper import send_error, send_result, Token
 from app.enums import regions
+from app.gateway import authorization_require
 from app.models import Address, User, AddressOrder
 from shortuuid import uuid
 from app.extensions import jwt, db
@@ -37,7 +38,7 @@ def get_address():
 
 
 @api.route("", methods=["POST"])
-@jwt_required
+@authorization_require()
 def post_address_order():
     try:
         user_id = get_jwt_identity()
@@ -92,7 +93,7 @@ def post_address_order():
 
 
 @api.route("/address_order", methods=["GET"])
-@jwt_required
+@authorization_require()
 def get_address_order():
     try:
         user_id = get_jwt_identity()
@@ -114,7 +115,7 @@ def get_address_order():
 
 
 @api.route("/<address_order_id>", methods=["DELETE"])
-@jwt_required
+@authorization_require()
 def remove_item(address_order_id):
     try:
         user_id = get_jwt_identity()
@@ -149,7 +150,7 @@ def remove_item(address_order_id):
 
 
 @api.route("/<address_order_id>", methods=["PUT"])
-@jwt_required
+@authorization_require()
 def choose_default(address_order_id):
     try:
         user_id = get_jwt_identity()
