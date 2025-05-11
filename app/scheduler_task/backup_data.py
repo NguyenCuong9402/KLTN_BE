@@ -1,4 +1,5 @@
-from app.extensions import db, CONFIG, logger
+from app.extensions import db, CONFIG
+from app.settings import logger
 from app.utils import get_datetime_now
 from threading import Thread
 import os

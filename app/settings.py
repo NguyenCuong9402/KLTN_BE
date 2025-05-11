@@ -3,6 +3,9 @@ from dotenv import load_dotenv
 
 os_env = os.environ
 
+import logging
+logger = logging.getLogger('app')
+logger.setLevel(logging.DEBUG)
 
 class Config(object):
     SECRET_KEY = '3nF3Rn0'
@@ -53,7 +56,7 @@ class DevConfig(Config):
     BK_PASSWORD_MYSQL = os.environ.get('BK_PASSWORD_MYSQL', "cuong942002")
     BK_DBNAME_MYSQL = os.environ.get('BK_DBNAME_MYSQL', "dev_kltn")
     SQLALCHEMY_DATABASE_URI = f'mysql://{BK_USERNAME_MYSQL}:{BK_PASSWORD_MYSQL}@{BK_HOST_MYSQL}:{BK_PORT_MYSQL}/{BK_DBNAME_MYSQL}?charset=utf8mb4'
-    print(f"Database{SQLALCHEMY_DATABASE_URI}")
+    logger.info(f"Đã {SQLALCHEMY_DATABASE_URI}----------------------")
     # redis config
     REDIS_HOST = os.environ.get('REDIS_HOST', "localhost")
     REDIS_PORT = os.environ.get('REDIS_PORT', PORT_DEFAULT_REDIS)
