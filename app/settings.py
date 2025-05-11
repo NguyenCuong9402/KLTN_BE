@@ -112,3 +112,9 @@ class DevConfig(Config):
 
     TOKEN_BOT_TELE = os.environ.get("TOKEN_BOT_TELE", "7572579273:AAHnb4pnCs8OUthEP0tbJ68yB6v8uNT60Fw")
 
+
+    #Minios3
+    MINIO_ENDPOINT = os.environ.get("MINIO_ENDPOINT", "http://localhost:9000")
+    MINIO_ACCESS_KEY = os.environ.get("MINIO_ACCESS_KEY", "admin")
+    MINIO_SECRET_KEY = os.environ.get("MINIO_SECRET_KEY", "admin")
+    MINIO_BUCKET_NAME = os.environ.get("MINIO_BUCKET_NAME", "backup")
