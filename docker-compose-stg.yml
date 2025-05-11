@@ -56,21 +56,21 @@ services:
 #      - test-cache:/data
     networks:
       - test-kltn
-#  app:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile-multistage
-#    container_name: backend_app
-#    restart: always
-#    ports:
-#      - "5012:5012"
-#    networks:
-#      - test-kltn
-#    depends_on:
-#      - mongo
-#      - mysql
-#      - redis
-#      - rabbitmq
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile-multistage
+    container_name: backend_app
+    restart: always
+    ports:
+      - "5012:5012"
+    networks:
+      - test-kltn
+    depends_on:
+      - mongo
+      - mysql
+      - redis
+      - rabbitmq
 #volumes:
 #  test-db-data:
 #  test-rabbitmq-data:
