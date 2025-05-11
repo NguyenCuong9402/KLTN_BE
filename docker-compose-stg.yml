@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  mysql:
+  db:
     image: mysql:8.0
     container_name: mysql_container_stg
     restart: always
@@ -68,7 +68,7 @@ services:
       - stg-kltn
     depends_on:
       - mongo
-      - mysql
+      - db
       - redis
       - rabbitmq
     environment:
