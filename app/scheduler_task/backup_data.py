@@ -22,6 +22,8 @@ def __thread_backup():
         # zip folder backup
         backup_folder_name = f"backup_{str(get_datetime_now().date())}.zip"
         image_path = './app/files/backup'
+        os.makedirs(image_path, exist_ok=True)
+
         os.system(f"zip -r {backup_folder_name} {backup_dbsql_name} {backup_mongodb_name} {image_path}")
         # upload backup to s3
 
