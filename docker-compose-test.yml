@@ -27,8 +27,8 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: admin  # Tên đăng nhập mặc định
       RABBITMQ_DEFAULT_PASS: admin  # Mật khẩu mặc định
-    volumes:
-      - test-rabbitmq-data:/var/lib/rabbitmq
+#    volumes:
+#      - test-rabbitmq-data:/var/lib/rabbitmq
     networks:
       - test-kltn
   mongo:
@@ -41,8 +41,8 @@ services:
       MONGO_INITtest-db-dataBASE: dev-shop
     ports:
       - "27018:27017"
-    volumes:
-      - test-mongo-db-data:/data/db
+#    volumes:
+#      - test-mongo-db-data:/data/db
     networks:
       - test-kltn
   redis:
@@ -52,8 +52,8 @@ services:
     ports:
       - "6380:6379"
     command: redis-server --save 20 1 --loglevel warning
-    volumes:
-      - test-cache:/data
+#    volumes:
+#      - test-cache:/data
     networks:
       - test-kltn
   app:
@@ -71,10 +71,10 @@ services:
       - mysql
       - redis
       - rabbitmq
-volumes:
+#volumes:
 #  test-db-data:
-  test-rabbitmq-data:
-  test-mongo-db-data:
-  test-cache:
+#  test-rabbitmq-data:
+#  test-mongo-db-data:
+#  test-cache:
 networks:
   test-kltn:
