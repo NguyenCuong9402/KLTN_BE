@@ -59,7 +59,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-multistage
     container_name: backend_app
     restart: always
     ports:
