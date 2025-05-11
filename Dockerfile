@@ -4,7 +4,7 @@ FROM python:3.11
 RUN apt-get update && apt-get install -y \
     zip \
     tzdata \
-    default-mysql-client \  # chứa lệnh mysqldump
+    default-mysql-client \
     gnupg \
     curl \
     && rm -rf /var/lib/apt/lists/*
