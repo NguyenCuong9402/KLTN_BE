@@ -1,2 +1,2 @@
-from .consumer import RabbitMQConsumerStatisticsConsumer, RabbitMQConsumerSendMailConsumer, RabbitMQConsumerGenerateReportConsumer
-from .producer import RabbitMQProducerStatistics, RabbitMQProducerSendMail, RabbitMQProducerGenerateReport
+from .consumer import RabbitMQConsumerSendMailConsumer
+from .producer import RabbitMQProducerSendMail
