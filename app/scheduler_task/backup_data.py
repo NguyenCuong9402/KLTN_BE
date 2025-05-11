@@ -16,7 +16,7 @@ def __thread_backup():
         os.system(f"mongodump --uri=\"{uri}\" --out={backup_mongodb_name}")
 
         # zip folder backup
-        backup_folder_name = f"backup_fit_{str(get_datetime_now().date())}.zip"
+        backup_folder_name = f"backup_{str(get_datetime_now().date())}.zip"
         image_path = './app/files/backup'
         os.system(f"zip -r {backup_folder_name} {backup_dbsql_name} {backup_mongodb_name} {image_path}")
         # upload backup to s3
@@ -26,9 +26,9 @@ def __thread_backup():
         os.system(f"find {image_path} -type f -mtime +3 -exec rm {{}} \;")
 
         # remove backup local in docker
-        os.system(f"rm -rf {backup_mongodb_name}")
-        os.system(f"rm {backup_dbsql_name}")
-        os.system(f"rm {backup_folder_name}")
+        # os.system(f"rm -rf {backup_mongodb_name}")
+        # os.system(f"rm {backup_dbsql_name}")
+        # os.system(f"rm {backup_folder_name}")
 
 
 def backup_data():
