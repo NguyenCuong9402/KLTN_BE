@@ -4,11 +4,11 @@ import os
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
-from logging.handlers import RotatingFileHandler
 from flask_redis import Redis
 from flask_migrate import Migrate
 from apscheduler.schedulers.background import BackgroundScheduler
 import pymongo
+import logging
 
 from .settings import DevConfig
 CONFIG = DevConfig
@@ -40,8 +40,8 @@ mongo_db = pymongo.MongoClient(CONFIG.MONGO_CONN, serverSelectionTimeoutMS=5000)
 # formatter = logging.Formatter(
 #     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # create console handler with a higher log level
 # # logger
-# logger = logging.getLogger('api')
-# logger.setLevel(logging.DEBUG)
+logger = logging.getLogger('app')
+logger.setLevel(logging.DEBUG)
 # logger.addHandler(app_log_handler)
 # # logger for crawl
 #

@@ -1,8 +1,7 @@
-from app.extensions import db, CONFIG
+from app.extensions import db, CONFIG, logger
 from app.utils import get_datetime_now
 from threading import Thread
 import os
-import logger
 def __thread_backup():
     with db.app.app_context():
         # export mysql
