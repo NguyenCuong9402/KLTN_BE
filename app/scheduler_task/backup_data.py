@@ -14,8 +14,8 @@ def __thread_backup():
             image_path = './app/files/backup'
             os.makedirs(image_path, exist_ok=True)
 
-            backup_dbsql_name = os.path.join(image_path,
-                                             f"{CONFIG.BK_DBNAME_MYSQL}_{str(get_datetime_now().date())}.sql")
+            timestamp = get_datetime_now().strftime('%Y-%m-%d_%H-%M')
+            backup_dbsql_name = os.path.join(image_path, f"{CONFIG.BK_DBNAME_MYSQL}_{timestamp}.sql")
 
             os.system(f"mysqldump -c -P {CONFIG.BK_PORT_MYSQL} -h {CONFIG.BK_HOST_MYSQL} -u {CONFIG.BK_USERNAME_MYSQL} "
                       f"--password={CONFIG.BK_PASSWORD_MYSQL} {CONFIG.BK_DBNAME_MYSQL} > {backup_dbsql_name}")
