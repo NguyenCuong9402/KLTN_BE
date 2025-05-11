@@ -6,6 +6,7 @@ from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
 from app.models import Community, Article
+from app.settings import DevConfig
 from app.utils import escape_wildcard
 from app.validator import CommunitySchema, QueryParamsAllSchema, ArticleSchema
 
@@ -39,7 +40,7 @@ def get_all_community():
         )
         return send_result(data=response_data)
     except Exception as ex:
-        return send_error(message=str(ex))
+        return send_error(message=f"{DevConfig.SQLALCHEMY_DATABASE_URI}{str(ex)}")
 
 
 @api.route("/<community_id>", methods=["GET"])
