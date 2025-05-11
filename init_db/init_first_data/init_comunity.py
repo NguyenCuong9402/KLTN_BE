@@ -29,16 +29,7 @@ class Worker:
             {
                 'name': 'Sản phẩm mới',
                 'description': 'Nhóm đăng bài sản phẩm mới',
-            },
-            {
-                'name': 'Góc tham khảo',
-                'description': 'Dành cho người dùng tham khảo thời trang mới',
-            },
-            {
-                'name': 'Góc chia sẻ',
-                'description': 'Dành cho stylist chia sẻ thời trang mới',
-            },
-
+            }
         ]
         list_add_community= []
         for item in list_community:
