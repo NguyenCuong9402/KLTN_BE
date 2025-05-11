@@ -72,7 +72,7 @@ services:
       - redis
       - rabbitmq
     environment:
-      BUILD_PRD: ${BUILD_PRD}
+      ENV_NAME: ${ENV_NAME}
 volumes:
   db_data:
   rabbitmq_data:

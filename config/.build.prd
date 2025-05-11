@@ -1,1 +1,1 @@
-BUILD_PRD=true
+ENV_NAME=.env.prd

@@ -11,10 +11,8 @@ class Config(object):
 
 class DevConfig(Config):
     """Development configuration."""
-    env_prd = '.env.prd'
-    env_dev = '.env.test'
 
-    name_file_env = env_prd if os.environ.get("BUILD_PRD", "False").lower() == "true" else env_dev
+    name_file_env = os.environ.get("ENV_NAME", '.env.test')
 
     load_dotenv(f"config/{name_file_env}", override=True)
 
