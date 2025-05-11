@@ -22,16 +22,16 @@ class DevConfig(Config):
     # app config
     ENV = os.environ.get("ENV", "dev")
 
-    if ENV == 'prd':
-        PORT_DEFAULT_MYSQL = 3306
-        PORT_DEFAULT_REDIS = 6379
-        PORT_DEFAULT_MONGO = 27017
-        PORT_DEFAULT_RABBIT = 5672
-    else:
+    if ENV == 'env':
         PORT_DEFAULT_MYSQL = 3308
         PORT_DEFAULT_REDIS = 6380
         PORT_DEFAULT_MONGO = 27018
         PORT_DEFAULT_RABBIT = 5673
+    else:
+        PORT_DEFAULT_MYSQL = 3306
+        PORT_DEFAULT_REDIS = 6379
+        PORT_DEFAULT_MONGO = 27017
+        PORT_DEFAULT_RABBIT = 5672
 
 
     DEBUG = True if ENV == "dev" else False
