@@ -18,6 +18,19 @@ class DevConfig(Config):
 
     # app config
     ENV = os.environ.get("ENV", "dev")
+
+    if ENV == 'prd':
+        PORT_DEFAULT_MYSQL = 3306
+        PORT_DEFAULT_REDIS = 6379
+        PORT_DEFAULT_MONGO = 27017
+        PORT_DEFAULT_RABBIT = 5672
+    else:
+        PORT_DEFAULT_MYSQL = 3308
+        PORT_DEFAULT_REDIS = 6380
+        PORT_DEFAULT_MONGO = 27018
+        PORT_DEFAULT_RABBIT = 5673
+
+
     DEBUG = False if ENV == "dev" else False
     DEBUG_TB_ENABLED = DEBUG  # Disable Debug toolbar
     TEMPLATES_AUTO_RELOAD = True
@@ -35,7 +48,7 @@ class DevConfig(Config):
     TIME_ZONE = 'Asia/Ho_Chi_Minh'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     BK_HOST_MYSQL =  os.environ.get('BK_HOST_MYSQL', "localhost")
-    BK_PORT_MYSQL = os.environ.get('BK_PORT_MYSQL', "3306")
+    BK_PORT_MYSQL = os.environ.get('BK_PORT_MYSQL', PORT_DEFAULT_MYSQL)
     BK_USERNAME_MYSQL = os.environ.get('BK_USERNAME_MYSQL', "root")
     BK_PASSWORD_MYSQL = os.environ.get('BK_PASSWORD_MYSQL', "cuong942002")
     BK_DBNAME_MYSQL = os.environ.get('BK_DBNAME_MYSQL', "dev_kltn")
@@ -43,7 +56,7 @@ class DevConfig(Config):
 
     # redis config
     REDIS_HOST = os.environ.get('REDIS_HOST', "localhost")
-    REDIS_PORT = os.environ.get('REDIS_PORT', "6379")
+    REDIS_PORT = os.environ.get('REDIS_PORT', PORT_DEFAULT_REDIS)
     REDIS_DB = 2
     REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
 
@@ -63,7 +76,7 @@ class DevConfig(Config):
     # Config Mongodb
 
     BK_HOST_MONGODB = os.environ.get("BK_HOST_MONGODB", "localhost")
-    BK_PORT_MONGODB = os.environ.get("BK_PORT_MONGODB", "27017")
+    BK_PORT_MONGODB = os.environ.get("BK_PORT_MONGODB", PORT_DEFAULT_MONGO)
     BK_USERNAME_MONGODB = os.environ.get("BK_USERNAME_MONGODB", "root")
     BK_PASSWORD_MONGODB = os.environ.get("BK_PASSWORD_MONGODB", "admin-password")
     MONGO_DB = os.environ.get("MONGO_DB", "dev-shop")
@@ -85,7 +98,7 @@ class DevConfig(Config):
     EXCHANGE_TYPE = os.environ.get("EXCHANGE_TYPE", "direct")
 
     HOST_RABBIT = os.environ.get("HOST_RABBIT", "localhost")
-    PORT_RABBIT = int(os.environ.get("PORT_RABBIT", 5672))
+    PORT_RABBIT = int(os.environ.get("PORT_RABBIT", PORT_DEFAULT_RABBIT))
     USER_RABBIT = os.environ.get("USER_RABBIT", "admin")
     PASSWORD_RABBIT = os.environ.get("PASSWORD_RABBIT", "admin")
 
