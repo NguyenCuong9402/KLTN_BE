@@ -3,7 +3,7 @@ version: '3'
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql_container
+    container_name: mysql_container_stg
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: cuong942002
@@ -14,12 +14,12 @@ services:
       - --bind-address=0.0.0.0
       - --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
 #    volumes:
-#      - test-db-data:/var/lib/mysql
+#      - stg-db-data:/var/lib/mysql
     networks:
-      - test-kltn
+      - stg-kltn
   rabbitmq:
     image: rabbitmq:3-management  # Phiên bản có giao diện web
-    container_name: rabbitmq_container
+    container_name: rabbitmq_container_stg
     restart: always
     ports:
       - "5673:5672"  # Cổng cho giao tiếp AMQP
@@ -28,34 +28,34 @@ services:
       RABBITMQ_DEFAULT_USER: admin  # Tên đăng nhập mặc định
       RABBITMQ_DEFAULT_PASS: admin  # Mật khẩu mặc định
 #    volumes:
-#      - test-rabbitmq-data:/var/lib/rabbitmq
+#      - stg-rabbitmq-data:/var/lib/rabbitmq
     networks:
-      - test-kltn
+      - stg-kltn
   mongo:
     image: mongo:6.0.6
-    container_name: mongodb_container
+    container_name: mongodb_container_stg
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: admin-password
-      MONGO_INITtest-db-dataBASE: dev-shop
+      MONGO_INITstg-db-dataBASE: dev-shop
     ports:
       - "27018:27017"
 #    volumes:
-#      - test-mongo-db-data:/data/db
+#      - stg-mongo-db-data:/data/db
     networks:
-      - test-kltn
+      - stg-kltn
   redis:
     image: redis:6.2.14-alpine
-    container_name: redis_container
+    container_name: redis_container_stg
     restart: always
     ports:
       - "6380:6379"
     command: redis-server --save 20 1 --loglevel warning
 #    volumes:
-#      - test-cache:/data
+#      - stg-cache:/data
     networks:
-      - test-kltn
+      - stg-kltn
   app:
     build:
       context: .
@@ -65,16 +65,18 @@ services:
     ports:
       - "5012:5012"
     networks:
-      - test-kltn
+      - stg-kltn
     depends_on:
       - mongo
       - mysql
       - redis
       - rabbitmq
+    environment:
+      ENV_NAME: ${ENV_NAME}
 #volumes:
-#  test-db-data:
-#  test-rabbitmq-data:
-#  test-mongo-db-data:
-#  test-cache:
+#  stg-db-data:
+#  stg-rabbitmq-data:
+#  stg-mongo-db-data:
+#  stg-cache:
 networks:
-  test-kltn:
+  stg-kltn:

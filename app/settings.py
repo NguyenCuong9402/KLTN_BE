@@ -34,7 +34,7 @@ class DevConfig(Config):
         PORT_DEFAULT_RABBIT = 5673
 
 
-    DEBUG = False if ENV == "dev" else False
+    DEBUG = True if ENV == "dev" else False
     DEBUG_TB_ENABLED = DEBUG  # Disable Debug toolbar
     TEMPLATES_AUTO_RELOAD = True
     HOST = '0.0.0.0'
@@ -56,7 +56,6 @@ class DevConfig(Config):
     BK_PASSWORD_MYSQL = os.environ.get('BK_PASSWORD_MYSQL', "cuong942002")
     BK_DBNAME_MYSQL = os.environ.get('BK_DBNAME_MYSQL', "dev_kltn")
     SQLALCHEMY_DATABASE_URI = f'mysql://{BK_USERNAME_MYSQL}:{BK_PASSWORD_MYSQL}@{BK_HOST_MYSQL}:{BK_PORT_MYSQL}/{BK_DBNAME_MYSQL}?charset=utf8mb4'
-    logger.info(f"Đã {SQLALCHEMY_DATABASE_URI}----------------------")
     # redis config
     REDIS_HOST = os.environ.get('REDIS_HOST', "localhost")
     REDIS_PORT = os.environ.get('REDIS_PORT', PORT_DEFAULT_REDIS)
