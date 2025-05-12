@@ -15,18 +15,23 @@ class Config(object):
 class DevConfig(Config):
     """Development configuration."""
 
-    name_file_env = os.environ.get("ENV_NAME", '.env.test')
+    name_file_env = os.environ.get("ENV_NAME", '.env.dev')
 
     load_dotenv(f"config/{name_file_env}", override=True)
 
     # app config
-    ENV = os.environ.get("ENV", "dev")
+    ENV = os.environ.get("ENV", "prd")
 
     if ENV == 'dev':
         PORT_DEFAULT_MYSQL = 3308
         PORT_DEFAULT_REDIS = 6380
         PORT_DEFAULT_MONGO = 27018
         PORT_DEFAULT_RABBIT = 5673
+
+        PORT_DEFAULT_MYSQL = 3306
+        PORT_DEFAULT_REDIS = 6379
+        PORT_DEFAULT_MONGO = 27017
+        PORT_DEFAULT_RABBIT = 5672
     else:
         PORT_DEFAULT_MYSQL = 3306
         PORT_DEFAULT_REDIS = 6379
@@ -60,7 +65,7 @@ class DevConfig(Config):
     REDIS_HOST = os.environ.get('REDIS_HOST', "localhost")
     REDIS_PORT = os.environ.get('REDIS_PORT', PORT_DEFAULT_REDIS)
     REDIS_DB = 2
-    REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
+    # REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
 
     # email config
     ADMIN_EMAIL = os.environ.get('MAIL_USERNAME', "cn.company.enterprise@gmail.com" )

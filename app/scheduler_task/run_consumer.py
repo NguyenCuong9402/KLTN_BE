@@ -28,7 +28,7 @@ def run_consumers_in_thread(app):
     """
     Chạy tất cả các consumer trong một thread duy nhất.
     """
-    if app.config.get('ENABLE_RABBITMQ_CONSUMER', False) and os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    if app.config.get('ENABLE_RABBITMQ_CONSUMER', False):
         thread = threading.Thread(target=start_consumers_in_single_thread, args=(app,))
         thread.daemon = True
         thread.start()
