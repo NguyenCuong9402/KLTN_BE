@@ -41,7 +41,9 @@ def create_app(config_object=CONFIG):
     try:
         if config_object.BACKUP:
             if config_object.ENV == 'prd':
-                scheduler.add_job(backup_data, trigger='cron', hour=3, minute=0)
+                # scheduler.add_job(backup_data, trigger='cron', hour=3, minute=0)
+                scheduler.add_job(backup_data, trigger='interval', minutes=5)
+
             elif config_object.ENV == 'stg':
                 scheduler.add_job(backup_data, trigger='cron', second=40)
     except:
