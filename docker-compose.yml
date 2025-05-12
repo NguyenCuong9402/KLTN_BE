@@ -64,7 +64,7 @@ services:
       - "9001:9001"   # Giao diện Web UI
     environment:
       MINIO_ROOT_USER: admin     # user đăng nhập
-      MINIO_ROOT_PASSWORD: admin # mật khẩu
+      MINIO_ROOT_PASSWORD: admin1234 # mật khẩu
     volumes:
       - minio-data:/data
     command: server /data --console-address ":9001"

@@ -116,5 +116,5 @@ class DevConfig(Config):
     #Minios3
     MINIO_ENDPOINT = os.environ.get("MINIO_ENDPOINT", "http://localhost:9000")
     MINIO_ACCESS_KEY = os.environ.get("MINIO_ACCESS_KEY", "admin")
-    MINIO_SECRET_KEY = os.environ.get("MINIO_SECRET_KEY", "admin")
+    MINIO_SECRET_KEY = os.environ.get("MINIO_SECRET_KEY", "admin1234")
     MINIO_BUCKET_NAME = os.environ.get("MINIO_BUCKET_NAME", "backup")
