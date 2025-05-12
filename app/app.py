@@ -42,10 +42,7 @@ def create_app(config_object=CONFIG):
         scheduler.add_job(
             backup_data,
             trigger='cron',
-            second=40,
-            id='backup_data',
-            replace_existing=True,
-            misfire_grace_time=30  # Cho phép trễ tối đa 30s vẫn chạy
+            minute=30,
             )
             # scheduler.add_job(backup_data, trigger='interval', minutes=5)
         #
