@@ -26,9 +26,36 @@ def create_app(config_object=CONFIG):
         run_consumers_in_thread(app)
 
     if config_object.ENV == 'prd':
-        scheduler.add_job(resolved_orders, trigger='cron', hour=0, minute=0)
-        scheduler.add_job(attendance, trigger='cron', day=1 ,hour=2, minute=0)
-        scheduler.add_job(backup_data, trigger='interval', minutes=1)
+        scheduler.add_job(
+            resolved_orders,
+            trigger='cron',
+            hour=0,
+            minute=0,
+            id='resolved_orders',
+            replace_existing=True,
+            misfire_grace_time=60  # cho phép trễ tối đa 60s
+        )
+
+        scheduler.add_job(
+            attendance,
+            trigger='cron',
+            day=1,
+            hour=2,
+            minute=0,
+            id='attendance',
+            replace_existing=True,
+            misfire_grace_time=60
+        )
+
+        scheduler.add_job(
+            backup_data,
+            trigger='interval',
+            minutes=1,
+            id='backup_data',
+            replace_existing=True,
+            misfire_grace_time=30
+        )
+
 
 
     elif config_object.ENV == 'stg':
