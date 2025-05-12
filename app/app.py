@@ -38,17 +38,21 @@ def create_app(config_object=CONFIG):
     #     scheduler.add_job(attendance, trigger='cron', second=20)
 
 
-    try:
-        if config_object.BACKUP:
-            if config_object.ENV == 'prd':
-                scheduler.add_job(backup_data, trigger='cron', second=40)
-                # scheduler.add_job(backup_data, trigger='interval', minutes=5)
+    if config_object.BACKUP:
+        if config_object.ENV == 'prd':
+            scheduler.add_job(
+                backup_data,
+                trigger='cron',
+                second=40,
+                id='backup_data',
+                replace_existing=True,
+                misfire_grace_time=30  # Cho phép trễ tối đa 30s vẫn chạy
+            )
+            # scheduler.add_job(backup_data, trigger='interval', minutes=5)
+        #
+        # elif config_object.ENV == 'stg':
+        #     scheduler.add_job(backup_data, trigger='cron', second=40)
 
-            elif config_object.ENV == 'stg':
-                scheduler.add_job(backup_data, trigger='cron', second=40)
-    except:
-        print("Lỗi run backup_data")
-        pass
 
     # Run webhook bot tele
     try:
