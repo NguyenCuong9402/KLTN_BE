@@ -31,25 +31,10 @@ def create_app(config_object=CONFIG):
         scheduler.add_job(backup_data, trigger='interval', minutes=1)
 
 
-    # elif config_object.ENV == 'stg':
-    #     scheduler.add_job(resolved_orders, trigger='interval', minutes=5)
-
-
-    # if config_object.ENV == 'prd':
-        # scheduler.add_job(attendance, trigger='interval', minutes=5)
-    # elif config_object.ENV == 'stg':
-    #     scheduler.add_job(attendance, trigger='cron', second=20)
-
-
-    # if config_object.ENV == 'prd':
-        # scheduler.add_job(
-        #     backup_data,
-        #     trigger='cron',
-        #     minute=30,
-        #     )
-        #
-        # elif config_object.ENV == 'stg':
-        #     scheduler.add_job(backup_data, trigger='cron', second=40)
+    elif config_object.ENV == 'stg':
+        scheduler.add_job(resolved_orders, trigger='interval', minutes=1)
+        scheduler.add_job(attendance, trigger='interval', minutes=2)
+        scheduler.add_job(backup_data, trigger='interval', minutes=1)
 
 
     # Run webhook bot tele
