@@ -34,8 +34,8 @@ def create_app(config_object=CONFIG):
     if config_object.ENV == 'prd':
         scheduler.add_job(attendance, trigger='cron', day=1 ,hour=2, minute=0)
         # scheduler.add_job(attendance, trigger='interval', minutes=5)
-    elif config_object.ENV == 'stg':
-        scheduler.add_job(attendance, trigger='cron', second=20)
+    # elif config_object.ENV == 'stg':
+    #     scheduler.add_job(attendance, trigger='cron', second=20)
 
 
     try:
