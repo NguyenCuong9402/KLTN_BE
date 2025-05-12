@@ -39,4 +39,4 @@ COPY . .
 
 EXPOSE 5012
 
-CMD ["gunicorn", "--workers=3", "--threads=2", "--timeout=3600", "--preload", "-b", "0.0.0.0:5012", "server:app"]
+CMD ["gunicorn", "--workers=4", "--threads=1", "--timeout=3600", "--preload", "-b", "0.0.0.0:5012", "server:app"]
