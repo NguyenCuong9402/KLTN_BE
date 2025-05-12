@@ -27,24 +27,26 @@ def create_app(config_object=CONFIG):
 
     if config_object.ENV == 'prd':
         scheduler.add_job(resolved_orders, trigger='cron', hour=0, minute=0)
+        scheduler.add_job(attendance, trigger='cron', day=1 ,hour=2, minute=0)
+        scheduler.add_job(backup_data, trigger='interval', minutes=1)
+
+
     # elif config_object.ENV == 'stg':
     #     scheduler.add_job(resolved_orders, trigger='interval', minutes=5)
 
 
-    if config_object.ENV == 'prd':
-        scheduler.add_job(attendance, trigger='cron', day=1 ,hour=2, minute=0)
+    # if config_object.ENV == 'prd':
         # scheduler.add_job(attendance, trigger='interval', minutes=5)
     # elif config_object.ENV == 'stg':
     #     scheduler.add_job(attendance, trigger='cron', second=20)
 
 
-    if config_object.ENV == 'prd':
+    # if config_object.ENV == 'prd':
         # scheduler.add_job(
         #     backup_data,
         #     trigger='cron',
         #     minute=30,
         #     )
-        scheduler.add_job(backup_data, trigger='interval', minutes=1)
         #
         # elif config_object.ENV == 'stg':
         #     scheduler.add_job(backup_data, trigger='cron', second=40)
