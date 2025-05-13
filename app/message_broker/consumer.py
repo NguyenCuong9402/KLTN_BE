@@ -49,7 +49,8 @@ class RabbitMQConsumerSendMailConsumer(BaseRabbitMQConsumer):
         type_action = message.get('type_action', None)
         email = message.get('email')
         if type_action in[TYPE_ACTION_SEND_MAIL['REGISTER'], TYPE_ACTION_SEND_MAIL['OPEN_ACCOUNT'],
-                          TYPE_ACTION_SEND_MAIL['UPDATE_ACCOUNT']] and email:
+                          TYPE_ACTION_SEND_MAIL['UPDATE_ACCOUNT'], TYPE_ACTION_SEND_MAIL['FORGET_PASS'],
+                          TYPE_ACTION_SEND_MAIL['NEW_PASSWORD']] and email:
 
             email =  message.get('email')
             html = message.get('html', None)
@@ -60,8 +61,3 @@ class RabbitMQConsumerSendMailConsumer(BaseRabbitMQConsumer):
                 else:
                     msg.body = message.get('body_mail')
                 mail.send(msg)
-
-        elif type_action == TYPE_ACTION_SEND_MAIL['CHANGE_PASS']:
-            pass
-        elif type_action == TYPE_ACTION_SEND_MAIL['FORGET_PASS']:
-            pass

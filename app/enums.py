@@ -80,7 +80,8 @@ TYPE_ACTION_SEND_MAIL = {
     'OPEN_ACCOUNT': 'open_account',
     'UPDATE_ACCOUNT': 'update_account',
     'CHANGE_PASS': 'change_pass',
-    'FORGET_PASS': 'forget_pass'
+    'FORGET_PASS': 'forget_pass',
+    'NEW_PASSWORD': 'new_password',
 }
 
 TYPE_FILE_LINK = {

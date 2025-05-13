@@ -17,7 +17,7 @@ from app.gateway import authorization_require
 from app.message_broker import RabbitMQProducerSendMail
 from app.models import User, VerityCode, Group
 from app.settings import DevConfig
-from app.utils import trim_dict, get_timestamp_now, data_preprocessing, generate_random_number_string
+from app.utils import trim_dict, get_timestamp_now, data_preprocessing, generate_random_number_string, generate_password
 from app.extensions import mail
 
 from app.validator import UserSchema, AuthValidation, PasswordValidation, RegisterValidation
@@ -305,6 +305,10 @@ def send_code():
 
         elif type_input_code == TYPE_ACTION_SEND_MAIL['REGISTER']:
             title_mail = 'MÃ XÁC THỰC ĐĂNG KÝ TÀI KHOẢN C&N'
+
+        elif type_input_code == TYPE_ACTION_SEND_MAIL['FORGET_PASS']:
+            title_mail = 'MÃ XÁC THỰC QUÊN MẬT KHẨU TÀI KHOẢN C&N'
+
         html_content = f"""
         <!DOCTYPE html>
         <html lang="vi">
@@ -439,7 +443,75 @@ def verity_code():
             user.status = 1
             db.session.flush()
             db.session.commit()
-
+        elif type_input_code == TYPE_ACTION_SEND_MAIL['FORGET_PASS']:
+            user = User.query.filter(User.email == verity.user.email).first()
+            if user is None:
+                return send_error(message='Tài khoản chưa được đăng ký')
+            password = generate_password()
+            user.password = password
+            body_mail = f"Mật khẩu mới của bạn là : {password}"
+            db.session.flush()
+            db.session.commit()
+            title_mail = 'CẤP MẬT KHẨU MỚI TÀI KHOẢN C&N'
+            html_content = f"""
+                                            <!DOCTYPE html>
+                                            <html lang="vi">
+                                            <head>
+                                                <meta charset="UTF-8">
+                                                <title>{title_mail}</title>
+                                            </head>
+                                            <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0;">
+                                                <table align="center" width="100%" style="max-width: 600px; background-color: #ffffff; padding: 20px; border-radius: 8px;">
+                                                    <tr>
+                                                        <td align="center" style="padding-bottom: 20px;">
+                                                            <img src="{DevConfig.BASE_URL_WEBSITE}/logo.png" alt="C&N Fashion" style="height: 60px;">
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <h2 style="color: #333333;"> <strong>C&N Fashion</strong>, xin chào</h2>
+                                                            <p style="font-size: 16px; color: #555555;">
+                                                               Mật khẩu mới của bạn là :
+                                                            </p>
+                                                            <div style="text-align: center; margin: 30px 0;">
+                                                                <span style="font-size: 32px; font-weight: bold; color: #2c3e50;">
+                                                                    {password}
+                                                                </span>
+                                                            </div>
+                                                            <p style="font-size: 14px; color: #888888;">
+                                                                Mã có hiệu lực trong vòng 5 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.
+                                                            </p>
+                                                            <p style="font-size: 16px; color: #555555;">
+                                                                Trân trọng,<br>
+                                                                <strong>Đội ngũ C&N Fashion</strong>
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td align="center" style="font-size: 12px; color: #aaaaaa; padding-top: 20px;">
+                                                            © 2025 C&N Fashion. All rights reserved.<br>
+                                                            <a href="mailto:cn.company.enterprise@gmail.com" style="color: #aaaaaa;">cn.company.enterprise@gmail.com</a> | Hotline: 0988 951 321
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </body>
+                                            </html>
+                                            """
+            if DevConfig.ENABLE_RABBITMQ_CONSUMER:
+                body = {
+                    'type_action': TYPE_ACTION_SEND_MAIL['NEW_PASSWORD'],
+                    'body_mail': body_mail,
+                    'email': [user.email],
+                    'html': html_content,
+                    'title': title_mail
+                }
+                queue_mail = RabbitMQProducerSendMail()
+                queue_mail.call(body)
+            else:
+                msg = MessageMail(title_mail, recipients=[user.email])
+                msg.html = html_content
+                mail.send(msg)
+            return send_result(message="Mật khẩu tạm thời đã được gửi đến email của bạn")
 
         return send_result(message='Xác thực thành công.')
     except Exception as ex:

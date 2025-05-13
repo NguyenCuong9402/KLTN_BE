@@ -383,6 +383,7 @@ class VerityCode(db.Model):
     user_id = db.Column(db.String(50), db.ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
                         nullable=True)
     limit = db.Column(INTEGER(unsigned=True), nullable=True)  # Cho phép NULL
+    user = db.relationship('User', viewonly=True)
 
 
 class Region(db.Model):
