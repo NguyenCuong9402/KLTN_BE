@@ -260,7 +260,7 @@ def register():
             queue_mail.call(body)
         else:
             msg = MessageMail(title_mail, recipients=[email])
-            msg.body = body_mail
+            msg.html = html_content
             mail.send(msg)
 
         db.session.commit()
@@ -304,7 +304,7 @@ def send_code():
             title_mail = 'MÃ XÁC THAY ĐỔI MẬT KHẨU TÀI KHOẢN C&N'
 
         elif type_input_code == TYPE_ACTION_SEND_MAIL['REGISTER']:
-            title_mail = 'MÃ XÁC THAY ĐỔI MẬT KHẨU TÀI KHOẢN C&N'
+            title_mail = 'MÃ XÁC THỰC ĐĂNG KÝ TÀI KHOẢN C&N'
         html_content = f"""
         <!DOCTYPE html>
         <html lang="vi">
@@ -326,7 +326,7 @@ def send_code():
                             Dưới đây là mã xác thực:
                         </p>
                         <div style="text-align: center; margin: 30px 0;">
-                            <span style="font-size: 24px; font-weight: bold; color: #2c3e50;">
+                            <span style="font-size: 32px; font-weight: bold; color: #2c3e50;">
                                 {code_out_put}
                             </span>
                         </div>
@@ -356,12 +356,6 @@ def send_code():
         db.session.flush()
         db.session.commit()
 
-        # msg = MessageMail('Mã xác thực là:', recipients=[user.email])
-        # msg.body = mail_send.body
-        # mail.send(msg)
-
-
-
         if DevConfig.ENABLE_RABBITMQ_CONSUMER:
             body = {
                 'type_action': type_input_code,
@@ -374,7 +368,7 @@ def send_code():
             queue_mail.call(body)
         else:
             msg = MessageMail(title_mail, recipients=[email])
-            msg.body = html_content
+            msg.html = html_content
             mail.send(msg)
 
         return send_result(message='Gửi Code thành công.', data={'verity_code_id': code.id})
