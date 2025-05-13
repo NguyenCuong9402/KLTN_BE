@@ -41,6 +41,9 @@ class Worker:
         # FOLDER_SRC = r"C:\Users\Administrator\Documents\KhoaLuanTotNghiep\kltn-be\app\file_mau"
         # FOLDER_DEST = r"C:\Users\Administrator\Documents\KhoaLuanTotNghiep\kltn-be\app\files\image/"
 
+        # FOLDER_SRC = r"E:\KLTN\kltn-be\app\file_mau"
+        # FOLDER_DEST = r"E:\KLTN\kltn-be\app\files\image/"
+
         FOLDER_DEST_SAVE_DB = "/files/image/"
 
         if not os.path.exists(FOLDER_DEST):
