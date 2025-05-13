@@ -52,9 +52,13 @@ class RabbitMQConsumerSendMailConsumer(BaseRabbitMQConsumer):
                           TYPE_ACTION_SEND_MAIL['UPDATE_ACCOUNT']] and email:
 
             email =  message.get('email')
+            html = message.get('html', None)
             with current_app.app_context():  # Thêm application context
                 msg = MessageMail(message.get('title', 'MÃ XÁC THỰC ĐĂNG KÝ TÀI KHOẢN C&N'), recipients=email)
-                msg.body = message.get('body_mail')
+                if html is not None:
+                    msg.html = html
+                else:
+                    msg.body = message.get('body_mail')
                 mail.send(msg)
 
         elif type_action == TYPE_ACTION_SEND_MAIL['CHANGE_PASS']:

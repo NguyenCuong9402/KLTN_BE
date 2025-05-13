@@ -193,30 +193,74 @@ def register():
         db.session.flush()
 
         email = json_body.get('email')
-        code = generate_random_number_string()
+        code_out_put = generate_random_number_string()
         # body = body_mail(MAIL_VERITY_CODE, {'code': code})
-        body = f"Mã Code của bạn là : {code} "
-        # Mail
+        body_mail = f"Mã Code của bạn là : {code_out_put}"        # Mail
 
         # Tạo verity code
-        code = VerityCode(id=str(uuid()), user_id=user.id, code=code, limit=get_timestamp_now() + 5 * 60)
+        code = VerityCode(id=str(uuid()), user_id=user.id, code=code_out_put, limit=get_timestamp_now() + 5 * 60)
         db.session.add(code)
         db.session.flush()
 
         title_mail = 'MÃ XÁC THỰC ĐĂNG KÝ TÀI KHOẢN C&N'
+        html_content = f"""
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>{title_mail}</title>
+                </head>
+                <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0;">
+                    <table align="center" width="100%" style="max-width: 600px; background-color: #ffffff; padding: 20px; border-radius: 8px;">
+                        <tr>
+                            <td align="center" style="padding-bottom: 20px;">
+                                <img src="{DevConfig.BASE_URL_WEBSITE}/logo.png" alt="C&N Fashion" style="height: 60px;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h2 style="color: #333333;"> <strong>C&N Fashion</strong>, xin chào</h2>
+                                <p style="font-size: 16px; color: #555555;">
+                                   Dưới đây là mã xác thực:
+                                </p>
+                                <div style="text-align: center; margin: 30px 0;">
+                                    <span style="font-size: 32px; font-weight: bold; color: #2c3e50;">
+                                        {code_out_put}
+                                    </span>
+                                </div>
+                                <p style="font-size: 14px; color: #888888;">
+                                    Mã có hiệu lực trong vòng 5 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.
+                                </p>
+                                <p style="font-size: 16px; color: #555555;">
+                                    Trân trọng,<br>
+                                    <strong>Đội ngũ C&N Fashion</strong>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center" style="font-size: 12px; color: #aaaaaa; padding-top: 20px;">
+                                © 2025 C&N Fashion. All rights reserved.<br>
+                                <a href="mailto:cn.company.enterprise@gmail.com" style="color: #aaaaaa;">cn.company.enterprise@gmail.com</a> | Hotline: 0988 951 321
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+                """
         # gửi mail neu co queue
         if DevConfig.ENABLE_RABBITMQ_CONSUMER:
             body = {
                 'type_action': TYPE_ACTION_SEND_MAIL['REGISTER'],
-                'body_mail': body,
+                'body_mail': body_mail,
                 'email': [email],
+                'html':html_content,
                 'title': title_mail
             }
             queue_mail = RabbitMQProducerSendMail()
             queue_mail.call(body)
         else:
             msg = MessageMail(title_mail, recipients=[email])
-            msg.body = body
+            msg.body = body_mail
             mail.send(msg)
 
         db.session.commit()
@@ -248,20 +292,9 @@ def send_code():
             user_id = user.id
 
 
-        code = generate_random_number_string()
+        code_out_put = generate_random_number_string()
         # body = body_mail(MAIL_VERITY_CODE, {'code': code})
-        body = f"Mã Code của bạn là : {code} "
-        # Tạo verity code
-        code = VerityCode(id=str(uuid()), user_id=user_id, code=code, limit=get_timestamp_now() + 5 * 60)
-        db.session.add(code)
-
-        db.session.flush()
-        db.session.commit()
-
-        # msg = MessageMail('Mã xác thực là:', recipients=[user.email])
-        # msg.body = mail_send.body
-        # mail.send(msg)
-
+        body_mail = f"Mã Code của bạn là : {code_out_put}"
         title_mail = 'MÃ XÁC THỰC'
 
         if type_input_code == TYPE_ACTION_SEND_MAIL['OPEN_ACCOUNT']:
@@ -272,11 +305,68 @@ def send_code():
 
         elif type_input_code == TYPE_ACTION_SEND_MAIL['REGISTER']:
             title_mail = 'MÃ XÁC THAY ĐỔI MẬT KHẨU TÀI KHOẢN C&N'
+        html_content = f"""
+        <!DOCTYPE html>
+        <html lang="vi">
+        <head>
+            <meta charset="UTF-8">
+            <title>{title_mail}</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0;">
+            <table align="center" width="100%" style="max-width: 600px; background-color: #ffffff; padding: 20px; border-radius: 8px;">
+                <tr>
+                    <td align="center" style="padding-bottom: 20px;">
+                        <img src="{DevConfig.BASE_URL_WEBSITE}/logo.png" alt="C&N Fashion" style="height: 60px;">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <h2 style="color: #333333;"><strong>C&N Fashion</strong>, xin chào</h2>
+                        <p style="font-size: 16px; color: #555555;">
+                            Dưới đây là mã xác thực:
+                        </p>
+                        <div style="text-align: center; margin: 30px 0;">
+                            <span style="font-size: 24px; font-weight: bold; color: #2c3e50;">
+                                {code_out_put}
+                            </span>
+                        </div>
+                        <p style="font-size: 14px; color: #888888;">
+                            Mã có hiệu lực trong vòng 5 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.
+                        </p>
+                        <p style="font-size: 16px; color: #555555;">
+                            Trân trọng,<br>
+                            <strong>Đội ngũ C&N Fashion</strong>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="font-size: 12px; color: #aaaaaa; padding-top: 20px;">
+                        © 2025 C&N Fashion. All rights reserved.<br>
+                        <a href="mailto:cn.company.enterprise@gmail.com" style="color: #aaaaaa;">cn.company.enterprise@gmail.com</a> | Hotline: 0988 951 321
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+        # Tạo verity code
+        code = VerityCode(id=str(uuid()), user_id=user_id, code=code_out_put, limit=get_timestamp_now() + 5 * 60)
+        db.session.add(code)
+
+        db.session.flush()
+        db.session.commit()
+
+        # msg = MessageMail('Mã xác thực là:', recipients=[user.email])
+        # msg.body = mail_send.body
+        # mail.send(msg)
+
+
 
         if DevConfig.ENABLE_RABBITMQ_CONSUMER:
             body = {
                 'type_action': type_input_code,
-                'body_mail': body,
+                'body_mail': body_mail,
+                'html': html_content,
                 'email': [email],
                 'title': title_mail
             }
@@ -284,7 +374,7 @@ def send_code():
             queue_mail.call(body)
         else:
             msg = MessageMail(title_mail, recipients=[email])
-            msg.body = body
+            msg.body = html_content
             mail.send(msg)
 
         return send_result(message='Gửi Code thành công.', data={'verity_code_id': code.id})
