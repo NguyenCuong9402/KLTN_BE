@@ -246,26 +246,26 @@ def timesheet():
                 existing_data = find_attendance_data(staff['id'], time_str)
                 if existing_data:
                     data = existing_data
-                else:
-                    attendances = Attendance.query.filter(
-                        Attendance.user_id == staff['id'],
-                        extract("month", Attendance.work_date) == month,
-                        extract("year", Attendance.work_date) == year
-                    ).order_by(Attendance.work_date.asc()).all()
-                    data['number_work_date'] = len(attendances)
-                    for attendance in attendances:
-                        if attendance.work_unit in list(WORK_UNIT_TYPE.values()):
-                            data['work_unit'] += 1
-                        if attendance.check_in:
-                            check_in_dt = datetime.combine(base_date, attendance.check_in)
-                            if check_in_dt > check_in_attendance:
-                                data['work_later_and_leave_early'] += 1
-                            if not attendance.check_out:
-                                data['forget_checkout'] += 1
-                            else:
-                                check_out_dt = datetime.combine(base_date, attendance.check_out)
-                                if check_out_dt < check_out_attendance:
-                                    data['work_later_and_leave_early'] += 1
+                # else:
+                #     attendances = Attendance.query.filter(
+                #         Attendance.user_id == staff['id'],
+                #         extract("month", Attendance.work_date) == month,
+                #         extract("year", Attendance.work_date) == year
+                #     ).order_by(Attendance.work_date.asc()).all()
+                #     data['number_work_date'] = len(attendances)
+                #     for attendance in attendances:
+                #         if attendance.work_unit in list(WORK_UNIT_TYPE.values()):
+                #             data['work_unit'] += 1
+                #         if attendance.check_in:
+                #             check_in_dt = datetime.combine(base_date, attendance.check_in)
+                #             if check_in_dt > check_in_attendance:
+                #                 data['work_later_and_leave_early'] += 1
+                #             if not attendance.check_out:
+                #                 data['forget_checkout'] += 1
+                #             else:
+                #                 check_out_dt = datetime.combine(base_date, attendance.check_out)
+                #                 if check_out_dt < check_out_attendance:
+                #                     data['work_later_and_leave_early'] += 1
 
             staff['time_keeping'] = data
 
@@ -352,26 +352,26 @@ def export():
                 existing_data = find_attendance_data(staff['id'], time_str)
                 if existing_data:
                     data = existing_data
-                else:
-                    attendances = Attendance.query.filter(
-                        Attendance.user_id == staff['id'],
-                        extract("month", Attendance.work_date) == month,
-                        extract("year", Attendance.work_date) == year
-                    ).order_by(Attendance.work_date.asc()).all()
-                    data['number_work_date'] = len(attendances)
-                    for attendance in attendances:
-                        if attendance.work_unit in list(WORK_UNIT_TYPE.values()):
-                            data['work_unit'] += 1
-                        if attendance.check_in:
-                            check_in_dt = datetime.combine(base_date, attendance.check_in)
-                            if check_in_dt > check_in_attendance:
-                                data['work_later_and_leave_early'] += 1
-                            if not attendance.check_out:
-                                data['forget_checkout'] += 1
-                            else:
-                                check_out_dt = datetime.combine(base_date, attendance.check_out)
-                                if check_out_dt < check_out_attendance:
-                                    data['work_later_and_leave_early'] += 1
+                # else:
+                #     attendances = Attendance.query.filter(
+                #         Attendance.user_id == staff['id'],
+                #         extract("month", Attendance.work_date) == month,
+                #         extract("year", Attendance.work_date) == year
+                #     ).order_by(Attendance.work_date.asc()).all()
+                #     data['number_work_date'] = len(attendances)
+                #     for attendance in attendances:
+                #         if attendance.work_unit in list(WORK_UNIT_TYPE.values()):
+                #             data['work_unit'] += 1
+                #         if attendance.check_in:
+                #             check_in_dt = datetime.combine(base_date, attendance.check_in)
+                #             if check_in_dt > check_in_attendance:
+                #                 data['work_later_and_leave_early'] += 1
+                #             if not attendance.check_out:
+                #                 data['forget_checkout'] += 1
+                #             else:
+                #                 check_out_dt = datetime.combine(base_date, attendance.check_out)
+                #                 if check_out_dt < check_out_attendance:
+                #                     data['work_later_and_leave_early'] += 1
 
             staff['time_keeping'] = data
         ### Viết csv
