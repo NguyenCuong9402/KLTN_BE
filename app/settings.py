@@ -20,24 +20,18 @@ class DevConfig(Config):
     load_dotenv(f"config/{name_file_env}", override=True)
 
     # app config
-    ENV = os.environ.get("ENV", "prd")
-
-    if ENV == 'dev':
-        PORT_DEFAULT_MYSQL = 3308
-        PORT_DEFAULT_REDIS = 6380
-        PORT_DEFAULT_MONGO = 27018
-        PORT_DEFAULT_RABBIT = 5673
-
-        # PORT_DEFAULT_MYSQL = 3306
-        # PORT_DEFAULT_REDIS = 6379
-        # PORT_DEFAULT_MONGO = 27017
-        # PORT_DEFAULT_RABBIT = 5672
-    else:
+    ENV = os.environ.get("ENV", "dev")
+    PORT_DEFAULT=True
+    if PORT_DEFAULT:
         PORT_DEFAULT_MYSQL = 3306
         PORT_DEFAULT_REDIS = 6379
         PORT_DEFAULT_MONGO = 27017
         PORT_DEFAULT_RABBIT = 5672
-
+    else:
+        PORT_DEFAULT_MYSQL = 3308
+        PORT_DEFAULT_REDIS = 6380
+        PORT_DEFAULT_MONGO = 27018
+        PORT_DEFAULT_RABBIT = 5673
 
     DEBUG = True if ENV == "dev" else False
     DEBUG_TB_ENABLED = DEBUG  # Disable Debug toolbar
