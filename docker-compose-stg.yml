@@ -31,7 +31,7 @@ services:
 #      - stg-rabbitmq-data:/var/lib/rabbitmq
     networks:
       - stg-kltn
-  mongo:
+  mongodb:
     image: mongo:6.0.6
     container_name: mongodb_container_stg
     restart: always
@@ -82,7 +82,7 @@ services:
     networks:
       - stg-kltn
     depends_on:
-      - mongo
+      - mongodb
       - db
       - redis
       - rabbitmq

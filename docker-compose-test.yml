@@ -31,7 +31,7 @@ services:
 #      - test-rabbitmq-data:/var/lib/rabbitmq
     networks:
       - test-kltn
-  mongo:
+  mongodb:
     image: mongo:6.0.6
     container_name: mongodb_container
     restart: always

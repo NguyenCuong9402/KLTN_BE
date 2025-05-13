@@ -31,7 +31,7 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - prd-kltn
-  mongo:
+  mongodb:
     image: mongo:6.0.6
     container_name: mongodb_container
     restart: always
@@ -82,7 +82,7 @@ services:
     networks:
       - prd-kltn
     depends_on:
-      - mongo
+      - mongodb
       - db
       - redis
       - rabbitmq
