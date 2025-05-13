@@ -1,0 +1,99 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: cuong942002
+    ports:
+      - "3306:3306"
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --bind-address=0.0.0.0
+      - --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+#    volumes:
+#      - db_data:/var/lib/mysql
+    networks:
+      - dev-kltn
+  rabbitmq:
+    image: rabbitmq:3-management  # Phiên bản có giao diện web
+    container_name: rabbitmq_container
+    restart: always
+    ports:
+      - "5672:5672"  # Cổng cho giao tiếp AMQP
+      - "15672:15672"  # Cổng giao diện quản lý web
+    environment:
+      RABBITMQ_DEFAULT_USER: admin  # Tên đăng nhập mặc định
+      RABBITMQ_DEFAULT_PASS: admin  # Mật khẩu mặc định
+#    volumes:
+#      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - dev-kltn
+  mongodb:
+    image: mongo:6.0.6
+    container_name: mongodb_container
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: admin-password
+      MONGO_INITDB_DATABASE: dev-shop
+    ports:
+      - "27017:27017"
+#    volumes:
+#      - mongodb_data:/data/db
+    networks:
+      - dev-kltn
+  redis:
+    image: redis:6.2.14-alpine
+    container_name: redis_container
+    restart: always
+    ports:
+      - "6379:6379"
+#    command: redis-server --save 20 1 --loglevel warning
+#    volumes:
+#      - cache:/data
+    networks:
+      - dev-kltn
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"   # API S3
+      - "9001:9001"   # Giao diện Web UI
+    environment:
+      MINIO_ROOT_USER: admin     # user đăng nhập
+      MINIO_ROOT_PASSWORD: admin1234 # mật khẩu
+#    volumes:
+#      - minio-data:/data
+    command: server /data --console-address ":9001"
+    restart: always
+    networks:
+      - dev-kltn
+#  app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile-multistage
+#    container_name: backend_app
+#    restart: always
+#    ports:
+#      - "5012:5012"
+#    networks:
+#      -dev-kltn
+#    depends_on:
+#      - mongodb
+#      - db
+#      - redis
+#      - rabbitmq
+#      - minio
+#    environment:
+#      ENV_NAME: ${ENV_NAME}
+#volumes:
+#  db_data:
+#  rabbitmq_data:
+#  mongodb_data:
+#  cache:
+#  minio-data:
+networks:
+ dev-kltn:
