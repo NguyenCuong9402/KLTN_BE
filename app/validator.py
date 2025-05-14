@@ -682,8 +682,10 @@ class QueryParamsAllSchema(BaseValidation):
     sort = fields.String(
         missing="desc", validate=validate.OneOf(["asc", "desc"])  # Chỉ chấp nhận 'asc' hoặc 'desc'
     )
-    text_search = fields.String(allow_none=True)  # Có thể None
+    text_search = fields.String(allow_none=True)
 
+class QueryStaffSchema(QueryParamsAllSchema):
+    type_staff=fields.String(allow_none=True)
 
 class QueryTimeSheetSchema(QueryParamsAllSchema):
     time_str=fields.String(allow_none=True)

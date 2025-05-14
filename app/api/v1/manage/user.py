@@ -3,7 +3,7 @@ from datetime import date
 
 from flask import Blueprint, request
 from marshmallow import ValidationError
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, and_
 from sqlalchemy_pagination import paginate
 from sqlalchemy import or_
 
@@ -13,7 +13,7 @@ from app.api.helper import send_result, send_error, convert_to_datetime, Token
 from app.gateway import authorization_require
 from app.models import User, Group, Files, Address
 from app.utils import trim_dict, escape_wildcard, generate_password
-from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema
+from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema, QueryStaffSchema
 
 api = Blueprint('manage/user', __name__)
 
@@ -188,7 +188,7 @@ def get_staff():
     try:
         try:
             params = request.args.to_dict(flat=True)
-            params = QueryParamsAllSchema().load(params) if params else dict()
+            params = QueryStaffSchema().load(params) if params else dict()
         except ValidationError as err:
             return send_error(message='INVALID_PARAMETERS_ERROR', data=err.messages)
 
@@ -198,6 +198,7 @@ def get_staff():
         order_by = params.get('order_by', 'created_date')
         sort = params.get('sort', 'desc')
         text_search = params.get('text_search', None)
+        type_staff = params.get('type_staff', None)
 
         query = User.query.join(Group).filter(
             Group.is_staff == True,
@@ -218,6 +219,20 @@ def get_staff():
                 )
             )
 
+        if type_staff == 'work_on':
+            query = query.filter(
+                or_(
+                    User.finish_date == None,
+                    User.finish_date >= date.today()
+                )
+            )
+        elif type_staff == 'work_off':
+            query = query.filter(
+                and_(
+                    User.finish_date != None,
+                    User.finish_date < date.today()
+                )
+            )
         if order_by == "group_name":
             column_sorted = Group.name  # Thay vì User.group.name
         else:
