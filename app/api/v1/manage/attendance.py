@@ -20,7 +20,28 @@ from app.gateway import authorization_require
 from app.models import User, Group, Attendance
 from app.utils import escape_wildcard, find_attendance_data
 from app.validator import UserSchema, AttendanceSchema, QueryTimeSheetSchema
+import socket
 
+def is_same_subnet(ip1, ip2, subnet="255.255.255.0"):
+    import struct
+    import socket
+
+    ip1_bin = struct.unpack('>I', socket.inet_aton(ip1))[0]
+    ip2_bin = struct.unpack('>I', socket.inet_aton(ip2))[0]
+    mask_bin = struct.unpack('>I', socket.inet_aton(subnet))[0]
+
+    return (ip1_bin & mask_bin) == (ip2_bin & mask_bin)
+
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except:
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+    return ip
 api = Blueprint('manage/attendance', __name__)
 
 
@@ -35,6 +56,11 @@ def check_in():
 
         if user is None:
             return send_error(message='Tài khoản không tồn tại ')
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        server_ip = get_local_ip()
+
+        if not is_same_subnet(client_ip, server_ip):
+            return send_error(message= f"Không cùng mạng nội bộ. IP bạn: {client_ip}, Server: {server_ip}")
 
         today = date.today()
         now = datetime.now().time()
@@ -56,7 +82,7 @@ def check_in():
 
         data = AttendanceSchema().dump(attendance)
 
-        return send_result(data=data, message=f'Check in thành công lúc {attendance.check_in}')
+        return send_result(data=data, message=f'Check in thành công lúc {attendance.check_in} ,{client_ip} Server: {server_ip}")')
 
     except Exception as ex:
         db.session.rollback()
