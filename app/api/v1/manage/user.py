@@ -7,13 +7,17 @@ from sqlalchemy import desc, asc, and_
 from sqlalchemy_pagination import paginate
 from sqlalchemy import or_
 
-from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, USER_KEY_GROUP
+from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, USER_KEY_GROUP, TYPE_ACTION_SEND_MAIL
 from app.extensions import db
 from app.api.helper import send_result, send_error, convert_to_datetime, Token
 from app.gateway import authorization_require
+from app.message_broker import RabbitMQProducerSendMail
 from app.models import User, Group, Files, Address
+from app.settings import DevConfig
 from app.utils import trim_dict, escape_wildcard, generate_password
 from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema, QueryStaffSchema
+from app.extensions import mail
+from flask_mail import Message as MessageMail
 
 api = Blueprint('manage/user', __name__)
 
@@ -83,6 +87,64 @@ def new():
         db.session.commit()
 
         #send mail
+        title_mail = f'CẤP TÀI KHOẢN C&N'
+        html_content = f"""
+                        <!DOCTYPE html>
+                        <html lang="vi">
+                        <head>
+                            <meta charset="UTF-8">
+                            <title>{title_mail}</title>
+                        </head>
+                        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0;">
+                            <table align="center" width="100%" style="max-width: 600px; background-color: #ffffff; padding: 20px; border-radius: 8px;">
+                                <tr>
+                                    <td align="center" style="padding-bottom: 20px;">
+                                        <img src="{DevConfig.BASE_URL_WEBSITE}/logo.png" alt="C&N Fashion" style="height: 60px;">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <h2 style="color: #333333;"> <strong>C&N Fashion</strong>, xin chào {user.group.name}</h2>
+                                        <p style="font-size: 16px; color: #555555;">
+                                           Dưới đây là mật khẩu của bạn, không cung cấp cho người khác:
+                                        </p>
+                                        <div style="text-align: center; margin: 30px 0;">
+                                            <span style="font-size: 32px; font-weight: bold; color: #2c3e50;">
+                                                {user.password}
+                                            </span>
+                                        </div>
+                                        <p style="font-size: 16px; color: #555555;">
+                                            Trân trọng,<br>
+                                            <strong>Đội ngũ C&N Fashion</strong>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="font-size: 12px; color: #aaaaaa; padding-top: 20px;">
+                                        © 2025 C&N Fashion. All rights reserved.<br>
+                                        <a href="mailto:cn.company.enterprise@gmail.com" style="color: #aaaaaa;">cn.company.enterprise@gmail.com</a> | Hotline: 0988 951 321
+                                    </td>
+                                </tr>
+                            </table>
+                        </body>
+                        </html>
+                        """
+        # gửi mail neu co queue
+        body_mail = f"Xin chào {user.group.name} mới, mật khẩu của bạn là  {user.password}"
+        if DevConfig.ENABLE_RABBITMQ_CONSUMER:
+            body = {
+                'type_action': TYPE_ACTION_SEND_MAIL['NEW_STAFF'],
+                'body_mail': body_mail,
+                'email': [email],
+                'html': html_content,
+                'title': title_mail
+            }
+            queue_mail = RabbitMQProducerSendMail()
+            queue_mail.call(body)
+        else:
+            msg = MessageMail(title_mail, recipients=[email])
+            msg.html = html_content
+            mail.send(msg)
 
         return send_result(message='Thành công')
 

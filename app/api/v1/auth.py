@@ -137,12 +137,12 @@ def refresh():
     user_id = get_jwt_identity()
     user = User.query.filter_by(id=user_id).first()
 
-    # list_permission = get_permissions(user)
+    list_permission = get_permissions(user)
     access_token = create_access_token(identity=user.id, expires_delta=ACCESS_EXPIRES, )
 
     # # Store the tokens in our store with a status of not currently revoked.
-    # Token.add_token_to_database(access_token, user_identity)
-    # Token.add_list_permission(user.id, list_permission)
+    Token.add_token_to_database(access_token, user_id)
+    Token.add_list_permission(user.id, list_permission)
 
     data = {
         'access_token': access_token

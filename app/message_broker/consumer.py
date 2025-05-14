@@ -49,7 +49,7 @@ class RabbitMQConsumerSendMailConsumer(BaseRabbitMQConsumer):
         email = message.get('email')
         if type_action in[TYPE_ACTION_SEND_MAIL['REGISTER'], TYPE_ACTION_SEND_MAIL['OPEN_ACCOUNT'],
                           TYPE_ACTION_SEND_MAIL['UPDATE_ACCOUNT'], TYPE_ACTION_SEND_MAIL['FORGET_PASS'],
-                          TYPE_ACTION_SEND_MAIL['NEW_PASSWORD']] and email:
+                          TYPE_ACTION_SEND_MAIL['NEW_PASSWORD'], TYPE_ACTION_SEND_MAIL['NEW_STAFF']] and email:
 
             email =  message.get('email')
             html = message.get('html', None)
