@@ -183,7 +183,7 @@ def send_email_template_old(recipient: str, title: str, template: str, data_fill
 def convert_to_datetime(date_str):
     try:
         # Chuyển chuỗi thành datetime với định dạng "dd/MM/yyyy"
-        return datetime.datetime.strptime(date_str, "%d/%m/%Y")
+        return datetime.datetime.strptime(date_str, "%Y-%m-%d")
     except ValueError:
         # Trả về None nếu định dạng không đúng
         return None
