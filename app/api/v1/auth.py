@@ -199,6 +199,7 @@ def register():
         code = VerityCode(id=str(uuid()), user_id=user.id, code=code_out_put, limit=get_timestamp_now() + 5 * 60)
         db.session.add(code)
         db.session.flush()
+        # <img src="{DevConfig.BASE_URL_WEBSITE}/logo.png" alt="C&N Fashion" style="height: 60px;">
 
         title_mail = 'MÃ XÁC THỰC ĐĂNG KÝ TÀI KHOẢN C&N'
         html_content = f"""
@@ -212,7 +213,8 @@ def register():
                     <table align="center" width="100%" style="max-width: 600px; background-color: #ffffff; padding: 20px; border-radius: 8px;">
                         <tr>
                             <td align="center" style="padding-bottom: 20px;">
-                                <img src="{DevConfig.BASE_URL_WEBSITE}/logo.png" alt="C&N Fashion" style="height: 60px;">
+                                <img src="https://cc6b-1-55-188-41.ngrok-free.app/files/image/5382b5d6-d261-46a0-935f-602344dce9b7.jpg" alt="C&N Fashion" style="height: 60px;">
+
                             </td>
                         </tr>
                         <tr>
