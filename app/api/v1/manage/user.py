@@ -97,11 +97,6 @@ def new():
                         <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0;">
                             <table align="center" width="100%" style="max-width: 600px; background-color: #ffffff; padding: 20px; border-radius: 8px;">
                                 <tr>
-                                    <td align="center" style="padding-bottom: 20px;">
-                                        <img src="{DevConfig.BASE_URL_WEBSITE}/logo.png" alt="C&N Fashion" style="height: 60px;">
-                                    </td>
-                                </tr>
-                                <tr>
                                     <td>
                                         <h2 style="color: #333333;"> <strong>C&N Fashion</strong>, xin chào {user.group.name}</h2>
                                         <p style="font-size: 16px; color: #555555;">
