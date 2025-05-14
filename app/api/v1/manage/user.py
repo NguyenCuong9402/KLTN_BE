@@ -79,7 +79,6 @@ def new():
 
         json_body['password'] = generate_password()
 
-        json_body['status'] = 0 # Khi nào User đăng nhập sẽ được kích hoạt
         user = User(id=str(uuid()),**json_body)
 
         db.session.add(user)
