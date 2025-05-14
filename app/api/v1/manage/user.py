@@ -12,7 +12,7 @@ from sqlalchemy import extract
 from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, ATTENDANCE, USER_KEY_GROUP
 from app.extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.api.helper import send_result, send_error, convert_to_datetime
+from app.api.helper import send_result, send_error, convert_to_datetime, Token
 from app.gateway import authorization_require
 from app.models import User, Group, Files, Address, Attendance
 from app.utils import trim_dict, escape_wildcard, get_timestamp_now, generate_password
@@ -138,6 +138,10 @@ def update_staff(profile_id):
     if check_group.key in KEY_GROUP_NOT_STAFF:
         return send_error(message='Chức vụ không phù hợp')
 
+    if user.group_id != check_group.id:
+        Token.revoke_all_token(user.id)
+
+
     for key, value in json_body.items():
         # Kiểm tra nếu trường đó tồn tại trong đối tượng User (tránh trường không hợp lệ)
         if hasattr(user, key):
@@ -145,6 +149,9 @@ def update_staff(profile_id):
 
         # Lưu thay đổi vào cơ sở dữ liệu
     db.session.commit()
+
+    if user.finish_date and user.finish_date < date.today():
+        Token.revoke_all_token(user.id)
 
     # Check finish date nếu hết hạn thì xóa token trển redis
     
@@ -166,6 +173,9 @@ def active_user(user_id):
         db.session.flush()
         db.session.refresh(user)
         db.session.commit()
+
+        if not user.is_active:
+            Token.revoke_all_token(user.id)
 
         # Xác định trạng thái mở/khoá
         status = "mở" if user.is_active else "khóa"
