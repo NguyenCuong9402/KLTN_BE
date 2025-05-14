@@ -51,7 +51,7 @@ def create_app(config_object=CONFIG):
             scheduler.add_job(
                 backup_data,
                 trigger='interval',
-                minutes=2,
+                minutes=5,
                 id='backup_data',
                 misfire_grace_time=30
             )
@@ -60,9 +60,30 @@ def create_app(config_object=CONFIG):
 
 
     elif config_object.ENV == 'stg':
-        scheduler.add_job(resolved_orders, trigger='interval', minutes=1)
-        scheduler.add_job(attendance, trigger='interval', minutes=2)
-        scheduler.add_job(backup_data, trigger='interval', minutes=1)
+        if not scheduler.get_job('resolved_orders'):
+            scheduler.add_job(
+                resolved_orders,
+                trigger='interval',
+                minute=3,
+                id='resolved_orders',
+                misfire_grace_time=60
+            )
+        if not scheduler.get_job('attendance'):
+            scheduler.add_job(
+                attendance,
+                trigger='interval',
+                minute=10,
+                id='attendance',
+                misfire_grace_time=60
+            )
+        if not scheduler.get_job('backup_data'):
+            scheduler.add_job(
+                backup_data,
+                trigger='interval',
+                minutes=5,
+                id='backup_data',
+                misfire_grace_time=30
+            )
 
 
     # Run webhook bot tele
