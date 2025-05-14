@@ -98,7 +98,9 @@ def new():
                             <table align="center" width="100%" style="max-width: 600px; background-color: #ffffff; padding: 20px; border-radius: 8px;">
                                 <tr>
                                     <td align="center" style="padding-bottom: 20px;">
-                                        <img src="{DevConfig.BASE_URL_WEBSITE}/logo.png" alt="C&N Fashion" style="height: 60px;">
+                                        # <img src="{DevConfig.BASE_URL_WEBSITE}/logo.png" alt="C&N Fashion" style="height: 60px;">
+                                        <img src="https://cc6b-1-55-188-41.ngrok-free.app/files/image/5382b5d6-d261-46a0-935f-602344dce9b7.jpg" alt="C&N Fashion" style="height: 60px;">
+
                                     </td>
                                 </tr>
                                 <tr>
@@ -121,7 +123,7 @@ def new():
                                 <tr>
                                     <td align="center" style="font-size: 12px; color: #aaaaaa; padding-top: 20px;">
                                         © 2025 C&N Fashion. All rights reserved.<br>
-                                        <a href="mailto:cn.company.enterprise@gmail.com" style="color: #aaaaaa;">cn.company.enterprise@gmail.com</a> | Hotline: 0988 951 321
+                                        <a href="{DevConfig.BASE_URL_WEBSITE}" style="color: #aaaaaa;">cn.company.enterprise@gmail.com</a> | Hotline: 0988 951 321
                                     </td>
                                 </tr>
                             </table>
