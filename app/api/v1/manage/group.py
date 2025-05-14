@@ -1,8 +1,4 @@
-import json
-
-from flask import Blueprint, request, make_response, send_file, Response
-from flask_jwt_extended import get_jwt_identity, jwt_required
-from marshmallow import ValidationError
+from flask import Blueprint, request
 from sqlalchemy import asc, desc
 
 from sqlalchemy_pagination import paginate
@@ -11,8 +7,8 @@ from app.api.helper import send_result, send_error
 from app.enums import KEY_GROUP_NOT_STAFF
 from app.gateway import authorization_require
 from app.models import Group
-from app.utils import trim_dict, escape_wildcard
-from app.validator import GroupSchema, QueryParamsAllSchema
+from app.utils import escape_wildcard
+from app.validator import GroupSchema
 
 api = Blueprint('group', __name__)
 

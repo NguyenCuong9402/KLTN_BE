@@ -1,8 +1,7 @@
-import json
 from shortuuid import uuid
 from flask import Blueprint, request
-from flask_jwt_extended import get_jwt_identity, jwt_required
-from sqlalchemy import asc, desc
+from flask_jwt_extended import get_jwt_identity
+from sqlalchemy import asc
 
 from app.api.helper import send_result, send_error
 from app.enums import regions, TYPE_PAYMENT_ONLINE
@@ -11,8 +10,7 @@ from app.models import db, User, SessionOrder, SessionOrderCartItems, Orders, Or
     PriceShip, Shipper, PaymentOnline
 from app.signal import handle_orders_notification
 from app.utils import get_timestamp_now, trim_dict
-from app.validator import CartSchema, SessionSchema, ShipperSchema, AddressOrderSchema, PaymentValidation, \
-    SessionOrderValidate
+from app.validator import SessionSchema, ShipperSchema, AddressOrderSchema, SessionOrderValidate
 
 api = Blueprint('session_order', __name__)
 

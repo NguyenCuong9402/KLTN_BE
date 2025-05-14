@@ -1,14 +1,12 @@
 import json
 import typing
-from datetime import date
 
 from marshmallow import Schema, fields, validate, ValidationError, types, pre_load, validates_schema
 from sqlalchemy import desc, asc
 
 from app.enums import TYPE_REACTION, TYPE_PAYMENT_ONLINE, TYPE_PAYMENT
-from app.extensions import db
 from app.models import Reaction, Comment
-from app.utils import REGEX_EMAIL, REGEX_VALID_PASSWORD, REGEX_FULLNAME_VIETNAMESE, REGEX_PHONE_NUMBER
+from app.utils import REGEX_EMAIL, REGEX_VALID_PASSWORD, REGEX_PHONE_NUMBER
 
 # Validator
 class BaseValidation(Schema):

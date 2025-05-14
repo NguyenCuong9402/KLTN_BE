@@ -1,8 +1,5 @@
-import json
-from shortuuid import uuid
-from flask import Blueprint, request
-from marshmallow import ValidationError
-from sqlalchemy import desc, asc, or_
+from flask import Blueprint
+from sqlalchemy import asc
 from app.api.helper import send_result, send_error
 from app.models import Region
 from app.validator import ShipperSchema

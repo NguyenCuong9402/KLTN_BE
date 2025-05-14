@@ -1,4 +1,3 @@
-import json
 from datetime import timedelta, datetime
 
 from shortuuid import uuid
@@ -7,10 +6,9 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, get_raw_jwt, jwt_refresh_token_required, jwt_required)
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.enums import GROUP_KEY_PARAM, GROUP_ADMIN_KEY, GROUP_USER_KEY, \
+from app.enums import GROUP_KEY_PARAM, GROUP_USER_KEY, \
     TYPE_ACTION_SEND_MAIL
-from app.api.helper import get_permissions, CONFIG, send_email_template, get_roles_key, Token, convert_to_datetime, \
-    get_user_id_request
+from app.api.helper import get_permissions,get_user_id_request
 from app.api.helper import send_error, send_result, Token
 from app.extensions import jwt, db
 from app.gateway import authorization_require
@@ -23,7 +21,7 @@ from app.extensions import mail
 from app.validator import UserSchema, AuthValidation, PasswordValidation, RegisterValidation
 from flask_mail import Message as MessageMail
 
-ACCESS_EXPIRES = timedelta(days=1)
+ACCESS_EXPIRES = timedelta(minutes=20)
 REFRESH_EXPIRES = timedelta(days=31)
 # ACCESS_EXPIRES = timedelta(seconds=30)
 # REFRESH_EXPIRES = timedelta(minutes=2)

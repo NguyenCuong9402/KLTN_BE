@@ -1,13 +1,12 @@
 import datetime
-import os
 import pickle
 from typing import List
-from flask import jsonify, request
+from flask import jsonify
 from flask_jwt_extended import decode_token, get_jwt_identity, verify_jwt_in_request_optional
 from flask_mail import Message as MessageMail
 from jinja2 import Template
 
-from app.extensions import mail, red, db, mongo_db
+from app.extensions import mail, red
 from app.models import User, GroupRole, RolePermission, Role
 from app.settings import DevConfig
 from app.utils import get_timestamp_now, no_accent_vietnamese

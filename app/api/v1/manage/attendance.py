@@ -1,10 +1,9 @@
 import io
-import json
 from flask import send_file
 
 import xlsxwriter
 from shortuuid import uuid
-from datetime import datetime, date, time
+from datetime import datetime, date
 
 from flask import Blueprint, request
 from marshmallow import ValidationError
@@ -13,15 +12,14 @@ from sqlalchemy_pagination import paginate
 from sqlalchemy import or_
 from sqlalchemy import extract
 
-from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, ATTENDANCE, USER_KEY_GROUP, WORK_UNIT_TYPE
+from app.enums import ADMIN_KEY_GROUP, ATTENDANCE
 from app.extensions import db
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.api.helper import send_result, send_error, convert_to_datetime
+from flask_jwt_extended import get_jwt_identity
+from app.api.helper import send_result, send_error
 from app.gateway import authorization_require
-from app.models import User, Group, Files, Address, Attendance
-from app.utils import trim_dict, escape_wildcard, get_timestamp_now, generate_password, find_attendance_data, \
-    save_attendance_data
-from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema, AttendanceSchema, QueryTimeSheetSchema
+from app.models import User, Group, Attendance
+from app.utils import escape_wildcard, find_attendance_data
+from app.validator import UserSchema, AttendanceSchema, QueryTimeSheetSchema
 
 api = Blueprint('manage/attendance', __name__)
 
@@ -352,26 +350,6 @@ def export():
                 existing_data = find_attendance_data(staff['id'], time_str)
                 if existing_data:
                     data = existing_data
-                # else:
-                #     attendances = Attendance.query.filter(
-                #         Attendance.user_id == staff['id'],
-                #         extract("month", Attendance.work_date) == month,
-                #         extract("year", Attendance.work_date) == year
-                #     ).order_by(Attendance.work_date.asc()).all()
-                #     data['number_work_date'] = len(attendances)
-                #     for attendance in attendances:
-                #         if attendance.work_unit in list(WORK_UNIT_TYPE.values()):
-                #             data['work_unit'] += 1
-                #         if attendance.check_in:
-                #             check_in_dt = datetime.combine(base_date, attendance.check_in)
-                #             if check_in_dt > check_in_attendance:
-                #                 data['work_later_and_leave_early'] += 1
-                #             if not attendance.check_out:
-                #                 data['forget_checkout'] += 1
-                #             else:
-                #                 check_out_dt = datetime.combine(base_date, attendance.check_out)
-                #                 if check_out_dt < check_out_attendance:
-                #                     data['work_later_and_leave_early'] += 1
 
             staff['time_keeping'] = data
         ### Viết csv
@@ -386,10 +364,6 @@ def export():
         format_cell_bold = workbook.add_format({'font_name': 'Times New Roman', 'bold': True, 'font_size': 11,
                                                 'align': 'center', 'valign': 'vcenter',
                                                 'bg_color': '#92d050', 'border': 1})
-        format_cell_not_bold = workbook.add_format({'font_name': 'Times New Roman', 'font_size': 11, 'border': 1,
-                                                    'align': 'center', 'valign': 'vcenter', 'bg_color': '#92d050'})
-        format_cell = workbook.add_format({'font_name': 'Times New Roman', 'font_size': 11, 'border': 1,
-                                           'align': 'center', 'valign': 'vcenter'})
         center_format = workbook.add_format({'align': 'center', 'font_name': 'Times New Roman', 'border': 1,
                                              'valign': 'vcenter'})
 

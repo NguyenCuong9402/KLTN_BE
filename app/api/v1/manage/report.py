@@ -1,18 +1,16 @@
-from shortuuid import uuid
 from flask import Blueprint, request
 from marshmallow import ValidationError
 from sqlalchemy import desc, asc
 from sqlalchemy_pagination import paginate
 
-from app.enums import TYPE_FILE_LINK, REPORT_ORDER_TYPE
+from app.enums import REPORT_ORDER_TYPE
 from app.extensions import db
 
 from app.api.helper import send_result, send_error
 from app.gateway import authorization_require
-from app.models import FileLink, OrderReport, User
-from app.utils import trim_dict, get_timestamp_now, escape_wildcard
-from app.validator import ReportValidation, OrderReportSchema, QueryParamsOrderSchema
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from app.models import OrderReport
+from app.utils import escape_wildcard
+from app.validator import OrderReportSchema, QueryParamsOrderSchema
 
 api = Blueprint('report', __name__)
 

@@ -1,7 +1,5 @@
-import json
-import os
 from flask import Blueprint, request
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity
 from marshmallow import ValidationError
 from sqlalchemy import asc, desc
 
@@ -10,7 +8,7 @@ from sqlalchemy_pagination import paginate
 from app.api.helper import send_result, send_error
 from app.enums import STATUS_ORDER
 from app.gateway import authorization_require
-from app.models import db, Product, User, Orders
+from app.models import db, User, Orders
 from app.utils import escape_wildcard
 from app.validator import OrderSchema, QueryParamsOrderSchema
 

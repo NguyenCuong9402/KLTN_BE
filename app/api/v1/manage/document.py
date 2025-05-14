@@ -2,9 +2,9 @@ import os
 
 from shortuuid import uuid
 from flask import Blueprint, request
-from sqlalchemy import desc, asc
+from sqlalchemy import asc
 
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 from werkzeug.utils import secure_filename
 
 from app.api.helper import send_result, send_error

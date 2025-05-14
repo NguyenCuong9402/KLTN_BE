@@ -1,22 +1,19 @@
-import json
 from shortuuid import uuid
-from datetime import datetime, date, time
+from datetime import date
 
 from flask import Blueprint, request
 from marshmallow import ValidationError
 from sqlalchemy import desc, asc
 from sqlalchemy_pagination import paginate
 from sqlalchemy import or_
-from sqlalchemy import extract
 
-from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, ATTENDANCE, USER_KEY_GROUP
+from app.enums import ADMIN_KEY_GROUP, KEY_GROUP_NOT_STAFF, USER_KEY_GROUP
 from app.extensions import db
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.api.helper import send_result, send_error, convert_to_datetime, Token
 from app.gateway import authorization_require
-from app.models import User, Group, Files, Address, Attendance
-from app.utils import trim_dict, escape_wildcard, get_timestamp_now, generate_password
-from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema, AttendanceSchema
+from app.models import User, Group, Files, Address
+from app.utils import trim_dict, escape_wildcard, generate_password
+from app.validator import StaffValidation, QueryParamsAllSchema, UserSchema
 
 api = Blueprint('manage/user', __name__)
 

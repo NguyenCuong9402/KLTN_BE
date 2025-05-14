@@ -1,17 +1,15 @@
-import json
 from shortuuid import uuid
 from flask import Blueprint, request
 from marshmallow import ValidationError
-from sqlalchemy import desc, asc, or_
+from sqlalchemy import desc, asc
 from sqlalchemy_pagination import paginate
 
 from app.extensions import db
-from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.api.helper import send_result, send_error
 from app.gateway import authorization_require
 from app.models import Shipper, PriceShip
-from app.utils import trim_dict, escape_wildcard, get_timestamp_now
-from app.validator import ProductValidation, QueryParamsAllSchema, ShipperSchema, ShipperValidation
+from app.utils import trim_dict, escape_wildcard
+from app.validator import QueryParamsAllSchema, ShipperSchema, ShipperValidation
 
 api = Blueprint('manage/shipper', __name__)
 

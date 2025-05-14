@@ -1,4 +1,3 @@
-import json
 from operator import or_
 
 from flask import Blueprint, request
@@ -8,7 +7,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
-from app.models import TypeProduct, Product
+from app.models import TypeProduct
 from app.utils import escape_wildcard
 from app.validator import TypeProductWithChildrenSchema, TypeProductSchema, ParamTypeProduct
 

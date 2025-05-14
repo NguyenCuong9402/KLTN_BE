@@ -5,7 +5,6 @@ from flask import current_app
 
 from app.enums import TYPE_ACTION_SEND_MAIL
 from app.settings import DevConfig
-import os
 from flask_mail import Message as MessageMail
 from app.extensions import mail
 

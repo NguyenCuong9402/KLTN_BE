@@ -1,5 +1,5 @@
 
-from flask import Blueprint, request
+from flask import Blueprint
 from sqlalchemy import asc
 
 from app.api.helper import send_error, send_result, Token

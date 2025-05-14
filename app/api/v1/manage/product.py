@@ -1,18 +1,13 @@
-import json
 from shortuuid import uuid
 from flask import Blueprint, request
-from marshmallow import ValidationError
-from sqlalchemy import desc, asc
-from sqlalchemy_pagination import paginate
 
 from app.enums import TYPE_FILE_LINK
 from app.extensions import db
-from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.api.helper import send_result, send_error
 from app.gateway import authorization_require
 from app.models import Product, Size, Color, \
     FileLink
-from app.utils import trim_dict, escape_wildcard, get_timestamp_now
+from app.utils import trim_dict, get_timestamp_now
 from app.validator import ProductValidation
 
 api = Blueprint('manage/product', __name__)

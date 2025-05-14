@@ -1,13 +1,12 @@
 from flask import Blueprint, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import asc
 
 from app.api.helper import send_error, send_result, Token
-from app.enums import regions
 from app.gateway import authorization_require
 from app.models import Address, User, AddressOrder
 from shortuuid import uuid
-from app.extensions import jwt, db
+from app.extensions import db
 from app.validator import AddressOrderSchema
 
 api = Blueprint('address', __name__)

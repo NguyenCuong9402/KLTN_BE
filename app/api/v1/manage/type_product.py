@@ -1,6 +1,3 @@
-import json
-
-from dns.e164 import query
 from shortuuid import uuid
 from flask import Blueprint, request
 from marshmallow import ValidationError
@@ -8,13 +5,11 @@ from sqlalchemy import desc, asc, or_
 from sqlalchemy_pagination import paginate
 
 from app.extensions import db
-from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.api.helper import send_result, send_error
 from app.gateway import authorization_require
 from app.models import TypeProduct, Product
-from app.utils import trim_dict, escape_wildcard, get_timestamp_now
-from app.validator import ProductValidation, ProductSchema, QueryParamsSchema, TypeProductValidation, \
-    QueryParamsAllSchema, TypeProductSchema, ParamTypeProduct
+from app.utils import trim_dict, escape_wildcard
+from app.validator import TypeProductValidation, QueryParamsAllSchema, TypeProductSchema
 
 api = Blueprint('manage/type_product', __name__)
 

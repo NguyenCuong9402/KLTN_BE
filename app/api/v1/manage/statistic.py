@@ -1,14 +1,14 @@
 import json
 from collections import defaultdict
-from datetime import datetime, timezone, date, timedelta
+from datetime import datetime, timezone
 from sqlalchemy import cast, Integer, BigInteger, case, text, and_, extract
 from dateutil.relativedelta import relativedelta
 from flask import Blueprint, request
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import asc, desc, func
 
 from app.api.helper import send_result, send_error
-from app.enums import KEY_GROUP_NOT_STAFF, STATUS_ORDER, ATTENDANCE, WORK_UNIT_TYPE
+from app.enums import  STATUS_ORDER, ATTENDANCE, WORK_UNIT_TYPE
 from app.extensions import db
 from app.gateway import authorization_require
 from app.models import Group, TypeProduct, Product, Shipper, Orders, User, Article, OrderItems, Files, FileLink, \

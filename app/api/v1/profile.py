@@ -1,6 +1,3 @@
-import json
-import uuid
-from datetime import timedelta
 from flask import Blueprint, request
 from flask_jwt_extended import (get_jwt_identity, jwt_required)
 from marshmallow import ValidationError
@@ -8,15 +5,12 @@ from sqlalchemy import desc, asc
 from sqlalchemy_pagination import paginate
 
 from app.enums import  GROUP_KEY_PARAM
-from app.api.helper import get_permissions, CONFIG, send_email_template, get_roles_key, Token, convert_to_datetime, \
-    get_user_id_request
+from app.api.helper import convert_to_datetime, get_user_id_request
 from app.api.helper import send_error, send_result
-from app.extensions import jwt, db
+from app.extensions import db
 from app.gateway import authorization_require
 from app.models import User, Address, Article, Community
-from app.utils import trim_dict, get_timestamp_now, data_preprocessing, generate_random_number_string, \
-    body_mail, escape_wildcard
-from app.extensions import mail
+from app.utils import trim_dict, escape_wildcard
 
 from app.validator import UserSchema, UserValidation, QueryParamsArticleSchema, ArticleSchema
 

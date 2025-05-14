@@ -3,7 +3,7 @@ from functools import wraps
 
 from flask import request
 from flask_jwt_extended import (
-    verify_jwt_in_request, get_jwt_claims, get_jwt_identity
+    verify_jwt_in_request, get_jwt_identity
 )
 
 from app.api.helper import send_error

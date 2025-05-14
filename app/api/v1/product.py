@@ -1,26 +1,15 @@
-import json
-import os
-import uuid
-from uuid import uuid4
-
-from flask import Blueprint, request, make_response, send_file, Response
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask import Blueprint, request
 from marshmallow import ValidationError
 from sqlalchemy import asc, desc
-from io import BytesIO
-import datetime
-import io
 
 from sqlalchemy_pagination import paginate
-from werkzeug.utils import secure_filename
 
 from app.api.helper import send_result, send_error
 from app.enums import PROMPT_AI
 from app.gateway import authorization_require
 from app.generativeai import search_ai
 from app.models import db, Product, TypeProduct
-from app.settings import DevConfig
-from app.utils import trim_dict, escape_wildcard
+from app.utils import escape_wildcard
 from app.validator import ProductSchema, QueryParamsSchema
 
 api = Blueprint('product', __name__)

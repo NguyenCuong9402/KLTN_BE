@@ -1,9 +1,7 @@
 import os
 from dotenv import load_dotenv
-
-os_env = os.environ
-
 import logging
+
 logger = logging.getLogger('app')
 logger.setLevel(logging.DEBUG)
 

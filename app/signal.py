@@ -1,10 +1,9 @@
 from shortuuid import uuid
 from sqlalchemy import desc
-from sqlalchemy.event import listens_for
 
 from app.enums import NOTIFY_TYPE, CONTENT_TYPE, TYPE_REACTION
 from app.extensions import db
-from app.models import Article, Comment, Reaction, Orders, Product, Notify, NotifyDetail, User
+from app.models import Article, Comment, Notify, NotifyDetail, User
 from app.utils import get_timestamp_now, sendMessage
 
 

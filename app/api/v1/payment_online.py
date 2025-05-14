@@ -1,4 +1,4 @@
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 from shortuuid import uuid
 from flask import Blueprint, request
 from app.api.helper import send_result, send_error, CONFIG
@@ -13,7 +13,7 @@ import requests
 from app.gateway import authorization_require
 from app.models import PaymentOnline, User, SessionOrder, Shipper, AddressOrder, PriceShip
 from app.utils import get_timestamp_now, trim_dict
-from app.validator import ProductValidation, PaymentValidation, PaymentOnlineSchema
+from app.validator import PaymentValidation, PaymentOnlineSchema
 
 api = Blueprint('payment_online', __name__)
 

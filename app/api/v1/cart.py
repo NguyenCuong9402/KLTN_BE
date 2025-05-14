@@ -1,10 +1,8 @@
-import json
 from shortuuid import uuid
 from flask import Blueprint, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from marshmallow import ValidationError
 from sqlalchemy import asc, desc
-from datetime import datetime
 from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error

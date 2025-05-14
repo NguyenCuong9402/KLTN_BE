@@ -1,22 +1,20 @@
-import json
-from datetime import timedelta, datetime
+from datetime import timedelta
 
 from dateutil.relativedelta import relativedelta
 from marshmallow import ValidationError
-from shortuuid import uuid
 from flask import Blueprint, request
 from sqlalchemy import desc, asc, or_
 from sqlalchemy_pagination import paginate
 
 from app.enums import STATUS_ORDER
 from app.extensions import db
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt_identity
 from app.api.helper import send_result, send_error
 from app.gateway import authorization_require
 from app.models import Orders, User
 from app.signal import handle_ship_orders_notification
 from app.utils import escape_wildcard, get_timestamp_now, get_datetime_now
-from app.validator import OrderSchema, QueryParamsOrderSchema, QueryParamsManageOrderSchema
+from app.validator import OrderSchema, QueryParamsManageOrderSchema
 
 api = Blueprint('manage/order', __name__)
 

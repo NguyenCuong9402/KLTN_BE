@@ -2,7 +2,7 @@ from shortuuid import uuid
 from flask import Blueprint, request
 from app.enums import TYPE_REACTION
 from app.extensions import db
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity
 from app.api.helper import send_result, send_error
 from app.gateway import authorization_require
 from app.models import Reaction, Article, Comment

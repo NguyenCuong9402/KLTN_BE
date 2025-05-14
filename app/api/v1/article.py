@@ -1,21 +1,19 @@
-import json
 from shortuuid import uuid
 from flask import Blueprint, request
 from marshmallow import ValidationError
 from sqlalchemy import desc, asc
-from sqlalchemy.sql.visitors import replacement_traverse
 from sqlalchemy_pagination import paginate
 
 from app.enums import LAYER_COMMENT
 from app.extensions import db
-from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request_optional
+from flask_jwt_extended import get_jwt_identity
 from app.api.helper import send_result, send_error, get_user_id_request
 from app.gateway import authorization_require
 from app.models import User, Article, Community, Product, ArticleTagProduct, Comment
 from app.signal import handle_article_notification
-from app.utils import trim_dict, escape_wildcard, get_timestamp_now
-from app.validator import ProductValidation, ArticleSchema, QueryParamsAllSchema, ArticleValidate, \
-    QueryParamsArticleSchema, CommentParamsValidation, CommentSchema
+from app.utils import trim_dict, escape_wildcard
+from app.validator import (ArticleSchema, ArticleValidate,
+                           QueryParamsArticleSchema, CommentParamsValidation, CommentSchema)
 
 api = Blueprint('article', __name__)
 

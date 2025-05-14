@@ -1,14 +1,12 @@
-import json
-
 from flask import Blueprint, request
-from sqlalchemy import asc, desc
+from sqlalchemy import asc
 from sqlalchemy_pagination import paginate
 
 from app.api.helper import send_result, send_error
-from app.models import Community, Article
+from app.models import Community
 from app.settings import DevConfig
 from app.utils import escape_wildcard
-from app.validator import CommunitySchema, QueryParamsAllSchema, ArticleSchema
+from app.validator import CommunitySchema
 
 api = Blueprint('community', __name__)
 
