@@ -84,6 +84,7 @@ def new():
         db.session.add(user)
         db.session.flush()
         db.session.commit()
+        # <img src="{DevConfig.BASE_URL_WEBSITE}/logo.png" alt="C&N Fashion" style="height: 60px;">
 
         #send mail
         title_mail = f'CẤP TÀI KHOẢN C&N'
@@ -98,9 +99,7 @@ def new():
                             <table align="center" width="100%" style="max-width: 600px; background-color: #ffffff; padding: 20px; border-radius: 8px;">
                                 <tr>
                                     <td align="center" style="padding-bottom: 20px;">
-                                        # <img src="{DevConfig.BASE_URL_WEBSITE}/logo.png" alt="C&N Fashion" style="height: 60px;">
                                         <img src="https://cc6b-1-55-188-41.ngrok-free.app/files/image/5382b5d6-d261-46a0-935f-602344dce9b7.jpg" alt="C&N Fashion" style="height: 60px;">
-
                                     </td>
                                 </tr>
                                 <tr>
