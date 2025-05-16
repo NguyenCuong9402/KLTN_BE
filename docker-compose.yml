@@ -130,3 +130,9 @@ volumes:
   grafana-data:
 networks:
   prd-kltn:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: "fd00:dead:beef::/64"
