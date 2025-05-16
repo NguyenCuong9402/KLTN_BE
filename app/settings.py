@@ -103,6 +103,7 @@ class DevConfig(Config):
     #BOT TELE
 
     TOKEN_BOT_TELE = os.environ.get("TOKEN_BOT_TELE", "7572579273:AAHnb4pnCs8OUthEP0tbJ68yB6v8uNT60Fw")
+    IP_CONFIG = os.environ.get("IP_CONFIG", None)
 
 
     #Minios3

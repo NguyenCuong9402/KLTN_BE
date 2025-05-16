@@ -9,14 +9,7 @@ from app.models import Community
 from app.settings import DevConfig
 from app.utils import escape_wildcard
 from app.validator import CommunitySchema
-def get_public_ipv6():
-    try:
-        response = requests.get("https://api64.ipify.org", timeout=3)
-        if response.status_code == 200:
-            return response.text.strip()
-    except Exception as e:
-        print("Lỗi khi lấy IPv6:", e)
-    return None
+
 api = Blueprint('community', __name__)
 
 
@@ -71,7 +64,7 @@ def get_community(community_id):
 def get_community_test():
     client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
 
-    server_ip = get_public_ipv6()
+    server_ip = DevConfig.IP_CONFIG
     check = is_same_ipv6_subnet(server_ip, client_ip)
 
     data = {
