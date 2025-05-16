@@ -1,4 +1,3 @@
-import socket
 import ipaddress
 from flask import Blueprint, request
 from sqlalchemy import asc
@@ -9,26 +8,18 @@ from app.models import Community
 from app.settings import DevConfig
 from app.utils import escape_wildcard
 from app.validator import CommunitySchema
+import psutil
 
 import socket
-
-import netifaces
-
-def get_all_ips():
-    ips = []
-    for iface in netifaces.interfaces():
-        addrs = netifaces.ifaddresses(iface)
-        # IPv4
-        if netifaces.AF_INET in addrs:
-            for addr in addrs[netifaces.AF_INET]:
-                ips.append(addr['addr'])
-        # IPv6
-        if netifaces.AF_INET6 in addrs:
-            for addr in addrs[netifaces.AF_INET6]:
-                ips.append(addr['addr'].split('%')[0])  # loại bỏ scope id nếu có
-    return ips
-
-
+def get_local_ipv6_addresses():
+    ipv6s = []
+    addrs = psutil.net_if_addrs()
+    for iface, addrs_list in addrs.items():
+        for addr in addrs_list:
+            if addr.family == socket.AF_INET6:
+                ip = addr.address.split('%')[0]  # bỏ phần scope_id sau dấu %
+                ipv6s.append((iface, ip))
+    return ipv6s
 api = Blueprint('community', __name__)
 
 
@@ -85,12 +76,11 @@ def get_community_test():
 
     server_ip = "2402:800:61c3:35a3:44e5:d262:4e7c:41db"
     check = is_same_ipv6_subnet(server_ip, client_ip)
-    server_ip_check = get_all_ips()
 
     data = {
         'client_ip': client_ip,
         'server_ip': server_ip,
         'check': check,
-        'server_ip_check': server_ip_check
+        'ipv6': get_local_ipv6_addresses()
     }
     return send_result(data=data, message="Done")
