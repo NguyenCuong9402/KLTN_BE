@@ -1,6 +1,5 @@
 import socket
-from ipaddress import ip_address, IPv4Address, IPv4Network
-
+import ipaddress
 from flask import Blueprint, request
 from sqlalchemy import asc
 from sqlalchemy_pagination import paginate
@@ -13,37 +12,36 @@ from app.validator import CommunitySchema
 
 api = Blueprint('community', __name__)
 
-def get_client_ipv4(request):
-    ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+
+def is_same_subnet(ip1, ip2, subnet="255.255.255.0"):
+    # Chuyển đổi IP thành mạng và kiểm tra xem ip2 có trong mạng của ip1 không
     try:
-        ip_obj = ip_address(ip)
-        if isinstance(ip_obj, IPv4Address):
-            return str(ip_obj)
-    except:
-        return None
+        network = ipaddress.IPv4Network(f"{ip1}/{subnet}", strict=False)
+        return ipaddress.IPv4Address(ip2) in network
+    except ValueError:
+        return False
 
-def same_subnet(ip1, ip2, mask="255.255.255.0"):
-    net1 = IPv4Network(f"{ip1}/{mask}", strict=False)
-    return ip2 in net1
-
-def get_server_ip():
+def get_local_ip():
+    # Lấy địa chỉ IP của server
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.connect(("8.8.8.8", 80))
-        return s.getsockname()[0]
+        s.connect(("8.8.8.8", 80))  # Kết nối đến DNS Google để lấy IP
+        ip = s.getsockname()[0]
     except:
-        return "127.0.0.1"
+        ip = "127.0.0.1"
     finally:
         s.close()
-
+    return ip
 
 @api.route("", methods=["GET"])
 def get_all_community():
     try:
         text_search = request.args.get('text_search', "")
 
-        client_ip = get_client_ipv4(request)
-        server_ip = get_server_ip()
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+        request_remote = request.remote_addr
+
+        server_ip = get_local_ip()
 
         query = Community.query.filter()
 
@@ -65,8 +63,9 @@ def get_all_community():
             has_previous=paginator.has_previous,  # Có trang trước không
             has_next=paginator.has_next  # Có trang sau không
         )
-        return send_result(data=response_data, message=f"Client: {client_ip} "
-                                                       f"Server: {server_ip}")
+        return send_result(data=response_data, message=f"Client: {client_ip}"
+                                                       f" Server: {server_ip}"
+                                                       f"request_remote {request_remote}")
     except Exception as ex:
         return send_error(message=f"{DevConfig.SQLALCHEMY_DATABASE_URI}{str(ex)}")
 
