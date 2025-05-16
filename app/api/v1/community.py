@@ -12,17 +12,22 @@ from app.validator import CommunitySchema
 
 import socket
 
-def get_local_ip():
-    s = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)  # Dùng IPv6 socket
-    try:
-        # Kết nối đến DNS Google IPv6 để lấy IP hiện tại
-        s.connect(("2001:4860:4860::8888", 80))
-        ip = s.getsockname()[0]
-    except Exception:
-        ip = None
-    finally:
-        s.close()
-    return ip
+import netifaces
+
+def get_all_ips():
+    ips = []
+    for iface in netifaces.interfaces():
+        addrs = netifaces.ifaddresses(iface)
+        # IPv4
+        if netifaces.AF_INET in addrs:
+            for addr in addrs[netifaces.AF_INET]:
+                ips.append(addr['addr'])
+        # IPv6
+        if netifaces.AF_INET6 in addrs:
+            for addr in addrs[netifaces.AF_INET6]:
+                ips.append(addr['addr'].split('%')[0])  # loại bỏ scope id nếu có
+    return ips
+
 
 api = Blueprint('community', __name__)
 
@@ -40,13 +45,6 @@ def is_same_ipv6_subnet(ip1, ip2, prefix_length=64):
 def get_all_community():
     try:
         text_search = request.args.get('text_search', "")
-
-        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
-
-        server_ip = get_local_ip()
-
-
-        check = is_same_ipv6_subnet(server_ip, client_ip)
 
         query = Community.query.filter()
 
@@ -68,8 +66,7 @@ def get_all_community():
             has_previous=paginator.has_previous,  # Có trang trước không
             has_next=paginator.has_next  # Có trang sau không
         )
-        return send_result(data=response_data, message=f"Client: {client_ip}"
-                                                       f" Server: {server_ip} Check: {check}" )
+        return send_result(data=response_data, message="Oke")
     except Exception as ex:
         return send_error(message=f"{DevConfig.SQLALCHEMY_DATABASE_URI}{str(ex)}")
 
@@ -81,3 +78,19 @@ def get_community(community_id):
         return send_error(message="Nhóm không tồn tại, F5 lại web")
     data = CommunitySchema().dump(item)
     return send_result(data=data)
+
+@api.route("/test", methods=["GET"])
+def get_community_test():
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+
+    server_ip = "2402:800:61c3:35a3:44e5:d262:4e7c:41db"
+    check = is_same_ipv6_subnet(server_ip, client_ip)
+    server_ip_check = get_all_ips()
+
+    data = {
+        'client_ip': client_ip,
+        'server_ip': server_ip,
+        'check': check,
+        'server_ip_check': server_ip_check
+    }
+    return send_result(data=data, message="Done")

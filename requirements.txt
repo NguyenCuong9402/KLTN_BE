@@ -61,3 +61,4 @@ google-generativeai==0.8.4
 logger==1.4
 boto3==1.26.0
 prometheus_client==0.21.1
+netifaces
