@@ -26,25 +26,24 @@ def same_subnet(ip1, ip2, mask="255.255.255.0"):
     net1 = IPv4Network(f"{ip1}/{mask}", strict=False)
     return ip2 in net1
 
-def get_local_ip():
-    # Lấy địa chỉ IP của server
+def get_server_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.connect(("8.8.8.8", 80))  # Kết nối đến DNS Google để lấy IP
-        ip = s.getsockname()[0]
+        s.connect(("8.8.8.8", 80))
+        return s.getsockname()[0]
     except:
-        ip = "127.0.0.1"
+        return "127.0.0.1"
     finally:
         s.close()
-    return ip
+
 
 @api.route("", methods=["GET"])
 def get_all_community():
     try:
         text_search = request.args.get('text_search', "")
 
-        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
-        server_ip = get_local_ip()
+        client_ip = get_client_ipv4(request)
+        server_ip = get_server_ip()
 
         query = Community.query.filter()
 
