@@ -89,11 +89,35 @@ services:
       - minio
     environment:
       ENV_NAME: ${ENV_NAME}
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - prd-kltn
+    depends_on:
+      - app
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - prd-kltn
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
 volumes:
   db_data:
   rabbitmq_data:
   mongodb_data:
   cache:
   minio-data:
+  grafana-data:
 networks:
   prd-kltn:
