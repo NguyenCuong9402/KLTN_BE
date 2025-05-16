@@ -10,6 +10,20 @@ from app.settings import DevConfig
 from app.utils import escape_wildcard
 from app.validator import CommunitySchema
 
+import socket
+
+def get_local_ip():
+    s = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)  # Dùng IPv6 socket
+    try:
+        # Kết nối đến DNS Google IPv6 để lấy IP hiện tại
+        s.connect(("2001:4860:4860::8888", 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = None
+    finally:
+        s.close()
+    return ip
+
 api = Blueprint('community', __name__)
 
 
