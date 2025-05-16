@@ -43,7 +43,8 @@ def get_all_community():
 
         client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
 
-        server_ip = "2402:800:61c3:35a3:44e5:d262:4e7c:41db"
+        server_ip = get_local_ip()
+
 
         check = is_same_ipv6_subnet(server_ip, client_ip)
 
