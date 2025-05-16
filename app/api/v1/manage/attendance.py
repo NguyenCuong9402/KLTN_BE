@@ -34,14 +34,13 @@ api = Blueprint('manage/attendance', __name__)
 @authorization_require()
 def check_in():
     try:
+        if DevConfig.ENV == 'prd':
+            client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+            server_ip = DevConfig.IP_CONFIG
+            check_ip = is_same_ipv6_subnet(server_ip, client_ip)
 
-        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
-
-        server_ip = DevConfig.IP_CONFIG
-        check_ip = is_same_ipv6_subnet(server_ip, client_ip)
-
-        if not check_ip:
-            return send_error(message='Bạn đang kết nối mạng không hợp lệ.')
+            if not check_ip:
+                return send_error(message='Bạn đang kết nối mạng không hợp lệ.')
 
 
         user_id = get_jwt_identity()
@@ -88,13 +87,13 @@ def check_in():
 def check_out():
     try:
 
-        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+        if DevConfig.ENV == 'prd':
+            client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+            server_ip = DevConfig.IP_CONFIG
+            check_ip = is_same_ipv6_subnet(server_ip, client_ip)
 
-        server_ip = DevConfig.IP_CONFIG
-        check_ip = is_same_ipv6_subnet(server_ip, client_ip)
-
-        if not check_ip:
-            return send_error(message='Bạn đang kết nối mạng không hợp lệ.')
+            if not check_ip:
+                return send_error(message='Bạn đang kết nối mạng không hợp lệ.')
 
         user_id = get_jwt_identity()
 
