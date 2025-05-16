@@ -12,7 +12,15 @@ from .extensions import mongo_db, db
 from .generativeai import about_us, love_nhung
 from .settings import DevConfig
 import requests
+import ipaddress
 
+def is_same_ipv6_subnet(ip1, ip2, prefix_length=64):
+    try:
+        network = ipaddress.IPv6Network(f"{ip1}/{prefix_length}", strict=False)
+        ip2_addr = ipaddress.IPv6Address(ip2)
+        return ip2_addr in network
+    except ValueError:
+        return False
 
 class FieldString(fields.String):
     """

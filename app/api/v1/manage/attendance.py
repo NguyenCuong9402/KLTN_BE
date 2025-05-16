@@ -18,7 +18,8 @@ from flask_jwt_extended import get_jwt_identity
 from app.api.helper import send_result, send_error
 from app.gateway import authorization_require
 from app.models import User, Group, Attendance
-from app.utils import escape_wildcard, find_attendance_data
+from app.settings import DevConfig
+from app.utils import escape_wildcard, find_attendance_data, is_same_ipv6_subnet
 from app.validator import UserSchema, AttendanceSchema, QueryTimeSheetSchema
 
 
@@ -33,6 +34,16 @@ api = Blueprint('manage/attendance', __name__)
 @authorization_require()
 def check_in():
     try:
+
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+
+        server_ip = DevConfig.IP_CONFIG
+        check_ip = is_same_ipv6_subnet(server_ip, client_ip)
+
+        if not check_ip:
+            return send_error(message='Bạn đang kết nối mạng không hợp lệ.')
+
+
         user_id = get_jwt_identity()
 
         user = User.query.filter_by(id=user_id).first()

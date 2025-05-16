@@ -7,19 +7,13 @@ from sqlalchemy_pagination import paginate
 from app.api.helper import send_result, send_error
 from app.models import Community
 from app.settings import DevConfig
-from app.utils import escape_wildcard
+from app.utils import escape_wildcard, is_same_ipv6_subnet
 from app.validator import CommunitySchema
 
 api = Blueprint('community', __name__)
 
 
-def is_same_ipv6_subnet(ip1, ip2, prefix_length=64):
-    try:
-        network = ipaddress.IPv6Network(f"{ip1}/{prefix_length}", strict=False)
-        ip2_addr = ipaddress.IPv6Address(ip2)
-        return ip2_addr in network
-    except ValueError:
-        return False
+
 
 
 @api.route("", methods=["GET"])
