@@ -104,7 +104,7 @@ class DevConfig(Config):
 
     TOKEN_BOT_TELE = os.environ.get("TOKEN_BOT_TELE", "7572579273:AAHnb4pnCs8OUthEP0tbJ68yB6v8uNT60Fw")
     IP_CONFIG = os.environ.get("IP_CONFIG", None)
-
+    CHECK_IP_CONFIG = os.environ.get("CHECK_IP_CONFIG", "False").lower() == "true"
 
     #Minios3
     MINIO_ENDPOINT = os.environ.get("MINIO_ENDPOINT", "http://localhost:9000")

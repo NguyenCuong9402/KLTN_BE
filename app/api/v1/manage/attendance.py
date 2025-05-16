@@ -34,7 +34,7 @@ api = Blueprint('manage/attendance', __name__)
 @authorization_require()
 def check_in():
     try:
-        if DevConfig.ENV == 'prd':
+        if DevConfig.ENV == 'prd' and DevConfig.CHECK_IP_CONFIG:
             client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
             server_ip = DevConfig.IP_CONFIG
             check_ip = is_same_ipv6_subnet(server_ip, client_ip)
@@ -87,7 +87,7 @@ def check_in():
 def check_out():
     try:
 
-        if DevConfig.ENV == 'prd':
+        if DevConfig.ENV == 'prd' and DevConfig.CHECK_IP_CONFIG:
             client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
             server_ip = DevConfig.IP_CONFIG
             check_ip = is_same_ipv6_subnet(server_ip, client_ip)
