@@ -1,4 +1,5 @@
 import ipaddress
+import requests
 from flask import Blueprint, request
 from sqlalchemy import asc
 from sqlalchemy_pagination import paginate
@@ -8,18 +9,14 @@ from app.models import Community
 from app.settings import DevConfig
 from app.utils import escape_wildcard
 from app.validator import CommunitySchema
-import psutil
-
-import socket
-def get_local_ipv6_addresses():
-    ipv6s = []
-    addrs = psutil.net_if_addrs()
-    for iface, addrs_list in addrs.items():
-        for addr in addrs_list:
-            if addr.family == socket.AF_INET6:
-                ip = addr.address.split('%')[0]  # bỏ phần scope_id sau dấu %
-                ipv6s.append((iface, ip))
-    return ipv6s
+def get_public_ipv6():
+    try:
+        response = requests.get("https://api64.ipify.org", timeout=3)
+        if response.status_code == 200:
+            return response.text.strip()
+    except Exception as e:
+        print("Lỗi khi lấy IPv6:", e)
+    return None
 api = Blueprint('community', __name__)
 
 
@@ -74,13 +71,12 @@ def get_community(community_id):
 def get_community_test():
     client_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
 
-    server_ip = "2402:800:61c3:35a3:44e5:d262:4e7c:41db"
+    server_ip = get_public_ipv6()
     check = is_same_ipv6_subnet(server_ip, client_ip)
 
     data = {
         'client_ip': client_ip,
         'server_ip': server_ip,
         'check': check,
-        'ipv6': get_local_ipv6_addresses()
     }
     return send_result(data=data, message="Done")
