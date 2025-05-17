@@ -376,6 +376,67 @@ class ProductValidation(BaseValidation):
         error_messages={"required": "Mã loại sản phẩm không được để trống."}
     )
 
+
+class ProductUpdateValidation(BaseValidation):
+    files = fields.List(
+        fields.Dict(
+            keys=fields.Str(),
+            values=fields.Raw(),
+            validate=validate.Length(min=1, error="Dữ liệu tệp tin không được rỗng.")
+        ),
+        required=True,
+        validate=validate.Length(min=1, error="Danh sách tệp tin phải chứa ít nhất một mục."),
+        error_messages={"required": "Danh sách tệp tin không được để trống."}
+    )
+
+    sizes = fields.List(
+        fields.String(validate=validate.Length(min=1, error="Kích thước không được rỗng.")),
+        required=True,
+        validate=validate.Length(min=1, error="Phải chọn ít nhất một kích thước."),
+        error_messages={"required": "Danh sách kích thước không được để trống."}
+    )
+
+    colors = fields.List(
+        fields.String(validate=validate.Length(min=1, error="Màu sắc không được rỗng.")),
+        required=True,
+        validate=validate.Length(min=1, error="Phải chọn ít nhất một màu sắc."),
+        error_messages={"required": "Danh sách màu sắc không được để trống."}
+    )
+
+    original_price = fields.Float(
+        required=True,
+        error_messages={"required": "Giá gốc không được để trống."}
+    )
+
+    discount = fields.Integer(
+        allow_none=True,
+        default=0,
+        validate=validate.Range(min=0, max=100, error="Giảm giá phải từ 0 đến 100%."),
+        error_messages={"invalid": "Giảm giá phải là một số nguyên."}
+    )
+
+    discount_from_date = fields.Integer(
+        allow_none=True
+    )
+
+    discount_to_date = fields.Integer(
+        allow_none=True
+    )
+
+    name = fields.String(
+        required=True,
+        error_messages={"required": "Tên sản phẩm không được để trống."}
+    )
+
+    describe = fields.String(
+        allow_none=True
+    )
+
+    type_product_id = fields.String(
+        required=True,
+        error_messages={"required": "Mã loại sản phẩm không được để trống."}
+    )
+
 class StaffValidation(BaseValidation):
     email = fields.String(
         required=True,

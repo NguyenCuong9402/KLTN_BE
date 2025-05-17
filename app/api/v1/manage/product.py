@@ -8,7 +8,7 @@ from app.gateway import authorization_require
 from app.models import Product, Size, Color, \
     FileLink
 from app.utils import trim_dict, get_timestamp_now
-from app.validator import ProductValidation
+from app.validator import ProductValidation, ProductUpdateValidation
 
 api = Blueprint('manage/product', __name__)
 
@@ -89,12 +89,40 @@ def update_item(product_id):
     try:
 
         product = Product.query.filter(Product.id == product_id, Product.is_delete.is_(False)).first()
-
         if product is None:
             return send_error(message='Sản phẩm không tồn tại.')
 
+        json_req = request.get_json()
+        json_body = trim_dict(json_req)
+        validator_input = ProductUpdateValidation()
+        is_not_validate = validator_input.validate(json_body)
+        if is_not_validate:
+            return send_error(data=is_not_validate, message='Validate Error')
+
+        for key, value in json_body.items():
+            if hasattr(product, key):
+                setattr(product, key, value)
+
+        files = json_body.pop('files')
+        sizes = json_body.pop('sizes')
+        colors = json_body.pop('colors')
+
+        size_objects = [Size(id=str(uuid()), name=size, product_id=product.id, index=index,
+                             created_date=get_timestamp_now() + index) for index, size in enumerate(sizes)]
+        color_objects = [Color(id=str(uuid()), name=color, product_id=product.id, index=index,
+                               created_date=get_timestamp_now() + index) for index, color in enumerate(colors)]
+        db.session.bulk_save_objects(size_objects)
+        db.session.bulk_save_objects(color_objects)
+        db.session.flush()
+
+        file_objects = [FileLink(id=str(uuid()), table_id=product.id, file_id=file["id"],
+                                 table_type=TYPE_FILE_LINK.get('PRODUCT', 'product'),
+                                 index=index, created_date=get_timestamp_now() + index)
+                        for index, file in enumerate(files)]
+        db.session.bulk_save_objects(file_objects)
         db.session.flush()
         db.session.commit()
+
         return send_result(message="Cập nhật sản phẩm thành công.")
     except Exception as ex:
         db.session.rollback()
