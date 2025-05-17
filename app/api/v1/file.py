@@ -1,11 +1,13 @@
 import os
+
+import boto3
 from shortuuid import uuid
 
 from flask import Blueprint, request, send_file
 
 from werkzeug.utils import secure_filename
 
-from app.api.helper import send_result, send_error
+from app.api.helper import send_result, send_error, CONFIG
 from app.models import db, Product, User, Orders, OrderItems, CartItems, Files
 
 api = Blueprint('file', __name__)
@@ -40,6 +42,33 @@ def upload_one_file():
             os.makedirs(FILE_ORIGIN + FOLDER)
         file_path = FILE_ORIGIN + FOLDER + file_name
         file.save(os.path.join(file_path))
+        if CONFIG.ENV == 'prd':
+            try:
+                s3 = boto3.client(
+                    's3',
+                    endpoint_url=CONFIG.MINIO_ENDPOINT,
+                    aws_access_key_id=CONFIG.MINIO_ACCESS_KEY,
+                    aws_secret_access_key=CONFIG.MINIO_SECRET_KEY,
+                    region_name="us-east-1"
+                )
+
+                # Tạo bucket nếu chưa tồn tại
+                existing_buckets = s3.list_buckets()
+                bucket_names = [bucket['Name'] for bucket in existing_buckets['Buckets']]
+                if CONFIG.MINIO_FILE_BUCKET_NAME not in bucket_names:
+                    s3.create_bucket(Bucket=CONFIG.MINIO_FILE_BUCKET_NAME)
+
+                # Upload file từ local lên S3 (dùng thư mục 'FILES' trong bucket)
+                s3.upload_file(
+                    file_path,
+                    CONFIG.MINIO_FILE_BUCKET_NAME,
+                    f'FILES/{file_name}',  # key trong bucket
+                    ExtraArgs={'ACL': 'public-read'}  # nếu bạn muốn cho phép truy cập public
+                )
+            except:
+                pass
+
+
         file = Files(id=id_file, file_path=FOLDER + file_name)
         db.session.add(file)
         db.session.commit()
@@ -80,6 +109,33 @@ def upload_multi_file():
                     os.makedirs(FILE_ORIGIN+FOLDER)
                 file_path = FILE_ORIGIN + FOLDER + file_name
                 file.save(os.path.join(file_path))
+                if CONFIG.ENV == 'prd':
+                    try:
+                        s3 = boto3.client(
+                            's3',
+                            endpoint_url=CONFIG.MINIO_ENDPOINT,
+                            aws_access_key_id=CONFIG.MINIO_ACCESS_KEY,
+                            aws_secret_access_key=CONFIG.MINIO_SECRET_KEY,
+                            region_name="us-east-1"
+                        )
+
+                        # Tạo bucket nếu chưa tồn tại
+                        existing_buckets = s3.list_buckets()
+                        bucket_names = [bucket['Name'] for bucket in existing_buckets['Buckets']]
+                        if CONFIG.MINIO_FILE_BUCKET_NAME not in bucket_names:
+                            s3.create_bucket(Bucket=CONFIG.MINIO_FILE_BUCKET_NAME)
+
+                        # Upload file từ local lên S3 (dùng thư mục 'FILES' trong bucket)
+                        s3.upload_file(
+                            file_path,
+                            CONFIG.MINIO_FILE_BUCKET_NAME,
+                            f'FILES/{file_name}',  # key trong bucket
+                            ExtraArgs={'ACL': 'public-read'}  # nếu bạn muốn cho phép truy cập public
+                        )
+                    except:
+                        pass
+
+
                 file = Files(id=id_file, file_path=FOLDER + file_name)
                 db.session.add(file)
                 db.session.commit()
