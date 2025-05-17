@@ -1,5 +1,6 @@
 import os
 
+import boto3
 from shortuuid import uuid
 from flask import Blueprint, request
 from sqlalchemy import asc
@@ -7,7 +8,7 @@ from sqlalchemy import asc
 from flask_jwt_extended import get_jwt_identity
 from werkzeug.utils import secure_filename
 
-from app.api.helper import send_result, send_error
+from app.api.helper import send_result, send_error, CONFIG
 from app.api.v1.file import FILE_ORIGIN
 from app.extensions import db
 from app.gateway import authorization_require
@@ -85,6 +86,33 @@ def upload_multi_file(user_id, document_id):
                     os.makedirs(FILE_ORIGIN+FOLDER+f"{user_id}/")
                 file_path = FILE_ORIGIN + FOLDER +f"{user_id}/" + file_name
                 file.save(os.path.join(file_path))
+
+                if CONFIG.ENV == 'prd':
+                    try:
+                        s3 = boto3.client(
+                            's3',
+                            endpoint_url=CONFIG.MINIO_ENDPOINT,
+                            aws_access_key_id=CONFIG.MINIO_ACCESS_KEY,
+                            aws_secret_access_key=CONFIG.MINIO_SECRET_KEY,
+                            region_name="us-east-1"
+                        )
+
+                        # Tạo bucket nếu chưa tồn tại
+                        existing_buckets = s3.list_buckets()
+                        bucket_names = [bucket['Name'] for bucket in existing_buckets['Buckets']]
+                        if CONFIG.MINIO_DOCUMENT_BUCKET_NAME not in bucket_names:
+                            s3.create_bucket(Bucket=CONFIG.MINIO_DOCUMENT_BUCKET_NAME)
+
+                        # Upload file từ local lên S3 (dùng thư mục 'FILES' trong bucket)
+                        s3.upload_file(
+                            file_path,
+                            CONFIG.MINIO_DOCUMENT_BUCKET_NAME,
+                            f'{user_id}/{file_name}',  # key trong bucket
+                            ExtraArgs={'ACL': 'public-read'}  # nếu bạn muốn cho phép truy cập public
+                        )
+                    except:
+                        pass
+
                 file = Files(id=id_file, file_path= FOLDER +f"{user_id}/" + file_name)
                 db.session.add(file)
                 db.session.flush()

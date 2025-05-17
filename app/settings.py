@@ -112,4 +112,6 @@ class DevConfig(Config):
     MINIO_SECRET_KEY = os.environ.get("MINIO_SECRET_KEY", "admin1234")
     MINIO_BUCKET_NAME = os.environ.get("MINIO_BUCKET_NAME", "backup")
     MINIO_FILE_BUCKET_NAME = os.environ.get("MINIO_FILE_BUCKET_NAME", "files")
+    MINIO_DOCUMENT_BUCKET_NAME = os.environ.get("MINIO_DOCUMENT_BUCKET_NAME", "documents")
+
 
