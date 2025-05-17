@@ -45,6 +45,8 @@ class Worker:
         # Xác suất 2/3 có check_out, 1/3 không có (None)
         check_out = random.choice([time(hour, minute, second),
                                    time(hour, minute, second),
+                                   time(hour, minute, second),
+                                   time(hour, minute, second),
                                    None])
 
         return check_out
@@ -56,7 +58,7 @@ class Worker:
         for user in users:
 
             start_date = user.join_date
-            end_date = date(2025, 5, 12)
+            end_date = date(2025, 5, 17)
             delta = timedelta(days=1)
 
             attendances = []
