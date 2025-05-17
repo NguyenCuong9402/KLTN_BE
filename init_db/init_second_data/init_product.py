@@ -83,15 +83,16 @@ class Worker:
         data = {
             "describe": "Đẹp, chất lượng cao, giá tốt",
             "sizes": [
-                "S",
                 "M",
                 "L",
-                "XL"
+                "XL",
+                "XXL"
             ],
             "colors": [
-                "Xanh",
                 "Đen",
-                "Trắng"
+                "Trắng",
+                "Xanh",
+
             ],
             "files": result
         }
@@ -102,43 +103,43 @@ class Worker:
         sizes = data.pop('sizes')
         colors = data.pop('colors')
 
+        type_datas = TypeProduct.query.filter(TypeProduct.type_id.isnot(None)).all()
 
-        for i in range(1, 40):
-            random_type = TypeProduct.query.filter(TypeProduct.type_id.isnot(None)).order_by(func.random()).first()
+        for type_data in type_datas:
+            for i in range(1, 3):
+                product = Product(**data, type_product_id=type_data.id, id=str(uuid()), original_price=random.choice(values),
+                                  name=f'{type_data.name} {i}', discount=random.randint(1, 20),
+                                  created_date=get_timestamp_now() + i)
+                db.session.add(product)
+                db.session.flush()
 
-            product = Product(**data, type_product_id=random_type.id, id=str(uuid()), original_price=random.choice(values),
-                              name=f'Sản phẩm {random_type.name} {i}', discount=random.randint(1, 20),
-                              created_date=get_timestamp_now() + i)
-            db.session.add(product)
-            db.session.flush()
+                if type_data.parent and type_data.parent.key == 'phu_kien':
+                    size_list = ['FreeSize']
+                else:
+                    size_list = sizes
 
-            if random_type.parent and random_type.parent.key == 'phu_kien':
-                size_list = ['FreeSize']
-            else:
-                size_list = sizes
+                size_objects = [
+                    Size(
+                        id=str(uuid()),
+                        name=size,
+                        product_id=product.id,
+                        index=index,
+                        created_date=get_timestamp_now() + index
+                    )
+                    for index, size in enumerate(size_list)
+                ]
+                color_objects = [Color(id=str(uuid()), name=color, product_id=product.id, index=index,
+                                       created_date=get_timestamp_now() + index) for index, color in enumerate(colors)]
+                db.session.bulk_save_objects(size_objects)
+                db.session.bulk_save_objects(color_objects)
+                db.session.flush()
 
-            size_objects = [
-                Size(
-                    id=str(uuid()),
-                    name=size,
-                    product_id=product.id,
-                    index=index,
-                    created_date=get_timestamp_now() + index
-                )
-                for index, size in enumerate(size_list)
-            ]
-            color_objects = [Color(id=str(uuid()), name=color, product_id=product.id, index=index,
-                                   created_date=get_timestamp_now() + index) for index, color in enumerate(colors)]
-            db.session.bulk_save_objects(size_objects)
-            db.session.bulk_save_objects(color_objects)
-            db.session.flush()
-
-            file_objects = [FileLink(id=str(uuid()), table_id=product.id, file_id=file["id"], table_type = TYPE_FILE_LINK.get('PRODUCT', 'product'),
-                                            index=index, created_date=get_timestamp_now() + index)
-                            for index, file in enumerate(files)]
-            db.session.bulk_save_objects(file_objects)
-            db.session.flush()
-            db.session.commit()
+                file_objects = [FileLink(id=str(uuid()), table_id=product.id, file_id=file["id"], table_type = TYPE_FILE_LINK.get('PRODUCT', 'product'),
+                                                index=index, created_date=get_timestamp_now() + index)
+                                for index, file in enumerate(files)]
+                db.session.bulk_save_objects(file_objects)
+                db.session.flush()
+        db.session.commit()
 
 
 if __name__ == '__main__':

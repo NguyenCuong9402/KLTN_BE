@@ -31,26 +31,30 @@ class Worker:
                     {'key': 'ao_bo', 'name': 'Áo Bò'},
                     {'key': 'ao_thun', 'name': 'Áo Thun'},
                     {'key': 'ao_so_mi', 'name': 'Áo Sơ Mi'},
+                    {'key': 'ao_hoodie', 'name': 'Áo Hoodie'},
+                    {'key': 'ao_ba_lo', 'name': 'Áo Ba Lỗ'},
+                    {'key': 'ao_coc', 'name': 'Áo Cộc'},
+
                 ]
             },
             {
                 'key': 'quan',
                 'name': 'Quần',
                 'child_type': [
-                    {'key': 'quan_jeans', 'name': 'Quần Jeans'},
-                    {'key': 'quan_tay', 'name': 'Quần Tây'},
+                    {'key': 'quan_jeans', 'name': 'Quần Bò'},
+                    {'key': 'quan_au', 'name': 'Quần Âu'},
                     {'key': 'quan_kaki', 'name': 'Quần Kaki'},
-                    {'key': 'quan_shorts', 'name': 'Quần Shorts'},
+                    {'key': 'quan_dui', 'name': 'Quần Đùi'},
                 ]
             },
             {
                 'key': 'phu_kien',
                 'name': 'Phụ Kiện',
                 'child_type': [
-                    {'key': 'that_lung', 'name': 'Thắt Lưng'},
-                    {'key': 'kinh_mat', 'name': 'Kính Mát'},
-                    {'key': 'non', 'name': 'Nón'},
-                    {'key': 'vi_da', 'name': 'Ví Da'},
+                    {'key': 'phu_kien_that_lung', 'name': 'Thắt Lưng'},
+                    {'key': 'phu_kien_kinh_mat', 'name': 'Kính Mát'},
+                    {'key': 'phu_kien_non', 'name': 'Nón'},
+                    {'key': 'phu_kien_vi_da', 'name': 'Ví Da'},
                 ]
             },
         ]
