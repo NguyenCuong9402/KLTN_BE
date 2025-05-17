@@ -2,6 +2,7 @@ import json
 import typing
 
 from marshmallow import Schema, fields, validate, ValidationError, types, pre_load, validates_schema
+from marshmallow.validate import Length
 from sqlalchemy import desc, asc
 
 from app.enums import TYPE_REACTION, TYPE_PAYMENT_ONLINE, TYPE_PAYMENT
@@ -204,13 +205,37 @@ class RegisterValidation(BaseValidation):
 
 class UserValidation(BaseValidation):
     email = fields.String(allow_none=True)
-    phone = fields.String(allow_none=True,
-                          validate=[validate.Length(min=10, max=20), validate.Regexp(REGEX_PHONE_NUMBER)])
-    full_name = fields.String(allow_none=True)
-    gender = fields.Boolean(allow_none=True)
-    birthday = fields.String(allow_none=True)
+
+    phone = fields.String(
+        required=True,
+        validate=[
+            validate.Length(min=10, max=11, error="Số điện thoại phải có độ dài từ 10 đến 11 ký tự."),
+            validate.Regexp(REGEX_PHONE_NUMBER, error="Số điện thoại không hợp lệ.")
+        ],
+        error_messages={"required": "Số điện thoại không được để trống."}
+    )
+
+    full_name = fields.String(
+        required=True,
+        error_messages={"required": "Họ và tên là bắt buộc."}
+    )
+
+    gender = fields.Boolean(
+        required=True,
+        error_messages={"required": "Giới tính là bắt buộc."}
+    )
+
+    birthday = fields.String(
+        required=True,
+        error_messages={"required": "Ngày sinh là bắt buộc."}
+    )
+
     detail_address = fields.String(allow_none=True)
-    address = fields.Dict(allow_none=True)
+
+    address = fields.Dict(
+        required=True,
+        error_messages={"required": "Địa chỉ là bắt buộc."}
+    )
 
 class CartValidation(BaseValidation):
     quantity = fields.Integer(
@@ -447,7 +472,7 @@ class StaffValidation(BaseValidation):
     phone = fields.String(
         required=True,
         validate=[
-            validate.Length(min=10, max=20, error="Số điện thoại phải có độ dài từ 10 đến 20 ký tự."),
+            validate.Length(min=10, max=11, error="Số điện thoại phải có độ dài từ 10 đến 11 ký tự."),
             validate.Regexp(REGEX_PHONE_NUMBER, error="Số điện thoại không hợp lệ.")
         ],
         error_messages={"required": "Số điện thoại không được để trống."}
