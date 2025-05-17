@@ -99,13 +99,13 @@ def update_item(product_id):
         if is_not_validate:
             return send_error(data=is_not_validate, message='Validate Error')
 
-        for key, value in json_body.items():
-            if hasattr(product, key):
-                setattr(product, key, value)
-
         files = json_body.pop('files')
         sizes = json_body.pop('sizes')
         colors = json_body.pop('colors')
+
+        for key, value in json_body.items():
+            if hasattr(product, key):
+                setattr(product, key, value)
 
         Size.query.filter(Size.product_id==product.id).delete()
         Color.query.filter(Color.product_id==product.id).delete()
