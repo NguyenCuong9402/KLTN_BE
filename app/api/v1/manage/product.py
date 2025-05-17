@@ -107,6 +107,14 @@ def update_item(product_id):
         sizes = json_body.pop('sizes')
         colors = json_body.pop('colors')
 
+        Size.query.filter(Size.product_id==product.id).delete()
+        Color.query.filter(Color.product_id==product.id).delete()
+        FileLink.query.filter(FileLink.table_id==product.id,
+                              FileLink.table_type==TYPE_FILE_LINK.get('PRODUCT', 'product')).delete()
+        db.session.flush()
+
+
+
         size_objects = [Size(id=str(uuid()), name=size, product_id=product.id, index=index,
                              created_date=get_timestamp_now() + index) for index, size in enumerate(sizes)]
         color_objects = [Color(id=str(uuid()), name=color, product_id=product.id, index=index,
