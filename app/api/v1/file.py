@@ -62,7 +62,7 @@ def upload_one_file():
                 s3.upload_file(
                     file_path,
                     CONFIG.MINIO_FILE_BUCKET_NAME,
-                    f'FILES/{file_name}',  # key trong bucket
+                    f'{file_name}',  # key trong bucket
                     ExtraArgs={'ACL': 'public-read'}  # nếu bạn muốn cho phép truy cập public
                 )
             except:
@@ -74,7 +74,8 @@ def upload_one_file():
         db.session.commit()
         dt = {
             "file_path": file.file_path,
-            "id": file.id
+            "id": file.id,
+            "s3_url": f"{CONFIG.MINIO_ENDPOINT}/{CONFIG.MINIO_BUCKET_NAME}/{file_name}"
         }
 
         return send_result(data=dt, message="File uploaded successfully")
@@ -129,7 +130,7 @@ def upload_multi_file():
                         s3.upload_file(
                             file_path,
                             CONFIG.MINIO_FILE_BUCKET_NAME,
-                            f'FILES/{file_name}',  # key trong bucket
+                            f'{file_name}',  # key trong bucket
                             ExtraArgs={'ACL': 'public-read'}  # nếu bạn muốn cho phép truy cập public
                         )
                     except:
@@ -143,7 +144,8 @@ def upload_multi_file():
                 continue
             dt = {
                 "file_path": file.file_path,
-                "id": file.id
+                "id": file.id,
+                "s3_url": f"{CONFIG.MINIO_ENDPOINT}/{CONFIG.MINIO_BUCKET_NAME}/{file_name}"
             }
             uploaded_files.append(dt)
 
