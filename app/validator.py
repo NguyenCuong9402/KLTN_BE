@@ -192,7 +192,7 @@ class RegisterValidation(BaseValidation):
     phone = fields.String(
         required=True,
         validate=[
-            validate.Length(min=10, max=20, error="Số điện thoại phải có từ 10 đến 20 số."),
+            validate.Length(min=10, max=11, error="Số điện thoại phải có từ 10 đến 11 kí tự."),
             validate.Regexp(REGEX_PHONE_NUMBER, error="Số điện thoại không hợp lệ.")
         ],
         error_messages={"required": "Số điện thoại không được để trống."}
