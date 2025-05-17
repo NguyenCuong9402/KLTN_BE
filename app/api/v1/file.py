@@ -75,7 +75,7 @@ def upload_one_file():
         dt = {
             "file_path": file.file_path,
             "id": file.id,
-            "s3_url": f"{CONFIG.MINIO_ENDPOINT}/{CONFIG.MINIO_BUCKET_NAME}/{file_name}"
+            "s3_url": f"{CONFIG.MINIO_ENDPOINT}/{CONFIG.MINIO_FILE_BUCKET_NAME}/{file_name}"
         }
 
         return send_result(data=dt, message="File uploaded successfully")
