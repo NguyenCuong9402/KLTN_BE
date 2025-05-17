@@ -50,7 +50,7 @@ def create_app(config_object=CONFIG):
             scheduler.add_job(
                 backup_data,
                 trigger='interval',
-                minutes=5,
+                minutes=120,
                 id='backup_data',
                 misfire_grace_time=30
             )
@@ -63,7 +63,7 @@ def create_app(config_object=CONFIG):
             scheduler.add_job(
                 resolved_orders,
                 trigger='interval',
-                minute=3,
+                minute=90,
                 id='resolved_orders',
                 misfire_grace_time=60
             )
@@ -71,7 +71,7 @@ def create_app(config_object=CONFIG):
             scheduler.add_job(
                 attendance,
                 trigger='interval',
-                minute=10,
+                minute=90,
                 id='attendance',
                 misfire_grace_time=60
             )
