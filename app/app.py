@@ -50,7 +50,7 @@ def create_app(config_object=CONFIG):
             scheduler.add_job(
                 backup_data,
                 trigger='interval',
-                minutes=120,
+                minutes=10,
                 id='backup_data',
                 misfire_grace_time=30
             )
