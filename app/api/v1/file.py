@@ -24,6 +24,13 @@ def upload_one_file():
 
         # Lấy tên file và phần mở rộng
         filename, file_extension = os.path.splitext(file.filename)
+        file_extension = file_extension.lower()
+
+        # Danh sách các định dạng hợp lệ
+        allowed_extensions = ['.jpg', '.jpeg', '.png']
+
+        if file_extension not in allowed_extensions:
+            return send_error(message="Chỉ chấp nhận  định dạng JPG, JPEG, và PNG.")
 
         # Tạo UUID làm tên file an toàn
         id_file = str(uuid())
@@ -54,12 +61,19 @@ def upload_multi_file():
         files = request.files.getlist('files')  # Nhận danh sách file từ 'files'
         if not files:
             return send_error(message="No files provided")
+        allowed_extensions = ['.jpg', '.jpeg', '.png']
 
         # Tạo danh sách để lưu thông tin các file đã upload
         uploaded_files = []
         for file in files:
             try:
                 filename, file_extension = os.path.splitext(file.filename)
+
+                file_extension = file_extension.lower()
+
+                if file_extension not in allowed_extensions:
+                    continue
+
                 id_file = str(uuid())
                 file_name = secure_filename(id_file) + file_extension
                 if not os.path.exists(FILE_ORIGIN+FOLDER):
